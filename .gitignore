@@ -1,0 +1,10 @@
+/.gradle/
+/.idea/
+/build/
+/gradle/
+/out/
+/FUN.tsv
+/jMetal.log
+/VAR.tsv
+/jMetal.log.1
+*.iml
