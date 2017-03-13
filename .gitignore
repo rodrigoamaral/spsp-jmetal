@@ -8,3 +8,14 @@
 /VAR.tsv
 /jMetal.log.1
 *.iml
+
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
