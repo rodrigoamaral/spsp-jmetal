@@ -1,7 +1,11 @@
 package net.rodrigoamaral.spsp.adapters;
 
+import net.rodrigoamaral.spsp.config.ProjectConfigLoader;
 import net.rodrigoamaral.spsp.constraints.*;
-import net.rodrigoamaral.spsp.objectives.*;
+import net.rodrigoamaral.spsp.objectives.CostObjective;
+import net.rodrigoamaral.spsp.objectives.DurationObjective;
+import net.rodrigoamaral.spsp.objectives.IObjectiveEvaluator;
+import net.rodrigoamaral.spsp.objectives.SPSPObjectiveEvaluator;
 import net.rodrigoamaral.spsp.project.Project;
 import org.uma.jmetal.solution.DoubleSolution;
 
@@ -24,7 +28,7 @@ public class JMetalSPSPAdapter {
     private SolutionConverter converter;
 
     public JMetalSPSPAdapter(String configFile) {
-        this.project = new Project(configFile);
+        this.project = new ProjectConfigLoader(configFile).createProject();
         this.objectiveEvaluator = new SPSPObjectiveEvaluator()
                 .addObjective(new CostObjective())
                 .addObjective(new DurationObjective());
