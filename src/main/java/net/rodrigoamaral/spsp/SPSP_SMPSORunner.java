@@ -29,12 +29,12 @@ import org.uma.jmetal.runner.AbstractAlgorithmRunner;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmRunner;
 import org.uma.jmetal.util.JMetalLogger;
-import org.uma.jmetal.util.ProblemUtils;
 import org.uma.jmetal.util.archive.BoundedArchive;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.util.pseudorandom.impl.MersenneTwisterGenerator;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ import java.util.List;
  */
 public class SPSP_SMPSORunner extends AbstractAlgorithmRunner {
 
-  private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) {
+  private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) throws FileNotFoundException {
     return new SPSProblem(projectPropertiesFileName);
   }
   /**
@@ -77,7 +77,7 @@ public class SPSP_SMPSORunner extends AbstractAlgorithmRunner {
 //    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
     //      Criando uma instância de projeto para SPSP
-    problem = loadProjectInstanceFromFile("sps-config-file2.properties");
+    problem = loadProjectInstanceFromFile("project-conf/sps-config-file2.properties");
 
     BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
 

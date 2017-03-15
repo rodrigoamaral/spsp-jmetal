@@ -9,6 +9,7 @@ import net.rodrigoamaral.spsp.objectives.SPSPObjectiveEvaluator;
 import net.rodrigoamaral.spsp.project.Project;
 import org.uma.jmetal.solution.DoubleSolution;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class JMetalSPSPAdapter {
 
     private SolutionConverter converter;
 
-    public JMetalSPSPAdapter(String configFile) {
+    public JMetalSPSPAdapter(String configFile) throws FileNotFoundException {
         this.project = new ProjectConfigLoader(configFile).createProject();
         this.objectiveEvaluator = new SPSPObjectiveEvaluator()
                 .addObjective(new CostObjective())

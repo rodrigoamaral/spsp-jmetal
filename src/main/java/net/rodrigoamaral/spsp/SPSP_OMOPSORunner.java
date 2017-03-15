@@ -22,9 +22,9 @@ import org.uma.jmetal.runner.AbstractAlgorithmRunner;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmRunner;
 import org.uma.jmetal.util.JMetalLogger;
-import org.uma.jmetal.util.ProblemUtils;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -35,7 +35,7 @@ import java.util.List;
 
 public class SPSP_OMOPSORunner extends AbstractAlgorithmRunner {
 
-  private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) {
+  private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) throws FileNotFoundException {
     return new SPSProblem(projectPropertiesFileName);
   }
 
@@ -67,7 +67,7 @@ public class SPSP_OMOPSORunner extends AbstractAlgorithmRunner {
 //    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
     //      Criando uma instância de projeto para SPSP
-    problem = loadProjectInstanceFromFile("sps-config-file2.properties");
+    problem = loadProjectInstanceFromFile("project-conf/sps-config-file2.properties");
 
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;
 

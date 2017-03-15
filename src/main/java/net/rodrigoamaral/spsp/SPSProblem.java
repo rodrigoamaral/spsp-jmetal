@@ -8,6 +8,8 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.solutionattribute.impl.NumberOfViolatedConstraints;
 import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 
+import java.io.FileNotFoundException;
+
 
 /**
  * Implementa SPSP no nos moldes de um DoubleProblem do JMetal
@@ -20,7 +22,7 @@ public class SPSProblem extends AbstractDoubleProblem implements ConstrainedProb
     public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints;
 
 
-    public SPSProblem(String projectPropertiesFileName) {
+    public SPSProblem(String projectPropertiesFileName) throws FileNotFoundException {
         spsp = new JMetalSPSPAdapter(projectPropertiesFileName);
         setName(spsp.getProblemName());
         setNumberOfVariables(spsp.getNumberOfVariables());

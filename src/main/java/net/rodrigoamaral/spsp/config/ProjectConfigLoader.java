@@ -5,6 +5,8 @@ import net.rodrigoamaral.spsp.project.Employee;
 import net.rodrigoamaral.spsp.project.Project;
 import net.rodrigoamaral.spsp.project.Task;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -18,7 +20,7 @@ public class ProjectConfigLoader {
     private Properties config;
     private Project project;
 
-    public ProjectConfigLoader(String configFile) {
+    public ProjectConfigLoader(String configFile) throws FileNotFoundException {
         config = loadFromFile(configFile);
     }
 
@@ -30,14 +32,14 @@ public class ProjectConfigLoader {
         return project;
     }
 
-    private static Properties loadFromFile(String fileName) {
+    private static Properties loadFromFile(String fileName) throws FileNotFoundException {
         // TODO: 02/09/16 Allow data loading from any file, not only the ones in resource folders
-        InputStream is = Class.class.getResourceAsStream("/" + fileName);
+        InputStream is = new FileInputStream(fileName);
         Properties prop = new Properties();
         try {
             prop.load(is);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
         }
         return prop;
     }

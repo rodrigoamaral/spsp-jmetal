@@ -33,7 +33,7 @@ public class SPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
      *                                  do problema
      * @return instância de SPSProblem, que estende o AbstractDoubleProblem do JMetal
      */
-    private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) {
+    private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) throws FileNotFoundException {
         return new SPSProblem(projectPropertiesFileName);
     }
 
@@ -46,7 +46,11 @@ public class SPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         String referenceParetoFront = "" ;
 
 //      Criando uma instância de projeto para SPSP
-        problem = loadProjectInstanceFromFile("sps-config-file2.properties");
+        String filename = "";
+        if (args.length == 1) {
+             filename = args[0];
+        }
+        problem = loadProjectInstanceFromFile(filename);
 
         double crossoverProbability = 0.9 ;
         double crossoverDistributionIndex = 20.0 ;

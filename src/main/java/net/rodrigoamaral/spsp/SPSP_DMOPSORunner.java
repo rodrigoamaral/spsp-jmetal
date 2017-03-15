@@ -20,8 +20,8 @@ import org.uma.jmetal.runner.AbstractAlgorithmRunner;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmRunner;
 import org.uma.jmetal.util.JMetalLogger;
-import org.uma.jmetal.util.ProblemUtils;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -32,7 +32,7 @@ import java.util.List;
 
 public class SPSP_DMOPSORunner extends AbstractAlgorithmRunner {
 
-  private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) {
+  private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) throws FileNotFoundException {
       return new SPSProblem(projectPropertiesFileName);
   }
 
@@ -52,7 +52,7 @@ public class SPSP_DMOPSORunner extends AbstractAlgorithmRunner {
 
 
     //      Criando uma instância de projeto para SPSP
-    problem = loadProjectInstanceFromFile("sps-config-file2.properties");
+    problem = loadProjectInstanceFromFile("project-conf/sps-config-file2.properties");
 
     algorithm = new DMOPSO(problem, 100, 250, 0.0, 0.1, 0.0, 1.0, 1.5, 2.5, 1.5, 2.5, 0.1, 0.4, -1.0, -1.0,
             "_TCHE", "MOEAD_Weights", 2) ;
