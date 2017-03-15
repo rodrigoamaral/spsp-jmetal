@@ -5,9 +5,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Vector;
 
-/**
- * Created by rodrigo on 21/02/17.
- */
 public class TaskPrecedenceGraph {
     private static final int DFS_WHITE = -1;
     private static final int DFS_BLACK = 1;
@@ -29,16 +26,16 @@ public class TaskPrecedenceGraph {
         }
     }
 
-    public static ArrayList<Integer> getTaskDependencies() {
+    public ArrayList<Integer> getTaskDependencies() {
         return vertexDegrees;
     }
 
-    public void initDFS(int size) {
+    private void initDFS(int size) {
         visited = new Vector<>();
         visited.addAll(Collections.nCopies(size, DFS_WHITE));
     }
 
-    public void runTopologicalSorting(int size) {
+    private void runTopologicalSorting(int size) {
         initDFS(size);
         sorted = new Vector<>();
         for (int i = 0; i < size; i++)
@@ -46,7 +43,7 @@ public class TaskPrecedenceGraph {
                 visit(i);
     }
 
-    public void visit(int u) {
+    private void visit(int u) {
         visited.set(u, DFS_BLACK);
         Iterator it = successors.get(u).iterator();
         while (it.hasNext()) {
@@ -57,7 +54,7 @@ public class TaskPrecedenceGraph {
         sorted.add(u);
     }
 
-    public Vector<Integer> getSorting(){
+    private Vector<Integer> getSorting(){
         runTopologicalSorting(successors.size());
         return sorted;
     }
@@ -73,7 +70,7 @@ public class TaskPrecedenceGraph {
         vertexDegrees.set(v, degree + 1);
     }
 
-    public static ArrayList<Integer> getTaskPredecessors(int task) {
+    public ArrayList<Integer> getTaskPredecessors(int task) {
         return predecessors.get(task);
     }
 
@@ -82,9 +79,9 @@ public class TaskPrecedenceGraph {
         StringBuilder sb = new StringBuilder();
         sb.append("TaskPrecedenceGraph{successors={");
         for (int i = 0; i < successors.size(); i++) {
-            sb.append(i + ":[");
+            sb.append(i).append(":[");
             for (Integer v: successors.get(i)) {
-                sb.append(v + " ");
+                sb.append(v).append(" ");
             }
             sb.append("] ");
         }
@@ -92,7 +89,7 @@ public class TaskPrecedenceGraph {
         sb.append("sorted={");
         this.getSorting();
         for(int i = sorted.size() - 1; i >= 0; i--) {
-            sb.append(sorted.get(i) + ", ");
+            sb.append(sorted.get(i)).append(", ");
         }
         sb.append("}}");
         return sb.toString();
