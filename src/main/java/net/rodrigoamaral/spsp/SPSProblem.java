@@ -1,6 +1,5 @@
 package net.rodrigoamaral.spsp;
 
-
 import net.rodrigoamaral.spsp.adapters.JMetalSPSPAdapter;
 import org.uma.jmetal.problem.ConstrainedProblem;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
@@ -10,9 +9,11 @@ import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 
 import java.io.FileNotFoundException;
 
-
 /**
- * Implementa SPSP no nos moldes de um DoubleProblem do JMetal
+ *
+ * Wraps our SPSP model as a jMetal DoubleProblem.
+ *
+ * @author Rodrigo Amaral
  *
  */
 public class SPSProblem extends AbstractDoubleProblem implements ConstrainedProblem<DoubleSolution>{

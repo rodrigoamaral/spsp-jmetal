@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Class for configuring and running the OMOPSO algorithm
  *
- * @author Antonio J. Nebro <antonio@lcc.uma.es>
+ * @author Antonio J. Nebro &lt;antonio@lcc.uma.es&gt;
  */
 
 public class SPSP_OMOPSORunner extends AbstractAlgorithmRunner {

@@ -9,21 +9,38 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Project configuration loader from a properties file according
+ * to the syntax defined by Alba and Chicano (2007)
+ *
+ * @author Rodrigo Amaral
+ * @see <a href="http://tracer.lcc.uma.es/problems/psp/generator.html">http://tracer.lcc.uma.es/problems/psp/generator.html</a>
+ */
 public class ProjectConfigLoader {
 
     private Properties config;
     private Project project;
 
+    /**
+     * Loads a project configuration from a properties file
+     *
+     * @param configFile Relative path to the configuration file
+     * @throws FileNotFoundException
+     */
     public ProjectConfigLoader(String configFile) throws FileNotFoundException {
         config = loadFromFile(configFile);
     }
 
+    /**
+     * Creates a project from the configuration file
+     *
+     * @return a {@link Project} instance
+     */
     public Project createProject() {
         project = new Project();
         loadTasks();
@@ -33,7 +50,6 @@ public class ProjectConfigLoader {
     }
 
     private static Properties loadFromFile(String fileName) throws FileNotFoundException {
-        // TODO: 02/09/16 Allow data loading from any file, not only the ones in resource folders
         InputStream is = new FileInputStream(fileName);
         Properties prop = new Properties();
         try {

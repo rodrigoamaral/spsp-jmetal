@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Representa uma tarefa e seus atributos, conforme definição do SPSP
+ *
+ * Represents a task and its attributes according to SPSP definition.
+ *
+ * @author Rodrigo Amaral
+ *
  */
 public class Task {
 

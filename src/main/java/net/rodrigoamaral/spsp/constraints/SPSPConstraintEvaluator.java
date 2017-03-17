@@ -7,7 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by rodrigo on 02/03/17.
+ *
+ * Encapsulates the collection of all constraints ({@link IConstraint})
+ * of a given SPSP formulation.
+ *
+ * @author Rodrigo Amaral
+ *
  */
 public class SPSPConstraintEvaluator implements IConstraintEvaluator {
     private List<IConstraint> constraints;

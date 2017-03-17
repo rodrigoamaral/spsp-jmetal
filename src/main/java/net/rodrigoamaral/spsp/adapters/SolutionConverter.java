@@ -5,7 +5,10 @@ import net.rodrigoamaral.spsp.solution.DedicationMatrix;
 import org.uma.jmetal.solution.DoubleSolution;
 
 /**
- * Created by rodrigo on 06/03/17.
+ * Converts a jMetal {@link DoubleSolution} into a {@link DedicationMatrix}.
+ * It also provides public methods to encode and decode vector indices
+ * of a DoubleSolution into matrix indices of a DedicationMatrix.
+ *
  */
 public class SolutionConverter {
 
@@ -23,6 +26,12 @@ public class SolutionConverter {
     }
 
 
+    /**
+     * Converts a {@link DoubleSolution} into a {@link DedicationMatrix}.
+     *
+     * @param solution DoubleSolution object
+     * @return new instance of DedicationMatrix
+     */
     public DedicationMatrix convert(DoubleSolution solution) {
         DedicationMatrix dm = new DedicationMatrix(employees, tasks);
         for (int i = 0; i < solution.getNumberOfVariables(); i++) {
@@ -33,14 +42,33 @@ public class SolutionConverter {
         return dm;
     }
 
+    /**
+     * Decode a DoubleSolution vector index into a task number/id/column index.
+     *
+     * @param index vector index
+     * @return task number (matrix column index)
+     */
     public static int decodeTask(int index) {
         return index % tasks;
     }
 
+    /**
+     * Decode a DoubleSolution vector index into a employee number/id/row index.
+     *
+     * @param index vector index
+     * @return employee number (matrix row index)
+     */
     public static int decodeEmployee(int index) {
         return Math.floorDiv(index, tasks);
     }
 
+    /**
+     * Encode a employee-task tuple into a DoubleSolution vector index.
+     *
+     * @param employee employee number (matrix row index)
+     * @param task task number (matrix column index)
+     * @return vector index
+     */
     public static int encode(int employee, int task) {
         return (employee * tasks) + task;
     }

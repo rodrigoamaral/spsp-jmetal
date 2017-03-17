@@ -14,8 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ *
  * Adapts Project interface to a JMetal AbstractDoubleProblem
- * that implements ConstrainedProblem<DoubleSolution>
+ * that implements ConstrainedProble&lt;DoubleSolution&gt;. {@link JMetalSPSPAdapter}
+ * must provide all the methods needed for these interfaces.
+ *
+ * @author Rodrigo Amaral
+ *
  */
 public class JMetalSPSPAdapter {
 
@@ -28,6 +33,13 @@ public class JMetalSPSPAdapter {
 
     private SolutionConverter converter;
 
+    /**
+     * Creates a {@link Project} instance and all objectives and constraints
+     * needed for SPSP.
+     *
+     * @param configFile Relative path to the configuration file
+     * @throws FileNotFoundException
+     */
     public JMetalSPSPAdapter(String configFile) throws FileNotFoundException {
         this.project = new ProjectConfigLoader(configFile).createProject();
         this.objectiveEvaluator = new SPSPObjectiveEvaluator()

@@ -7,7 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by rodrigo on 04/03/17.
+ *
+ * Encapsulates a collection of all objectives ({@link IObjective})
+ * for a given SPSP formulation.
+ *
+ * @author Rodrigo Amaral
+ *
  */
 public class SPSPObjectiveEvaluator implements IObjectiveEvaluator {
 

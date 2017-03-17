@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Representa um empregado e seus atributos conforme definição do SPSP
+ *
+ * Represents an employee and its attriubtes according to SPSP definition.
+ *
+ * @author Rodrigo Amaral
+ *
  */
 public class Employee {
     private int id;
@@ -23,16 +27,8 @@ public class Employee {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public double getSalary() {
         return salary;
-    }
-
-    public void setSalary(double salary) {
-        this.salary = salary;
     }
 
     public List<Integer> getSkills() {
