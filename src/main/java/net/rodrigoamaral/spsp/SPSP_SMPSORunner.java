@@ -62,22 +62,13 @@ public class SPSP_SMPSORunner extends AbstractAlgorithmRunner {
     MutationOperator<DoubleSolution> mutation;
 
     String referenceParetoFront = "" ;
-//
-//    String problemName ;
-//    if (args.length == 1) {
-//      problemName = args[0];
-//    } else if (args.length == 2) {
-//      problemName = args[0] ;
-//      referenceParetoFront = args[1] ;
-//    } else {
-//      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT4";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/ZDT4.pf" ;
-//    }
 
-//    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
-
-    //      Criando uma instância de projeto para SPSP
-    problem = loadProjectInstanceFromFile("project-conf/sps-config-file2.properties");
+    // Creates a SPSP project instance
+    String filename = "";
+    if (args.length == 1) {
+      filename = args[0];
+    }
+    problem = loadProjectInstanceFromFile(filename);
 
     BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
 

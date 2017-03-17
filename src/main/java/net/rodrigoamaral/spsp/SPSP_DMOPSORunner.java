@@ -50,9 +50,12 @@ public class SPSP_DMOPSORunner extends AbstractAlgorithmRunner {
 
     String referenceParetoFront = "" ;
 
-
-    //      Criando uma instância de projeto para SPSP
-    problem = loadProjectInstanceFromFile("project-conf/sps-config-file2.properties");
+    // Creates a SPSP project instance
+    String filename = "";
+    if (args.length == 1) {
+      filename = args[0];
+    }
+    problem = loadProjectInstanceFromFile(filename);
 
     algorithm = new DMOPSO(problem, 100, 250, 0.0, 0.1, 0.0, 1.0, 1.5, 2.5, 1.5, 2.5, 0.1, 0.4, -1.0, -1.0,
             "_TCHE", "MOEAD_Weights", 2) ;

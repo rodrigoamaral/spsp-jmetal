@@ -19,20 +19,8 @@ import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-
-/**
- * Executa implementação JMetal do algoritmo NSGA-II para o problema SPSP
- */
 public class SPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
-    /**
-     * Carrega uma instância de projeto SPSP a partir de um arquivo Properties,
-     * de acordo com a formulação implementada por (ALBA; CHICANO, 2007)
-     *
-     * @param projectPropertiesFileName caminho para arquivo properties com os dados de entrada
-     *                                  do problema
-     * @return instância de SPSProblem, que estende o AbstractDoubleProblem do JMetal
-     */
     private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) throws FileNotFoundException {
         return new SPSProblem(projectPropertiesFileName);
     }
@@ -45,7 +33,7 @@ public class SPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         SelectionOperator<List<DoubleSolution>, DoubleSolution> selection;
         String referenceParetoFront = "" ;
 
-//      Criando uma instância de projeto para SPSP
+        // Creates a SPSP project instance
         String filename = "";
         if (args.length == 1) {
              filename = args[0];
