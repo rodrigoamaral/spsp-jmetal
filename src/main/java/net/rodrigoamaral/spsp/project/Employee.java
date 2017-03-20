@@ -49,6 +49,7 @@ public class Employee {
                 "id=" + id +
                 ", salary=" + salary +
                 ", skills=" + skills +
+                ", maxDedication=" + maxDedication +
                 '}';
     }
 }
