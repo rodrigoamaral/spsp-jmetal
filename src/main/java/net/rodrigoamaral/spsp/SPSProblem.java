@@ -44,8 +44,9 @@ public class SPSProblem extends AbstractDoubleProblem implements ConstrainedProb
 
     @Override
     public void evaluateConstraints(DoubleSolution solution) {
-        overallConstraintViolationDegree.setAttribute(solution, spsp.getConstraintViolationDegree(solution));
-        numberOfViolatedConstraints.setAttribute(solution, spsp.getNumberOfViolatedConstraints(solution));
+        Integer violated = spsp.getNumberOfViolatedConstraints(solution);
+        numberOfViolatedConstraints.setAttribute(solution, violated);
+        overallConstraintViolationDegree.setAttribute(solution, Double.valueOf(violated));
     }
 
 }
