@@ -1,6 +1,5 @@
 package net.rodrigoamaral.spsp.project;
 
-import net.rodrigoamaral.spsp.graph.TaskPrecedenceGraph;
 import net.rodrigoamaral.spsp.solution.DedicationMatrix;
 
 import java.util.ArrayList;

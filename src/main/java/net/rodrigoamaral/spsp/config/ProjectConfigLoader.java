@@ -1,6 +1,6 @@
 package net.rodrigoamaral.spsp.config;
 
-import net.rodrigoamaral.spsp.graph.TaskPrecedenceGraph;
+import net.rodrigoamaral.spsp.project.TaskPrecedenceGraph;
 import net.rodrigoamaral.spsp.project.Employee;
 import net.rodrigoamaral.spsp.project.Project;
 import net.rodrigoamaral.spsp.project.Task;

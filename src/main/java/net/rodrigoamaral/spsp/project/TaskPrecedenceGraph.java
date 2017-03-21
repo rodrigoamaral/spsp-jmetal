@@ -1,4 +1,4 @@
-package net.rodrigoamaral.spsp.graph;
+package net.rodrigoamaral.spsp.project;
 
 import java.util.ArrayList;
 import java.util.Collections;
