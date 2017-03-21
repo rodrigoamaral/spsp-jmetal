@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by rodrigo on 07/03/17.
  */
-public class NoEmployeeOverworkConstraint extends AbstractConstraint implements IConstraint {
+public class NoEmployeeOverworkConstraint implements IConstraint {
     @Override
     public boolean isViolated(Project project, DedicationMatrix s) {
         return violationDegree(project, s) > 0;

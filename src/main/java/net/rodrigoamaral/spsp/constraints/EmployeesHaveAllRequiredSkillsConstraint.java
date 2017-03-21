@@ -11,7 +11,7 @@ import java.util.Collections;
  * union of the skills of the employees performing the task.
  *
  */
-public class EmployeesHaveAllRequiredSkillsConstraint extends AbstractConstraint implements IConstraint {
+public class EmployeesHaveAllRequiredSkillsConstraint implements IConstraint {
     @Override
     public boolean isViolated(Project project, DedicationMatrix s) {
         return violationDegree(project, s) > 0;

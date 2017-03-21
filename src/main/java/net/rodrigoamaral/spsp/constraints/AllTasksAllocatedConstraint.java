@@ -6,7 +6,7 @@ import net.rodrigoamaral.spsp.solution.DedicationMatrix;
 /**
  * Constraint 1: Each task must be performed by at least one person
  */
-public class AllTasksAllocatedConstraint extends AbstractConstraint implements IConstraint {
+public class AllTasksAllocatedConstraint implements IConstraint {
 
     @Override
     public boolean isViolated(Project project, DedicationMatrix s) {
