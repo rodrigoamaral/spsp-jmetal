@@ -23,26 +23,60 @@ public class NoEmployeeOverworkConstraint implements IConstraint {
         Collection<Employee> employees = project.getEmployees().values();
         Collection<Task> tasks = project.getTasks().values();
         double projectDuration = project.calculateDuration(s);
+//        System.out.println("Project Duration: " + projectDuration);
         double projectOverwork = 0.0;
         for (Employee e: employees) {
-            List<Double> overwork = new ArrayList<>();
+//            System.out.println("Employee: " + e);
             double employeeOverDedication = 0.0;
             for (int instant = 0; instant <= projectDuration; instant++) {
+//                System.out.println("-------------------");
+//                System.out.println("Instant: " + instant);
+//                System.out.println("-------------------");
                 double employeeDedication = 0.0;
                 for (Task t: tasks) {
+//                    System.out.println("Task:" + t);
                     if (t.isTaskRunning(instant)) {
+//                        System.out.println("Task is running!");
                         employeeDedication += s.getDedication(e.getId(), t.getId());
                     }
+//                    System.out.println("Employee " + e.getId() + " dedication to Task " + t.getId() + ": " + s.getDedication(e.getId(), t.getId()));
                 }
+//                System.out.println("Employee " + e.getId() + " total dedication: " + employeeDedication);
                 if (employeeDedication > e.getMaxDedication()) {
-                    overwork.add(employeeDedication - e.getMaxDedication());
-                } else {
-                    overwork.add(0.0);
+                    employeeOverDedication += employeeDedication - e.getMaxDedication();
+//                    System.out.println("Employee " + e.getId() + " overdedication: " + employeeOverDedication);
                 }
-                employeeOverDedication += overwork.get(overwork.size() - 1);
             }
             projectOverwork += employeeOverDedication;
         }
         return projectOverwork;
     }
+
+//    @Override
+//    public double violationDegree(Project project, DedicationMatrix s) {
+//        Collection<Employee> employees = project.getEmployees().values();
+//        Collection<Task> tasks = project.getTasks().values();
+//        double projectDuration = project.calculateDuration(s);
+//        double projectOverwork = 0.0;
+//        for (Employee e: employees) {
+//            List<Double> overwork = new ArrayList<>();
+//            double employeeOverDedication = 0.0;
+//            for (int instant = 0; instant <= projectDuration; instant++) {
+//                double employeeDedication = 0.0;
+//                for (Task t: tasks) {
+//                    if (t.isTaskRunning(instant)) {
+//                        employeeDedication += s.getDedication(e.getId(), t.getId());
+//                    }
+//                }
+//                if (employeeDedication > e.getMaxDedication()) {
+//                    overwork.add(employeeDedication - e.getMaxDedication());
+//                } else {
+//                    overwork.add(0.0);
+//                }
+//                employeeOverDedication += overwork.get(overwork.size() - 1);
+//            }
+//            projectOverwork += employeeOverDedication;
+//        }
+//        return projectOverwork;
+//    }
 }

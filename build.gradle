@@ -11,10 +11,10 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile group: 'org.uma.jmetal', name: 'jmetal-core', version: '5.1'
-    compile group: 'org.uma.jmetal', name: 'jmetal-algorithm', version: '5.1'
-    compile group: 'org.uma.jmetal', name: 'jmetal-problem', version: '5.1'
-    compile group: 'org.uma.jmetal', name: 'jmetal-exec', version: '5.1'
+    compile group: 'org.uma.jmetal', name: 'jmetal-core', version: '5.2'
+    compile group: 'org.uma.jmetal', name: 'jmetal-algorithm', version: '5.2'
+    compile group: 'org.uma.jmetal', name: 'jmetal-problem', version: '5.2'
+    compile group: 'org.uma.jmetal', name: 'jmetal-exec', version: '5.2'
     compile group: 'javax.json', name: 'javax.json-api', version: '1.0'
     compile group: 'org.glassfish', name: 'javax.json', version: '1.0.4'
 }

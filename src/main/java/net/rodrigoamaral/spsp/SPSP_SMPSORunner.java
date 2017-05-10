@@ -27,11 +27,15 @@ import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.runner.AbstractAlgorithmRunner;
 import org.uma.jmetal.solution.DoubleSolution;
+import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmRunner;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.archive.BoundedArchive;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
+import org.uma.jmetal.util.fileoutput.SolutionListOutput;
+import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
+import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.impl.MersenneTwisterGenerator;
 
 import java.io.FileNotFoundException;
@@ -43,6 +47,21 @@ import java.util.List;
  * @author Antonio J. Nebro &lt;antonio@lcc.uma.es&gt;
  */
 public class SPSP_SMPSORunner extends AbstractAlgorithmRunner {
+
+  public static void printFinalSolutionSet(List<? extends Solution<?>> population) {
+
+    String varFile = "VAR_SMPSO.csv";
+    String funFile = "FUN_SMPSO.csv";
+    new SolutionListOutput(population)
+            .setSeparator(";")
+            .setVarFileOutputContext(new DefaultFileOutputContext(varFile))
+            .setFunFileOutputContext(new DefaultFileOutputContext(funFile))
+            .print();
+
+    JMetalLogger.logger.info("Random seed: " + JMetalRandom.getInstance().getSeed());
+    JMetalLogger.logger.info("Objectives values have been written to file " + funFile);
+    JMetalLogger.logger.info("Variables values have been written to file " + varFile);
+  }
 
   private static SPSProblem loadProjectInstanceFromFile(String projectPropertiesFileName) throws FileNotFoundException {
     return new SPSProblem(projectPropertiesFileName);
@@ -67,7 +86,11 @@ public class SPSP_SMPSORunner extends AbstractAlgorithmRunner {
     String filename = "";
     if (args.length == 1) {
       filename = args[0];
+    } else if (args.length == 2) {
+        filename = args[0];
+        referenceParetoFront = args[1];
     }
+
     problem = loadProjectInstanceFromFile(filename);
 
     BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
@@ -78,7 +101,7 @@ public class SPSP_SMPSORunner extends AbstractAlgorithmRunner {
 
     algorithm = new SMPSOBuilder(problem, archive)
         .setMutation(mutation)
-        .setMaxIterations(250)
+        .setMaxIterations(1000)
         .setSwarmSize(100)
         .setRandomGenerator(new MersenneTwisterGenerator())
         .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())

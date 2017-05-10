@@ -38,13 +38,23 @@ public class Project {
         return getEmployees().size() * getTasks().size();
     }
 
+    private void resetTasksDuration() {
+        for (Task t : getTasks().values()) {
+            t.setDuration(0);
+            t.setStart(0);
+            t.setFinish(0);
+        }
+    }
     private void setTasksDuration(DedicationMatrix dm) {
+        resetTasksDuration();
         for (Task t : getTasks().values()){
             double taskDedication = 0;
             for (Employee e : getEmployees().values()){
                 taskDedication += dm.getDedication(e.getId(), t.getId());
             }
-            t.setDuration((t.getEffort() / taskDedication));
+            if (taskDedication > 0) {
+                t.setDuration((t.getEffort() / taskDedication));
+            }
         }
     }
 
