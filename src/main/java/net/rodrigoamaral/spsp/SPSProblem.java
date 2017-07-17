@@ -1,7 +1,6 @@
 package net.rodrigoamaral.spsp;
 
 import net.rodrigoamaral.spsp.adapters.JMetalSPSPAdapter;
-import org.uma.jmetal.problem.ConstrainedProblem;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.solutionattribute.impl.NumberOfViolatedConstraints;
@@ -23,7 +22,7 @@ public class SPSProblem extends AbstractDoubleProblem {
     public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree;
     public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints;
     private static final double PENALTY = 1.5;
-    private int count;
+    private int evaluationCounter;
 
 
     public SPSProblem(String projectPropertiesFileName) throws FileNotFoundException {
@@ -36,7 +35,7 @@ public class SPSProblem extends AbstractDoubleProblem {
         setUpperLimit(spsp.getUpperLimit());
         overallConstraintViolationDegree = new OverallConstraintViolation<>();
         numberOfViolatedConstraints = new NumberOfViolatedConstraints<>();
-        count = 0;
+        evaluationCounter = 0;
     }
 
 
@@ -52,8 +51,7 @@ public class SPSProblem extends AbstractDoubleProblem {
                 solution.setObjective(i, solution.getObjective(i) * PENALTY);
             }
         }
-        count++;
-        System.out.println(count);
+        evaluationCounter++;
     }
 
 
@@ -63,4 +61,7 @@ public class SPSProblem extends AbstractDoubleProblem {
         overallConstraintViolationDegree.setAttribute(solution, Double.valueOf(violated));
     }
 
+    public int getEvaluationCounter() {
+        return evaluationCounter;
+    }
 }
