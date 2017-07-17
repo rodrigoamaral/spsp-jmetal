@@ -20,3 +20,6 @@
 *.ear
 
 /docs/
+.ipynb_checkpoints
+*.csv
+*.ipynb
