@@ -4,17 +4,17 @@ package net.rodrigoamaral.dspsp.project;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Employee extends net.rodrigoamaral.spsp.project.Employee {
+public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee {
 
     private List skillsProficiency;
     private float overtimeSalary;
 
-    public Employee(int id, float salary) {
+    public DynamicEmployee(int id, float salary) {
         super(id, salary);
         skillsProficiency = new ArrayList();
     }
 
-    public Employee(int id, float salary, float _overtimeSalary) {
+    public DynamicEmployee(int id, float salary, float _overtimeSalary) {
         super(id, salary);
         skillsProficiency = new ArrayList();
         overtimeSalary = _overtimeSalary;

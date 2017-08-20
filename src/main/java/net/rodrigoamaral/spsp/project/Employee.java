@@ -45,7 +45,7 @@ public class Employee {
 
     @Override
     public String toString() {
-        return "Employee{" +
+        return "DynamicEmployee{" +
                 "id=" + id +
                 ", salary=" + salary +
                 ", skills=" + skills +
