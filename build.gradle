@@ -17,4 +17,7 @@ dependencies {
     compile group: 'org.uma.jmetal', name: 'jmetal-exec', version: '5.2'
     compile group: 'javax.json', name: 'javax.json-api', version: '1.0'
     compile group: 'org.glassfish', name: 'javax.json', version: '1.0.4'
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-math3
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+
 }
