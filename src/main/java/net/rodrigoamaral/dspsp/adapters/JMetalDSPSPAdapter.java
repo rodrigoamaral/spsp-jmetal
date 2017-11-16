@@ -42,9 +42,10 @@ public class JMetalDSPSPAdapter {
      */
     public JMetalDSPSPAdapter(String configFile) throws FileNotFoundException {
         this.project = new DynamicProjectConfigLoader(configFile).createProject();
-        for (int i = 0; i < 21; i++) {
-            System.out.println(i + "\t: " + project.isEmployeeAvailable(project.getEmployeeById(4), i));
-        }
+//        temp debug output
+//        for (int i = 0; i < 21; i++) {
+//            System.out.println(i + "\t: " + project.isEmployeeAvailable(project.getEmployeeById(4), i));
+//        }
         this.objectiveEvaluator = new SPSPObjectiveEvaluator()
                 .addObjective(new CostObjective())
                 .addObjective(new DurationObjective());
