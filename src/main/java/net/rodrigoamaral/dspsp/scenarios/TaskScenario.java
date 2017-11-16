@@ -31,12 +31,18 @@ public class TaskScenario {
         double sd = mean * 0.5;
         NormalDistribution nd = new NormalDistribution(mean, sd);
         double totalEffort = nd.sample();
-        // TODO: Replace this with the actual finishedEffort from task
-        double finishedEffort = task.getEffort() * 0.1;
+        double finishedEffort = getFinishedEffort(task);
         while (!validEffortValue(totalEffort, finishedEffort)) {
             totalEffort = nd.sample();
         }
         return totalEffort - finishedEffort;
+    }
+
+    private double getFinishedEffort(DynamicTask task) {
+        // TODO: Calculate the actual finishedEffort from task
+//  finished_effort = finished_effort + total_dedication * t / V(record_V);
+
+        return 0;
     }
 
     private boolean validEffortValue(double totalEffort, double finishedEffort) {

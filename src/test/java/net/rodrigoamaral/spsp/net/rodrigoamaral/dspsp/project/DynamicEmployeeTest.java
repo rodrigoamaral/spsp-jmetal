@@ -14,7 +14,7 @@ public class DynamicEmployeeTest {
 
     @Test
     public void newDynamicEmployeeOvertime() {
-        DynamicEmployee e = new DynamicEmployee(1, 1000, 1200);
+        DynamicEmployee e = new DynamicEmployee(1, 1000, 1200, 0);
         assertNotNull(e);
         assertEquals(1200, e.getOvertimeSalary(), 0);
     }

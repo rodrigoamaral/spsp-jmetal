@@ -43,6 +43,10 @@ public class Employee {
         return maxDedication;
     }
 
+    public void setMaxDedication(double maxDedication) {
+        this.maxDedication = maxDedication;
+    }
+
     @Override
     public String toString() {
         return "DynamicEmployee{" +
