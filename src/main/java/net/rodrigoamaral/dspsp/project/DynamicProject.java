@@ -2,7 +2,6 @@ package net.rodrigoamaral.dspsp.project;
 
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.project.events.EventType;
-import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
 import java.util.ArrayList;
@@ -136,19 +135,34 @@ public class DynamicProject {
     }
 
     private double taskCostByEmployee(DynamicEmployee e, DynamicTask t, DedicationMatrix solution) {
-        return e.getSalary() * solution.getDedication(e.getOriginalIndex(), t.getOriginalIndex()) * t.getDuration();
+        double employeeDedication = solution.getDedication(e.getOriginalIndex(), t.getOriginalIndex());
+        double regularCost = e.getSalary() * employeeDedication * t.getDuration();
+        return regularCost + getOvertimeCost(e, t, employeeDedication - 1)  * t.getDuration();
     }
 
     public double calculateCost(DedicationMatrix solution) {
+        calculateDuration(solution);
         double projectCost = 0;
         for (DynamicEmployee e: employees.values()) {
-            double employeeCost = 0;
             for (DynamicTask t: tasks.values()) {
-                employeeCost += taskCostByEmployee(e, t, solution);
+                projectCost += taskCostByEmployee(e, t, solution);
             }
-            projectCost += employeeCost;
         }
         return projectCost;
+    }
+
+    private double getOvertimeCost(DynamicEmployee e, DynamicTask t, double overdedication) {
+        double overtimeCost = e.getOvertimeSalary() * overdedication * t.getDuration();
+        overtimeCost = overtimeCost > 0 ? overtimeCost : 0;
+        return overtimeCost;
+    }
+
+    private double employeeTotalDedication(DedicationMatrix solution, DynamicEmployee e) {
+        double employeeDedication = 0;
+        for (DynamicTask t: tasks.values()) {
+            employeeDedication += solution.getDedication(e.getOriginalIndex(), t.getOriginalIndex());
+        }
+        return employeeDedication;
     }
 
     public List<DynamicEvent> getEvents() {
@@ -173,6 +187,10 @@ public class DynamicProject {
             }
         }
         return available;
+    }
+
+    public double getEmployeeProficiencyInTask(DynamicEmployee employee, DynamicTask task) {
+        return taskProficiency.get(employee.getOriginalIndex()).get(task.getOriginalIndex());
     }
 
 
