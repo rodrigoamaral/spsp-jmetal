@@ -8,8 +8,8 @@ import java.util.List;
 
 public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee implements IEventSubject {
 
-    private List skillsProficiency;
-    private float overtimeSalary;
+    private List<Double> skillsProficiency;
+    private double overtimeSalary;
     private int originalIndex;
 
     public DynamicEmployee(int id, float salary) {
@@ -24,7 +24,18 @@ public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee imp
         this.originalIndex = originalIndex;
     }
 
-    public List getSkillsProficiency() {
+    public DynamicEmployee(DynamicEmployee employee) {
+        super(employee.getId(), employee.getSalary());
+        skillsProficiency = new ArrayList<>();
+        for (double skp: employee.getSkillsProficiency()) {
+            skillsProficiency.add(skp);
+        }
+        skillsProficiency = employee.getSkillsProficiency();
+        overtimeSalary = employee.getOvertimeSalary();
+        originalIndex = employee.getOriginalIndex();
+    }
+
+    public List<Double> getSkillsProficiency() {
         return skillsProficiency;
     }
 
@@ -32,7 +43,7 @@ public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee imp
         this.skillsProficiency = skillsProficiency;
     }
 
-    public float getOvertimeSalary() {
+    public double getOvertimeSalary() {
         return overtimeSalary;
     }
 

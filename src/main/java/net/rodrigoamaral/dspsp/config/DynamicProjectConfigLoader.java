@@ -60,7 +60,7 @@ public class DynamicProjectConfigLoader {
         for (int taskIndex = 0; taskIndex < config.getAvailable_task().size(); taskIndex++) {
             DynamicTask t = loadTask(taskIndex);
             if (t != null) {
-                project.getTasks().put(t.getOriginalIndex(), t);
+                project.getTasks().add(t);
                 project.getTaskIndices().put(t.getId(), t.getOriginalIndex());
             }
             loadTaskSkill(taskIndex);
@@ -84,7 +84,7 @@ public class DynamicProjectConfigLoader {
         for (int employeeIndex = 0; employeeIndex < config.getAvailable_employee().size(); employeeIndex++) {
             DynamicEmployee emp = loadEmployee(employeeIndex);
             if (emp != null) {
-                project.getEmployees().put(emp.getOriginalIndex(), emp);
+                project.getEmployees().add(emp);
                 project.getEmployeeIndices().put(emp.getId(), emp.getOriginalIndex());
             }
             loadEmployeeSkill(employeeIndex);
@@ -111,8 +111,8 @@ public class DynamicProjectConfigLoader {
         emp.setSkillsProficiency(skillsProficiency);
     }
 
-    private void loadTaskPrecedenceGraph(Map<Integer, DynamicTask> taskMap) {
-        project.setTaskPrecedenceGraph(new DynamicTaskPrecedenceGraph(taskMap.size()));
+    private void loadTaskPrecedenceGraph(List<DynamicTask> tasks) {
+        project.setTaskPrecedenceGraph(new DynamicTaskPrecedenceGraph(tasks.size()));
         for (List<Integer> edge : config.getEdge_set()) {
             DynamicTask t1 = project.getTaskById(edge.get(0));
             DynamicTask t2 = project.getTaskById(edge.get(1));
@@ -149,7 +149,7 @@ public class DynamicProjectConfigLoader {
     }
 
     private void loadTaskProficiency() {
-        for (DynamicEmployee employee: project.getEmployees().values()) {
+        for (DynamicEmployee employee: project.getEmployees()) {
             int originalIndex = employee.getOriginalIndex();
             project.getTaskProficiency().put(originalIndex, config.getTask_Proficieny_total().get(originalIndex));
         }

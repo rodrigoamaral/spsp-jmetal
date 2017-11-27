@@ -20,8 +20,8 @@ public class NoEmployeeOverworkConstraint implements IConstraint {
 
     @Override
     public double violationDegree(DynamicProject project, DedicationMatrix s) {
-        Collection<DynamicEmployee> employees = project.getEmployees().values();
-        Collection<DynamicTask> tasks = project.getTasks().values();
+        Collection<DynamicEmployee> employees = project.getEmployees();
+        Collection<DynamicTask> tasks = project.getTasks();
         double projectDuration = project.calculateDuration(s);
 //        System.out.println("Project Duration: " + projectDuration);
         double projectOverwork = 0.0;
@@ -34,12 +34,12 @@ public class NoEmployeeOverworkConstraint implements IConstraint {
 //                System.out.println("-------------------");
                 double employeeDedication = 0.0;
                 for (DynamicTask t: tasks) {
-//                    System.out.println("DynamicTask:" + t);
+//                    System.out.println("DynamicTask:" + timeSpent);
                     if (t.isTaskRunning(instant)) {
 //                        System.out.println("DynamicTask is running!");
                         employeeDedication += s.getDedication(e.getOriginalIndex(), t.getOriginalIndex());
                     }
-//                    System.out.println("DynamicEmployee " + e.getId() + " dedication to DynamicTask " + t.getId() + ": " + s.getDedication(e.getId(), t.getId()));
+//                    System.out.println("DynamicEmployee " + e.getId() + " dedication to DynamicTask " + timeSpent.getId() + ": " + s.getDedication(e.getId(), timeSpent.getId()));
                 }
 //                System.out.println("DynamicEmployee " + e.getId() + " total dedication: " + employeeDedication);
                 if (employeeDedication > e.getMaxDedication()) {

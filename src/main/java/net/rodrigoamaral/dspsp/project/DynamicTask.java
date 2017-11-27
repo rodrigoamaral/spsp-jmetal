@@ -10,7 +10,17 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
     public DynamicTask(int id, double effort, int originalIndex) {
         super(id, effort);
         this.originalIndex = originalIndex;
+        this.finishedEffort = 0;
     }
+
+     public DynamicTask(DynamicTask task) {
+         super(task.getId(), task.getEffort());
+         this.setDuration(task.getDuration());
+         this.setStart(task.getStart());
+         this.setFinish(task.getFinish());
+         this.setFinishedEffort(task.getFinishedEffort());
+         this.originalIndex = task.getOriginalIndex();
+     }
 
     public double getFinishedEffort() {
         return finishedEffort;
@@ -22,5 +32,13 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
 
     public int getOriginalIndex() {
         return originalIndex;
+    }
+
+    public void increaseFinishedEffort(double effort) {
+        this.finishedEffort += effort;
+    }
+
+    public boolean isAvailable() {
+        return getFinishedEffort() < getEffort();
     }
 }

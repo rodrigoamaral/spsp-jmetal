@@ -1,12 +1,9 @@
 package net.rodrigoamaral.dspsp.adapters;
 
 import net.rodrigoamaral.dspsp.config.DynamicProjectConfigLoader;
+import net.rodrigoamaral.dspsp.objectives.*;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.constraints.*;
-import net.rodrigoamaral.dspsp.objectives.CostObjective;
-import net.rodrigoamaral.dspsp.objectives.DurationObjective;
-import net.rodrigoamaral.dspsp.objectives.IObjectiveEvaluator;
-import net.rodrigoamaral.dspsp.objectives.SPSPObjectiveEvaluator;
 import org.uma.jmetal.solution.DoubleSolution;
 
 import java.io.FileNotFoundException;
@@ -45,7 +42,8 @@ public class JMetalDSPSPAdapter {
         this.project = new DynamicProjectConfigLoader(configFile).createProject();
         this.objectiveEvaluator = new SPSPObjectiveEvaluator()
                 .addObjective(new CostObjective())
-                .addObjective(new DurationObjective());
+                .addObjective(new DurationObjective())
+                .addObjective(new RobustnessObjective());
         this.constraintEvaluator = new DSPSPConstraintEvaluator()
                 .addConstraint(new AllTasksAllocatedConstraint())
                 .addConstraint(new EmployeesHaveAllRequiredSkillsConstraint())

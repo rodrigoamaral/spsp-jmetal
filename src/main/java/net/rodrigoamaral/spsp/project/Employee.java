@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  *
- * Represents an employee and its attriubtes according to SPSP definition.
+ * Represents an employee and its attributes according to SPSP definition.
  *
  * @author Rodrigo Amaral
  *
@@ -16,7 +16,7 @@ public class Employee {
     private List<Integer> skills;
     private double maxDedication;
 
-    public Employee(int id, float salary) {
+    public Employee(int id, double salary) {
         this.id = id;
         this.salary = salary;
         this.skills = new ArrayList<>();
