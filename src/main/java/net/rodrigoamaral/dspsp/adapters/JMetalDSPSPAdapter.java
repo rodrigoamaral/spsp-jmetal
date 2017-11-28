@@ -43,7 +43,8 @@ public class JMetalDSPSPAdapter {
         this.objectiveEvaluator = new SPSPObjectiveEvaluator()
                 .addObjective(new CostObjective())
                 .addObjective(new DurationObjective())
-                .addObjective(new RobustnessObjective());
+                .addObjective(new RobustnessObjective())
+                .addObjective(new StabilityObjective());
         this.constraintEvaluator = new DSPSPConstraintEvaluator()
                 .addConstraint(new AllTasksAllocatedConstraint())
                 .addConstraint(new EmployeesHaveAllRequiredSkillsConstraint())

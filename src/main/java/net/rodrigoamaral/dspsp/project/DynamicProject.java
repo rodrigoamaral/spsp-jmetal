@@ -260,6 +260,10 @@ public class DynamicProject {
         return Math.sqrt(avg(durationDistances)) + ROBUSTNESS_COST_WEIGHT * Math.sqrt(avg(costDistances));
     }
 
+    public double calculateStability(DedicationMatrix solution) {
+        return 0;
+    }
+
     private double efficiencyDistance(double scenarioObjective, double solutionObjective) {
         return Math.pow(Math.max(0, (scenarioObjective - solutionObjective) / solutionObjective), 2);
     }
