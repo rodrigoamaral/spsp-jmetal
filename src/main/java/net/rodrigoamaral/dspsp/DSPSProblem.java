@@ -1,6 +1,7 @@
 package net.rodrigoamaral.dspsp;
 
 import net.rodrigoamaral.dspsp.adapters.JMetalDSPSPAdapter;
+import net.rodrigoamaral.dspsp.project.DynamicProject;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.solutionattribute.impl.NumberOfViolatedConstraints;
@@ -27,6 +28,15 @@ public class DSPSProblem extends AbstractDoubleProblem {
 
     public DSPSProblem(String projectPropertiesFileName) throws FileNotFoundException {
         dspsp = new JMetalDSPSPAdapter(projectPropertiesFileName);
+        init();
+    }
+
+    public DSPSProblem(DynamicProject project) {
+        dspsp = new JMetalDSPSPAdapter(project);
+        init();
+    }
+
+    private void init() {
         setName(dspsp.getProblemName());
         setNumberOfVariables(dspsp.getNumberOfVariables());
         setNumberOfObjectives(dspsp.getNumberOfObjectives());
@@ -63,5 +73,9 @@ public class DSPSProblem extends AbstractDoubleProblem {
 
     public int getEvaluationCounter() {
         return evaluationCounter;
+    }
+
+    public DynamicProject getProject() {
+        return dspsp.getProject();
     }
 }

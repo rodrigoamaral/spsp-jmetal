@@ -47,4 +47,15 @@ public class DynamicEvent {
     public void setSubject(IEventSubject subject) {
         this.subject = subject;
     }
+
+    // TODO: Create a human readable string representation for DynamicEvent
+    @Override
+    public String toString() {
+        return "DynamicEvent{" +
+                "id=" + id +
+                ", time=" + time +
+                ", type=" + type +
+                ", subject=" + subject +
+                '}';
+    }
 }

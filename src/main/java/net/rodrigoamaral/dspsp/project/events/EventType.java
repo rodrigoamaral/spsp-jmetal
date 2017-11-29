@@ -31,5 +31,10 @@ public enum EventType {
         return value;
     }
 
-
+    @Override
+    public String toString() {
+        return "EventType{" +
+                "value=" + value +
+                '}';
+    }
 }

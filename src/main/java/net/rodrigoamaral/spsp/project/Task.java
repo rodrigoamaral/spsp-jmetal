@@ -91,7 +91,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "DynamicTask{" +
+        return "Task{" +
                 "id=" + id +
                 ", effort=" + effort +
                 ", duration=" + duration +

@@ -2,6 +2,7 @@ package net.rodrigoamaral.dspsp.project;
 
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.project.events.EventType;
+import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 import net.rodrigoamaral.dspsp.scenarios.TaskScenario;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
@@ -10,7 +11,9 @@ import java.util.*;
 public class DynamicProject {
 
     private List<DynamicTask> tasks;
+    private Map<Integer, List<DynamicTask>> taskHistory;
     private List<DynamicEmployee> employees;
+    private Map<Integer, List<DynamicEmployee>> employeeHistory;
     private DynamicTaskPrecedenceGraph taskPrecedenceGraph;
     private List<DynamicEvent> events;
     private Map<Integer, Integer> taskIndices;
@@ -29,6 +32,8 @@ public class DynamicProject {
         taskIndices = new HashMap<>();
         employeeIndices = new HashMap<>();
         taskProficiency = new HashMap<>();
+        taskHistory = new HashMap<>();
+        employeeHistory = new HashMap<>();
     }
 
     public List<DynamicTask> getTasks() {
@@ -261,7 +266,9 @@ public class DynamicProject {
     }
 
     public double calculateStability(DedicationMatrix solution) {
-        return 0;
+        double stabilityValue = 0;
+
+        return stabilityValue;
     }
 
     private double efficiencyDistance(double scenarioObjective, double solutionObjective) {
@@ -278,6 +285,28 @@ public class DynamicProject {
             sum += d;
         }
         return sum;
+    }
+
+    /**
+     * Returns a list of all tasks available right after a dynamic event occurs.
+     *
+     * @param event
+     * @return
+     */
+    public List<DynamicTask> filterAvailableTasks(DynamicEvent event_) {
+        List<DynamicTask> availableTasks = new ArrayList<>();
+//        for (DynamicEvent event: getEvents()) {
+//            IEventSubject subject = event.getSubject();
+//            if (subject instanceof DynamicTask) {
+//                if (isTask(DynamicTask)subject)
+//            }
+//            for (DynamicTask task : getTasks()) {
+//                if (task.isAvailable()) {
+//                    availableTasks.add(task);
+//                }
+//            }
+//        }
+        return availableTasks;
     }
 
     public List<DynamicTask> filterAvailableTasks() {
