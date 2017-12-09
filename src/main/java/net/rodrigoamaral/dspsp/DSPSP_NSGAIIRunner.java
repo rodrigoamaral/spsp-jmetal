@@ -1,5 +1,6 @@
 package net.rodrigoamaral.dspsp;
 
+import net.rodrigoamaral.dspsp.decision.ComparisonMatrix;
 import net.rodrigoamaral.dspsp.decision.DecisionMaker;
 import net.rodrigoamaral.dspsp.nsgaii.DSPSP_NSGAIIBuilder;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
@@ -18,7 +19,6 @@ import org.uma.jmetal.runner.AbstractAlgorithmRunner;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmRunner;
-import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
@@ -30,7 +30,7 @@ import java.util.List;
 public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
 
-    public static void main(String[] args) throws JMetalException, FileNotFoundException {
+    public static void main(String[] args) throws Exception {
         String filename = "";
         String referenceParetoFront = "" ;
         if (args.length == 1) {
@@ -39,7 +39,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         run(filename, referenceParetoFront);
     }
 
-    private static void run(String inputFile, String refPF) throws FileNotFoundException {
+    private static void run(String inputFile, String refPF) throws Exception {
         Problem<DoubleSolution> problem = loadProjectInstance(inputFile);
         JMetalLogger.logger.info(problem.getName() +
                 "(" + ((DSPSProblem)problem).getProject().getTasks().size() + ", " +
@@ -51,6 +51,8 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
         DynamicProject project = algorithmAssembler.getProject();
 
+        ComparisonMatrix comparisonMatrix = new ComparisonMatrix();
+
         AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
                 .execute() ;
 
@@ -59,8 +61,10 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         long totalComputingTime = algorithmRunner.getComputingTime();
         JMetalLogger.logger.info("Initial scheduling complete. Elapsed time: " + totalComputingTime + " ms");
 
+        // TODO: Test decision making
         // Decides on the best initial schedule
-        DoubleSolution initialSchedule = new DecisionMaker(population).choose();
+        DoubleSolution initialSchedule = new DecisionMaker(population, comparisonMatrix)
+                .chooseInitialSchedule();
 
         // Loops through rescheduling points
         List<DynamicEvent> reschedulingPoints = project.getEvents();
@@ -76,7 +80,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
             JMetalLogger.logger.info("Rescheduling complete in " + result.getComputingTime() + " ms. " +
                     "Elapsed time: " + totalComputingTime + " ms.");
 
-            currentSchedule = new DecisionMaker(result.getSchedules()).choose();
+            currentSchedule = new DecisionMaker(result.getSchedules(), comparisonMatrix).chooseNewSchedule();
 
         }
 
