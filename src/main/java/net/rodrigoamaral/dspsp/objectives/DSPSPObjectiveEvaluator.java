@@ -1,5 +1,6 @@
 package net.rodrigoamaral.dspsp.objectives;
 
+import net.rodrigoamaral.dspsp.constraints.NoEmployeeOverworkConstraint;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
@@ -14,11 +15,11 @@ import java.util.List;
  * @author Rodrigo Amaral
  *
  */
-public class SPSPObjectiveEvaluator implements IObjectiveEvaluator {
+public class DSPSPObjectiveEvaluator implements IObjectiveEvaluator {
 
     private List<IObjective> objectives;
 
-    public SPSPObjectiveEvaluator() {
+    public DSPSPObjectiveEvaluator() {
         objectives = new ArrayList<>();
     }
 
@@ -35,6 +36,8 @@ public class SPSPObjectiveEvaluator implements IObjectiveEvaluator {
 
     @Override
     public double evaluate(int index, DynamicProject project, DedicationMatrix solution) {
+        // TODO: Repair candidate solutions HERE, when needed
+        solution = NoEmployeeOverworkConstraint.repair(solution, project.getAvailableEmployees(), project.getActiveTasks());
         return objectives.get(index).evaluate(project, solution);
     }
 

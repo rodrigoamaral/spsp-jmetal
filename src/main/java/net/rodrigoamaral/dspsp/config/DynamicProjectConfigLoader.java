@@ -10,12 +10,7 @@ import net.rodrigoamaral.spsp.project.Project;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import static net.rodrigoamaral.dspsp.project.events.EventType.EMPLOYEE_LEAVE;
-import static net.rodrigoamaral.dspsp.project.events.EventType.NEW_URGENT_TASK;
 
 /**
  * @author Rodrigo Amaral
@@ -51,33 +46,49 @@ public class DynamicProjectConfigLoader {
         loadTasks();
         loadEmployees();
         loadTaskPrecedenceGraph(project.getTasks());
+        loadAvailableDisconnectedTasks();
         loadEventTimeline();
         loadTaskProficiency();
+        project.updateCurrentStatus();
         return project;
     }
 
+    private void loadAvailableDisconnectedTasks() {
+        for (int t: project.getTaskPrecedenceGraph().getDisconnectedTasks()) {
+            if (t < config.getTask_number()) {
+                project.getTaskByIndex(t).setAvailable(true);
+            }
+        }
+    }
+
     private void loadTasks() {
-        for (int taskIndex = 0; taskIndex < config.getAvailable_task().size(); taskIndex++) {
+
+        for (int taskIndex = 0; taskIndex < config.getTask_effort_real_secnario_total().size(); taskIndex++) {
             DynamicTask t = loadTask(taskIndex);
             if (t != null) {
                 project.getTasks().add(t);
-                project.getTaskIndices().put(t.getId(), t.getOriginalIndex());
+                project.getTaskIndices().put(t.getId(), t.index());
             }
             loadTaskSkill(taskIndex);
+        }
+        for (double time: config.getArrival_time()) {
+            project.getTaskArrivalTimes().add(time);
         }
     }
 
 
     private DynamicTask loadTask(int taskIndex) {
-        int taskId = config.getAvailable_task().get(taskIndex);
-        double effort = config.getTask_effort_mu().get(taskIndex);
+        int taskId = taskIndex + 1;
+        double effort = config.getTask_effort_real_secnario_total().get(taskIndex);
         return new DynamicTask(taskId, effort, taskIndex);
     }
 
     private void loadTaskSkill(int taskIndex) {
-        List<Integer> skills = config.getTask_skill_set().get(taskIndex);
+        List<Integer> skills = config.getTask_skill_set_total().get(taskIndex);
         DynamicTask t = project.getTasks().get(taskIndex);
-        t.setSkills(skills);
+        for (Integer skill: skills) {
+            t.getSkills().add(skill);
+        }
     }
 
     private void loadEmployees() {
@@ -85,7 +96,7 @@ public class DynamicProjectConfigLoader {
             DynamicEmployee emp = loadEmployee(employeeIndex);
             if (emp != null) {
                 project.getEmployees().add(emp);
-                project.getEmployeeIndices().put(emp.getId(), emp.getOriginalIndex());
+                project.getEmployeeIndices().put(emp.getId(), emp.index());
             }
             loadEmployeeSkill(employeeIndex);
         }
@@ -112,12 +123,15 @@ public class DynamicProjectConfigLoader {
     }
 
     private void loadTaskPrecedenceGraph(List<DynamicTask> tasks) {
-        project.setTaskPrecedenceGraph(new DynamicTaskPrecedenceGraph(tasks.size()));
+        int initialSize = config.getTask_effort_real_secnario_total().size();
+        project.setTaskPrecedenceGraph(new DynamicTaskPrecedenceGraph(initialSize));
         for (List<Integer> edge : config.getEdge_set()) {
             DynamicTask t1 = project.getTaskById(edge.get(0));
             DynamicTask t2 = project.getTaskById(edge.get(1));
-            project.getTaskPrecedenceGraph().addEdge(t1.getOriginalIndex(),
-                                                     t2.getOriginalIndex());
+            t1.setAvailable(true);
+            t2.setAvailable(true);
+            project.getTaskPrecedenceGraph().addEdge(t1.index(),
+                                                     t2.index());
         }
     }
 
@@ -127,9 +141,10 @@ public class DynamicProjectConfigLoader {
         for (int i = 0; i < numberOfEvents; i++) {
             double time = config.getDynamic_time().get(i);
             int eventCode = config.getDynamic_class().get(i);
-            int urgentTaskId = config.getDynamic_rushjob_number().get(i);
+            int urgentTaskId = config.getDynamic_rushjob_number().get(i) + config.getTask_number();
             int leavingEmployeeId = config.getDynamic_labour_leave_number().get(i);
             int returningEmployeeId = config.getDynamic_labour_return_number().get(i);
+//            double arrivalTime = config.getArrival_time().get(i);
             EventType type = EventType.valueOf(eventCode);
             IEventSubject subject = null;
             switch (type) {
@@ -150,8 +165,8 @@ public class DynamicProjectConfigLoader {
 
     private void loadTaskProficiency() {
         for (DynamicEmployee employee: project.getEmployees()) {
-            int originalIndex = employee.getOriginalIndex();
-            project.getTaskProficiency().put(originalIndex, config.getTask_Proficieny_total().get(originalIndex));
+            int i = employee.index();
+            project.getTaskProficiency().put(i, config.getTask_Proficieny_total().get(i));
         }
     }
 

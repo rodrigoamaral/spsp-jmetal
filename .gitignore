@@ -6,7 +6,7 @@
 /FUN.tsv
 /jMetal.log
 /VAR.tsv
-/jMetal.log.1
+/jMetal.log.*
 *.iml
 
 *.class

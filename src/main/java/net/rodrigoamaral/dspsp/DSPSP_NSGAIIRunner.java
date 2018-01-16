@@ -7,6 +7,8 @@ import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.solution.SchedulingResult;
 import net.rodrigoamaral.jmetal.util.fileoutput.SolutionListOutput;
+import net.rodrigoamaral.logging.SPSPLogger;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
@@ -19,7 +21,6 @@ import org.uma.jmetal.runner.AbstractAlgorithmRunner;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.AlgorithmRunner;
-import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
@@ -28,6 +29,12 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
+
+    private static int schedulings = 0;
+
+    private static void incrementCounter() {
+        schedulings += 1;
+    }
 
 
     public static void main(String[] args) throws Exception {
@@ -40,12 +47,12 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
     }
 
     private static void run(String inputFile, String refPF) throws Exception {
-        Problem<DoubleSolution> problem = loadProjectInstance(inputFile);
-        JMetalLogger.logger.info(problem.getName() +
-                "(" + ((DSPSProblem)problem).getProject().getTasks().size() + ", " +
-                ((DSPSProblem)problem).getProject().getEmployees().size() +
-                ") loaded from " + inputFile);
 
+        SPSPLogger.info("Parsing instance file: " + inputFile);
+
+        DSPSProblem problem = loadProjectInstance(inputFile);
+
+        SPSPLogger.info("Parsing complete. Performing initial scheduling...");
 
         AlgorithmAssembler algorithmAssembler = new AlgorithmAssembler(problem).invoke();
         Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
@@ -59,9 +66,11 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         List<DoubleSolution> population = algorithm.getResult() ;
 
         long totalComputingTime = algorithmRunner.getComputingTime();
-        JMetalLogger.logger.info("Initial scheduling complete. Elapsed time: " + totalComputingTime + " ms");
 
-        // TODO: Test decision making
+        SPSPLogger.info("Initial scheduling complete.");
+        SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
+        incrementCounter();
+
         // Decides on the best initial schedule
         DoubleSolution initialSchedule = new DecisionMaker(population, comparisonMatrix)
                 .chooseInitialSchedule();
@@ -71,21 +80,31 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
         DoubleSolution currentSchedule = initialSchedule;
         for (DynamicEvent event: reschedulingPoints) {
-            JMetalLogger.logger.info(event + ". Rescheduling... ");
+
+            if (project.isFinished()) {
+                break;
+            }
+
+            SPSPLogger.info("Rescheduling "+ schedulings + " : " + event.description());
 
             SchedulingResult result = reschedule(project, event, currentSchedule);
 
             totalComputingTime += result.getComputingTime();
 
-            JMetalLogger.logger.info("Rescheduling complete in " + result.getComputingTime() + " ms. " +
-                    "Elapsed time: " + totalComputingTime + " ms.");
+            SPSPLogger.info("Rescheduling "+ schedulings +" complete in " + DurationFormatUtils.formatDuration(result.getComputingTime(), "HH:mm:ss,SSS") + ". ");
+            SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
+
+            incrementCounter();
+
+            writeSolutionFile(result.getSchedules(), "NSGA2", event.getId());
 
             currentSchedule = new DecisionMaker(result.getSchedules(), comparisonMatrix).chooseNewSchedule();
+
 
         }
 
 
-        JMetalLogger.logger.info("Total execution time: " + totalComputingTime + " ms");
+        SPSPLogger.info("Total execution time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS") + " ms");
 
         printFinalSolutionSet(population);
         if (!refPF.equals("")) {
@@ -93,10 +112,14 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         }
     }
 
-    private static SchedulingResult reschedule(DynamicProject project_,
+    private static SchedulingResult reschedule(DynamicProject project,
                                                DynamicEvent event,
-                                               DoubleSolution currentSchedule)  {
-        Problem<DoubleSolution> problem = loadProjectInstance(project_);
+                                               DoubleSolution lastSchedule) throws Exception {
+
+        project.update(event, lastSchedule);
+
+        DSPSProblem problem = loadProjectInstance(project);
+
 
         AlgorithmAssembler algorithmAssembler = new AlgorithmAssembler(problem).invoke();
         Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
@@ -104,7 +127,9 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
                 .execute();
 
-        return new SchedulingResult(algorithm.getResult(), algorithmRunner.getComputingTime());
+        return new SchedulingResult(algorithm.getResult(),
+                                    algorithmRunner.getComputingTime(),
+                                    problem.getProject().isFinished());
     }
 
     private static DSPSProblem loadProjectInstance(String projectPropertiesFileName) throws FileNotFoundException {
@@ -125,9 +150,23 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
                 .setFunFileOutputContext(new DefaultFileOutputContext(funFile))
                 .print();
 
-        JMetalLogger.logger.info("Random seed: " + JMetalRandom.getInstance().getSeed());
-        JMetalLogger.logger.info("Objectives values have been written to file " + funFile);
-        JMetalLogger.logger.info("Variables values have been written to file " + varFile);
+        SPSPLogger.info("Random seed: " + JMetalRandom.getInstance().getSeed());
+        SPSPLogger.info("Objectives values have been written to file " + funFile);
+        SPSPLogger.info("Variables values have been written to file " + varFile);
+    }
+
+    public static void writeSolutionFile(List<? extends Solution<?>> population, String algorithm, int reschedulingId) {
+        String varFile = "D_VAR_"+algorithm+"."+reschedulingId+".csv";
+        String funFile = "D_FUN_"+algorithm+"."+reschedulingId+".csv";
+        new SolutionListOutput(population)
+                .setSeparator(";")
+                .setVarFileOutputContext(new DefaultFileOutputContext(varFile))
+                .setFunFileOutputContext(new DefaultFileOutputContext(funFile))
+                .print();
+
+        SPSPLogger.info("Random seed: " + JMetalRandom.getInstance().getSeed());
+        SPSPLogger.info("Objectives values have been written to file " + funFile);
+        SPSPLogger.info("Variables values have been written to file " + varFile);
     }
 
     private static class AlgorithmAssembler {

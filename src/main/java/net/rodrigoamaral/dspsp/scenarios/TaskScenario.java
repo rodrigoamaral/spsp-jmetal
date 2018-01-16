@@ -1,6 +1,7 @@
 package net.rodrigoamaral.dspsp.scenarios;
 
 import net.rodrigoamaral.dspsp.project.DynamicEmployee;
+import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.project.DynamicTask;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -18,7 +19,7 @@ public class TaskScenario {
         return efforts;
     }
 
-//  TODO: Check if generateRemainingEffort follows the description in the paper
+//  REVIEW: Check if generateRemainingEffort matches the description in the paper
     public static double generateRemainingEffort(DynamicTask task,
                                                  List<DynamicEmployee> employees,
                                                  DedicationMatrix solution) {
@@ -36,7 +37,7 @@ public class TaskScenario {
     static public double employeeTotalDedication(DedicationMatrix solution, DynamicEmployee e, List<DynamicTask> tasks_) {
         double employeeDedication = 0;
         for (DynamicTask t: tasks_) {
-            employeeDedication += solution.getDedication(e.getOriginalIndex(), t.getOriginalIndex());
+            employeeDedication += solution.getDedication(e.index(), t.index());
         }
         return employeeDedication;
     }
@@ -44,7 +45,7 @@ public class TaskScenario {
     static public double totalDedicationToTask(DedicationMatrix solution, DynamicTask t, List<DynamicEmployee> employees_) {
         double totalDedication = 0;
         for (DynamicEmployee e: employees_) {
-            totalDedication += solution.getDedication(e.getOriginalIndex(), t.getOriginalIndex());
+            totalDedication += solution.getDedication(e.index(), t.index());
         }
         return totalDedication;
     }
@@ -62,7 +63,7 @@ public class TaskScenario {
     public static double getFinishedEffort(DynamicTask task,
                                            List<DynamicEmployee> employees,
                                            DedicationMatrix solution) {
-
+//        System.out.println("getFinishedEffort :: TASK " + task);
         double totalDedication = totalDedicationToTask(solution, task, employees);
         double totalFitness = totalFitnessOfEmployeesToTask(task, employees, solution, totalDedication);
         double costDriveValue = costDriveValue(totalFitness);
@@ -82,17 +83,31 @@ public class TaskScenario {
     static public double totalFitnessOfEmployeesToTask(DynamicTask task, List<DynamicEmployee> employees, DedicationMatrix solution, double totalDedication) {
         double totalProficiency = 0;
         for (DynamicEmployee e: employees) {
-            int i = e.getOriginalIndex();
+            int id = e.index();
             for (int skill: task.getSkills()) {
-                double proficiency = e.getSkillsProficiency().get(skill);
-                totalProficiency += proficiency * solution.getDedication(i, task.getOriginalIndex());
+                for (int i = 0; i < e.getSkills().size(); i++) {
+                    if (e.getSkills().get(i) == skill) {
+                        double skillProficiency = e.getSkillsProficiency().get(i);
+                        totalProficiency += skillProficiency * solution.getDedication(id, task.index());
+                    }
+                }
             }
 
         }
         return totalProficiency / totalDedication;
     }
 
+    static public double totalFitnessOfEmployeesToTask(DynamicProject project, DynamicTask task, List<DynamicEmployee> employees, DedicationMatrix solution, double totalDedication) {
+        double totalProficiency = 0;
+        for (DynamicEmployee e: employees) {
+            totalProficiency += taskProficiency(project, task, e) * solution.getDedication(e.index(), task.index());
+        }
+        return totalProficiency / totalDedication;
+    }
 
+    static public double taskProficiency(DynamicProject project, DynamicTask task, DynamicEmployee employee) {
+        return project.getTaskProficiency().get(employee.index()).get(task.index());
+    }
 
     private static boolean validEffortValue(double totalEffort, double finishedEffort) {
         return totalEffort > finishedEffort;

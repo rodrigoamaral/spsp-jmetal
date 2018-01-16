@@ -6,6 +6,9 @@ import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements IEventSubject {
     private double finishedEffort;
     private int originalIndex;
+    private static final double FINISH_THRESHOLD = 10E-10;
+
+    private boolean available = false;
 
     public DynamicTask(int id, double effort, int originalIndex) {
         super(id, effort);
@@ -19,7 +22,7 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
          this.setStart(task.getStart());
          this.setFinish(task.getFinish());
          this.setFinishedEffort(task.getFinishedEffort());
-         this.originalIndex = task.getOriginalIndex();
+         this.originalIndex = task.index();
      }
 
     public double getFinishedEffort() {
@@ -30,15 +33,42 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
         this.finishedEffort = finishedEffort;
     }
 
-    public int getOriginalIndex() {
+    public int index() {
         return originalIndex;
     }
 
-    public void increaseFinishedEffort(double effort) {
+    public void addFinishedEffort(double effort) {
         this.finishedEffort += effort;
     }
 
     public boolean isAvailable() {
-        return getFinishedEffort() < getEffort();
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public boolean isFinished() {
+        return getRemainingEffort() < FINISH_THRESHOLD;
+    }
+
+    public double getRemainingEffort() {
+        return getEffort() - getFinishedEffort();
+    }
+
+    @Override
+    public String toString() {
+        return "T_" + index();
+//        return "DynamicTask{" +
+//                "id=" + getId() +
+//                ", index=" + index() +
+//                ", available=" + isAvailable() +
+////                ", effort=" + getEffort() +
+////                ", duration=" + getDuration() +
+////                ", start=" + getStart() +
+////                ", finish=" + getFinish() +
+////                ", skills=" + getSkills() +
+//                '}';
     }
 }

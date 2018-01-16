@@ -5,7 +5,8 @@ import org.uma.jmetal.solution.DoubleSolution;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.commons.lang3.ObjectUtils.min;
+import static net.rodrigoamaral.util.DoubleUtils.max;
+import static net.rodrigoamaral.util.DoubleUtils.min;
 
 /**
  *  Implements the decision making method.
@@ -69,25 +70,7 @@ public class DecisionMaker {
         return choose(cm.reschedulingWeights());
     }
 
-    private double min(List<Double> values) {
-        double result = Double.POSITIVE_INFINITY;
-        for (double value: values) {
-            if (value < result) {
-                result = value;
-            }
-        }
-        return result;
-    }
 
-    private double max(List<Double> values) {
-        double result = Double.NEGATIVE_INFINITY;
-        for (double value: values) {
-            if (value > result) {
-                result = value;
-            }
-        }
-        return result;
-    }
 
     private List<Double> getObjectiveValues(int objectiveIndex) {
         List<Double> values = new ArrayList<>();

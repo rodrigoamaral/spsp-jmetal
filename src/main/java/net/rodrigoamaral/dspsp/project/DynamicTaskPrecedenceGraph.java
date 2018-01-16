@@ -1,27 +1,24 @@
 package net.rodrigoamaral.dspsp.project;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
 public class DynamicTaskPrecedenceGraph {
     private static final int DFS_WHITE = -1;
     private static final int DFS_BLACK = 1;
-    private static Vector<Vector<Integer>> successors;
-    private static Vector<Integer> visited;
-    private static Vector<Integer> sorted;
-    private static ArrayList<Integer> vertexDegrees;
-    private static ArrayList<ArrayList<Integer>> predecessors;
+    private Vector<Vector<Integer>> successors;
+    private Vector<Integer> visited;
+    private Vector<Integer> sorted;
+    private ArrayList<Integer> vertexDegrees;
+    private Vector<Vector<Integer>> predecessors;
 
     public DynamicTaskPrecedenceGraph(int qtdTasks) {
         visited = new Vector<>();
         successors = new Vector<>();
         vertexDegrees = new ArrayList<>();
-        predecessors = new ArrayList<>();
+        predecessors = new Vector<>();
         for(int i = 0; i < qtdTasks; i++){
             successors.add(new Vector<>());
-            predecessors.add(new ArrayList<>());
+            predecessors.add(new Vector<>());
             vertexDegrees.add(0);
         }
     }
@@ -54,7 +51,7 @@ public class DynamicTaskPrecedenceGraph {
         sorted.add(u);
     }
 
-    private Vector<Integer> getSorting(){
+    public Vector<Integer> getSorting(){
         runTopologicalSorting(successors.size());
         return sorted;
     }
@@ -70,8 +67,33 @@ public class DynamicTaskPrecedenceGraph {
         vertexDegrees.set(v, degree + 1);
     }
 
-    public ArrayList<Integer> getTaskPredecessors(int task) {
+    public Vector<Integer> getTaskPredecessors(int task) {
         return predecessors.get(task);
+    }
+
+    public Vector<Integer> getTaskSuccessors(int task) {
+        return successors.get(task);
+    }
+
+    public List<Integer> getIndependentTasks() {
+        List<Integer> independentTasks = new ArrayList<>();
+        for (Integer task: getSorting()) {
+            if (getTaskPredecessors(task).isEmpty()) {
+                independentTasks.add(task);
+            }
+        }
+        return independentTasks;
+    }
+
+    public List<Integer> getDisconnectedTasks() {
+        List<Integer> disconnectedTasks = new ArrayList<>();
+        int size = vertexDegrees.size();
+        for (int t = 0; t < size; t++) {
+            if (getTaskPredecessors(t).isEmpty() && getTaskSuccessors(t).isEmpty()) {
+                disconnectedTasks.add(t);
+            }
+        }
+        return disconnectedTasks;
     }
 
     @Override
@@ -93,5 +115,20 @@ public class DynamicTaskPrecedenceGraph {
         }
         sb.append("}}");
         return sb.toString();
+    }
+
+    public boolean isEmpty() {
+        return getSorting().isEmpty();
+    }
+
+    public void remove(int index) {
+        for (Vector<Integer> vs: predecessors) {
+            if (vs.contains(index)) {
+                vs.removeElement(index);
+            }
+        }
+        successors.set(index, new Vector<>());
+        predecessors.set(index, new Vector<>());
+        vertexDegrees.set(index, 0);
     }
 }

@@ -23,6 +23,7 @@ public class EmployeesHaveAllRequiredSkillsConstraint implements IConstraint {
         for (int i = 0; i < s.getEmployees(); i++) {
             for (int j = 0; j < s.getTasks(); j++) {
                 if (s.getDedication(i, j) > 0) {
+                    // REVIEW: Maybe we should consider only availableTasks
                     for (Integer skill: project.getTasks().get(j).getSkills()) {
                         if (!hasSkill(project, i, skill)) {
                             degree = degree + 1;

@@ -8,6 +8,9 @@ import net.rodrigoamaral.dspsp.project.DynamicTask;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
 import java.util.Collection;
+import java.util.List;
+
+import static org.apache.commons.lang3.ObjectUtils.max;
 
 /**
  * Created by rodrigo on 07/03/17.
@@ -19,37 +22,45 @@ public class NoEmployeeOverworkConstraint implements IConstraint {
     }
 
     @Override
-    public double violationDegree(DynamicProject project, DedicationMatrix s) {
-        Collection<DynamicEmployee> employees = project.getEmployees();
-        Collection<DynamicTask> tasks = project.getTasks();
-        double projectDuration = project.calculateDuration(s);
-//        System.out.println("Project Duration: " + projectDuration);
+    public double violationDegree(DynamicProject project, DedicationMatrix dm) {
+        Collection<DynamicEmployee> employees = project.getAvailableEmployees();
+        Collection<DynamicTask> tasks = project.getActiveTasks();
+        // REFACTOR: Get duration objective from some kind of cache
+        double projectDuration = project.calculateDuration(dm);
         double projectOverwork = 0.0;
         for (DynamicEmployee e: employees) {
-//            System.out.println("DynamicEmployee: " + e);
             double employeeOverDedication = 0.0;
             for (int instant = 0; instant <= projectDuration; instant++) {
-//                System.out.println("-------------------");
-//                System.out.println("Instant: " + instant);
-//                System.out.println("-------------------");
                 double employeeDedication = 0.0;
                 for (DynamicTask t: tasks) {
-//                    System.out.println("DynamicTask:" + timeSpent);
                     if (t.isTaskRunning(instant)) {
-//                        System.out.println("DynamicTask is running!");
-                        employeeDedication += s.getDedication(e.getOriginalIndex(), t.getOriginalIndex());
+                        employeeDedication += dm.getDedication(e.index(), t.index());
                     }
-//                    System.out.println("DynamicEmployee " + e.getId() + " dedication to DynamicTask " + timeSpent.getId() + ": " + s.getDedication(e.getId(), timeSpent.getId()));
                 }
-//                System.out.println("DynamicEmployee " + e.getId() + " total dedication: " + employeeDedication);
                 if (employeeDedication > e.getMaxDedication()) {
                     employeeOverDedication += employeeDedication - e.getMaxDedication();
-//                    System.out.println("DynamicEmployee " + e.getId() + " overdedication: " + employeeOverDedication);
                 }
             }
             projectOverwork += employeeOverDedication;
         }
         return projectOverwork;
+    }
+
+    public static DedicationMatrix repair(DedicationMatrix dm, List<DynamicEmployee> availableEmployees, List<DynamicTask> activeTasks) {
+        DedicationMatrix repaired = dm;
+        for (DynamicEmployee e: availableEmployees) {
+            double employeeDedication = 0.0;
+            for (DynamicTask t: activeTasks) {
+                employeeDedication += dm.getDedication(e.index(), t.index());
+            }
+            if (employeeDedication > e.getMaxDedication()) {
+                for (DynamicTask t: activeTasks) {
+                    double normalizedDedication = dm.getDedication(e.index(), t.index()) / Math.max(1, employeeDedication/e.getMaxDedication());
+                    repaired.setDedication(e.index(), t.index(), normalizedDedication);
+                }
+            }
+        }
+        return repaired;
     }
 
 

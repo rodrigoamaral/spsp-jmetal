@@ -8,9 +8,9 @@ package net.rodrigoamaral.dspsp.solution;
  */
 public class DedicationMatrix {
 
-    private double[][] matrix;
-    private int employees;
-    private int tasks;
+    final private double[][] matrix;
+    final private int employees;
+    final private int tasks;
 
     public DedicationMatrix(int _employees, int _tasks) {
         employees = _employees;
@@ -18,7 +18,8 @@ public class DedicationMatrix {
         matrix = new double[employees][tasks];
         for (int i = 0; i < employees; i++) {
             for (int j = 0; j < tasks; j++) {
-                matrix[i][j] = Math.random();
+                matrix[i][j] = 0;
+//                matrix[i][j] = Math.random();
             }
         }
     }
@@ -36,7 +37,6 @@ public class DedicationMatrix {
     }
 
     public double getDedication(int employee, int task) {
-        // TODO: Fix the index vs ID problem. Need to pass original indexes here. Should we store them in the entities?
         return matrix[employee][task];
     }
 
@@ -51,6 +51,14 @@ public class DedicationMatrix {
         }
         return taskDedication;
     }
+
+//    public void reset() {
+//        for (int i = 0; i < employees; i++) {
+//            for (int j = 0; j < tasks; j++) {
+//                matrix[i][j] = 0;
+//            }
+//        }
+//    }
 
     public static void main(String[] args) {
         DedicationMatrix dm = new DedicationMatrix(3, 3);

@@ -11,6 +11,7 @@ public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee imp
     private List<Double> skillsProficiency;
     private double overtimeSalary;
     private int originalIndex;
+    private boolean available = true;
 
     public DynamicEmployee(int id, float salary) {
         super(id, salary);
@@ -32,7 +33,7 @@ public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee imp
         }
         skillsProficiency = employee.getSkillsProficiency();
         overtimeSalary = employee.getOvertimeSalary();
-        originalIndex = employee.getOriginalIndex();
+        originalIndex = employee.index();
     }
 
     public List<Double> getSkillsProficiency() {
@@ -51,7 +52,20 @@ public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee imp
         this.overtimeSalary = overtimeSalary;
     }
 
-    public int getOriginalIndex() {
+    public int index() {
         return originalIndex;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    @Override
+    public String toString() {
+        return "E_" + index();
     }
 }

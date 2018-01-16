@@ -17,13 +17,11 @@ public class InstanceParser {
         DynamicInstance di = null;
 
         try {
-            System.out.print("Parsing instance file: " + filename);
             di = mapper.readValue(new File(filename), DynamicInstance.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.print(" ...Done!\n");
-//        return adjustIDs(di);
+
         return di;
     }
 

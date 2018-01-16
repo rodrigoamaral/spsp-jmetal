@@ -49,7 +49,7 @@ public class JMetalDSPSPAdapter {
     }
 
     private void init() {
-        this.objectiveEvaluator = new SPSPObjectiveEvaluator()
+        this.objectiveEvaluator = new DSPSPObjectiveEvaluator()
                 .addObjective(new CostObjective())
                 .addObjective(new DurationObjective())
                 .addObjective(new RobustnessObjective())
@@ -57,7 +57,8 @@ public class JMetalDSPSPAdapter {
         this.constraintEvaluator = new DSPSPConstraintEvaluator()
                 .addConstraint(new AllTasksAllocatedConstraint())
                 .addConstraint(new EmployeesHaveAllRequiredSkillsConstraint())
-                .addConstraint(new NoEmployeeOverworkConstraint());
+//                .addConstraint(new NoEmployeeOverworkConstraint())
+                ;
         this.converter = new SolutionConverter(this.project);
     }
 
