@@ -20,12 +20,6 @@ public class SolutionConverter {
         tasks = _project.getTasks().size();
     }
 
-    public SolutionConverter(int _employees, int _tasks) {
-        employees = _employees;
-        tasks = _tasks;
-    }
-
-
     /**
      * Converts a {@link DoubleSolution} into a {@link DedicationMatrix}.
      *
@@ -62,14 +56,4 @@ public class SolutionConverter {
         return Math.floorDiv(index, tasks);
     }
 
-    /**
-     * Encode a employee-task tuple into a DoubleSolution vector index.
-     *
-     * @param employee employee number (matrix row index)
-     * @param task task number (matrix column index)
-     * @return vector index
-     */
-    public static int encode(int employee, int task) {
-        return (employee * tasks) + task;
-    }
 }

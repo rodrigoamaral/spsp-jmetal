@@ -8,6 +8,7 @@ import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.solution.SchedulingResult;
 import net.rodrigoamaral.jmetal.util.fileoutput.SolutionListOutput;
 import net.rodrigoamaral.logging.SPSPLogger;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.operator.CrossoverOperator;
@@ -38,13 +39,24 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
 
     public static void main(String[] args) throws Exception {
+        Options options = new Options();
+        options.addOption("h", "help", false, "Show this help");
+
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(options, args);
+        if (cmd.hasOption("h")) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("DSPSP_NSGAIIRunner", options);
+            System.exit(0);
+        }
         String filename = "";
         String referenceParetoFront = "" ;
-        if (args.length == 1) {
-            filename = args[0];
+        if (cmd.getArgList().size() == 1) {
+            filename = cmd.getArgList().get(0);
         }
         run(filename, referenceParetoFront);
     }
+
 
     private static void run(String inputFile, String refPF) throws Exception {
 

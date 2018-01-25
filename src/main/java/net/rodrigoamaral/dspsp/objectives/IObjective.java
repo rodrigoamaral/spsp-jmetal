@@ -6,4 +6,5 @@ import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
 public interface IObjective {
     double evaluate(DynamicProject project, DedicationMatrix solution);
+    double penalize(DynamicProject project, DedicationMatrix solution, int missingSkills);
 }

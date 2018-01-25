@@ -1,9 +1,6 @@
 package net.rodrigoamaral.dspsp.project.events;
 
 
-import net.rodrigoamaral.dspsp.project.DynamicEmployee;
-import net.rodrigoamaral.dspsp.project.DynamicTask;
-
 public class DynamicEvent {
     private int id;
     private double time;

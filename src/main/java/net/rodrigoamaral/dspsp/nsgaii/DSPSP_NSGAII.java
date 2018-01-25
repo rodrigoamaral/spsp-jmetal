@@ -36,7 +36,7 @@ public class DSPSP_NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorith
                         SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
         super(problem);
         this.maxEvaluations = maxEvaluations;
-        setMaxPopulationSize(populationSize); ;
+        setMaxPopulationSize(populationSize);
 
         this.crossoverOperator = crossoverOperator;
         this.mutationOperator = mutationOperator;

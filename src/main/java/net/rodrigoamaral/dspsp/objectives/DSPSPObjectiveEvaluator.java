@@ -36,8 +36,7 @@ public class DSPSPObjectiveEvaluator implements IObjectiveEvaluator {
 
     @Override
     public double evaluate(int index, DynamicProject project, DedicationMatrix solution) {
-        // TODO: Repair candidate solutions HERE, when needed
-        solution = NoEmployeeOverworkConstraint.repair(solution, project.getAvailableEmployees(), project.getActiveTasks());
+
         return objectives.get(index).evaluate(project, solution);
     }
 

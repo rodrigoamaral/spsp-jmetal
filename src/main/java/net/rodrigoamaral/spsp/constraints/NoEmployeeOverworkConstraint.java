@@ -5,9 +5,7 @@ import net.rodrigoamaral.spsp.project.Project;
 import net.rodrigoamaral.spsp.project.Task;
 import net.rodrigoamaral.spsp.solution.DedicationMatrix;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by rodrigo on 07/03/17.

@@ -4,6 +4,8 @@ import net.rodrigoamaral.dspsp.config.DynamicProjectConfigLoader;
 import net.rodrigoamaral.dspsp.objectives.*;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.constraints.*;
+import net.rodrigoamaral.dspsp.project.tasks.TaskManager;
+import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import org.uma.jmetal.solution.DoubleSolution;
 
 import java.io.FileNotFoundException;
@@ -50,14 +52,15 @@ public class JMetalDSPSPAdapter {
 
     private void init() {
         this.objectiveEvaluator = new DSPSPObjectiveEvaluator()
-                .addObjective(new CostObjective())
                 .addObjective(new DurationObjective())
+                .addObjective(new CostObjective())
                 .addObjective(new RobustnessObjective())
                 .addObjective(new StabilityObjective());
         this.constraintEvaluator = new DSPSPConstraintEvaluator()
+                .addConstraint(new NoEmployeeOverworkConstraint())
                 .addConstraint(new AllTasksAllocatedConstraint())
-                .addConstraint(new EmployeesHaveAllRequiredSkillsConstraint())
-//                .addConstraint(new NoEmployeeOverworkConstraint())
+                .addConstraint(new MaximumHeadcountConstraint())
+                .addConstraint(new TaskSkillsConstraint())
                 ;
         this.converter = new SolutionConverter(this.project);
     }
@@ -78,6 +81,10 @@ public class JMetalDSPSPAdapter {
         return objectiveEvaluator.size();
     }
 
+    public List<IObjective> getObjectives() {
+        return objectiveEvaluator.getObjectives();
+    }
+
     private List<Double> populateLimitList(double value) {
         List<Double> limit = new ArrayList<>(getNumberOfVariables());
         for (int i = 0; i < getNumberOfVariables(); i++) {
@@ -94,9 +101,47 @@ public class JMetalDSPSPAdapter {
         return populateLimitList(UPPER_LIMIT + MAX_OVERWORK);
     }
 
-    public double evaluateObjective(int i, DoubleSolution solution) {
-        return objectiveEvaluator.evaluate(i, project, converter.convert(solution));
+//    public double evaluateObjective(int i, DoubleSolution solution) {
+//        DedicationMatrix dm = repair(solution);
+//        double evaluation = objectiveEvaluator.evaluate(i, project, dm);
+//        evaluation = penalizeObjective(evaluation, dm);
+//        return evaluation;
+//    }
+
+    /**
+     * Evaluates all objectives registered by the objectiveEvaluator in the
+     * constructor. Before evaluation, it repairs the solution according to
+     * the constraints registered by the constraintEvaluator in the
+     * constructor. Objectives are penalized if there is any skill missing
+     * in the available emplyee team.
+     *
+     * @param solution
+     * @return repaired solution
+     */
+    public DoubleSolution evaluateObjectives(DoubleSolution solution) {
+        DedicationMatrix dm = repair(solution);
+        int missingSkills = missingSkills();
+        if (missingSkills > 0) {
+            for (int i = 0; i < getNumberOfObjectives(); i++) {
+                solution.setObjective(i, penalizeObjective(i, dm, missingSkills));
+            }
+        } else {
+            for (int i = 0; i < getNumberOfObjectives(); i++) {
+                double evaluation = objectiveEvaluator.evaluate(i, project, dm);
+                solution.setObjective(i, evaluation);
+            }
+        }
+        return solution;
     }
+
+    private DedicationMatrix repair(DoubleSolution solution) {
+        return constraintEvaluator.repair(converter.convert(solution), project);
+    }
+
+//    private double penalizeObjective(double evaluation, DedicationMatrix dm) {
+////        return objectiveEvaluator.penalize(evaluation, dm, project);
+//        return 0;
+//    }
 
     public Double getConstraintViolationDegree(DoubleSolution solution) {
         return constraintEvaluator.overallConstraintViolationDegree(project, converter.convert(solution));
@@ -108,5 +153,17 @@ public class JMetalDSPSPAdapter {
 
     public int getNumberOfConstraints() {
         return constraintEvaluator.size();
+    }
+
+    public int missingSkills() {
+        return project.missingSkills();
+    }
+
+    public double penalizeObjective(int objectiveIndex, DoubleSolution solution, int missingSkills) {
+        return getObjectives().get(objectiveIndex).penalize(project, converter.convert(solution), missingSkills);
+    }
+
+    public double penalizeObjective(int objectiveIndex, DedicationMatrix dm, int missingSkills) {
+        return getObjectives().get(objectiveIndex).penalize(project, dm, missingSkills);
     }
 }

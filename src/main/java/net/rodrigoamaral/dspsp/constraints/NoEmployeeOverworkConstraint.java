@@ -2,7 +2,7 @@ package net.rodrigoamaral.dspsp.constraints;
 
 import net.rodrigoamaral.dspsp.project.DynamicEmployee;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
-import net.rodrigoamaral.dspsp.project.DynamicTask;
+import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
 //import net.rodrigoamaral.spsp.project.Employee;
 //import net.rodrigoamaral.spsp.project.Task;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
@@ -10,15 +10,13 @@ import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import java.util.Collection;
 import java.util.List;
 
-import static org.apache.commons.lang3.ObjectUtils.max;
-
 /**
  * Created by rodrigo on 07/03/17.
  */
 public class NoEmployeeOverworkConstraint implements IConstraint {
     @Override
-    public boolean isViolated(DynamicProject project, DedicationMatrix s) {
-        return violationDegree(project, s) > 0;
+    public boolean isViolated(DynamicProject project, DedicationMatrix dm) {
+        return violationDegree(project, dm) > 0;
     }
 
     @Override
@@ -46,8 +44,10 @@ public class NoEmployeeOverworkConstraint implements IConstraint {
         return projectOverwork;
     }
 
-    public static DedicationMatrix repair(DedicationMatrix dm, List<DynamicEmployee> availableEmployees, List<DynamicTask> activeTasks) {
+    public DedicationMatrix repair(DedicationMatrix dm, DynamicProject project) {
         DedicationMatrix repaired = dm;
+        List<DynamicEmployee> availableEmployees = project.getAvailableEmployees();
+        List<DynamicTask> activeTasks = project.getActiveTasks();
         for (DynamicEmployee e: availableEmployees) {
             double employeeDedication = 0.0;
             for (DynamicTask t: activeTasks) {
@@ -62,6 +62,5 @@ public class NoEmployeeOverworkConstraint implements IConstraint {
         }
         return repaired;
     }
-
 
 }

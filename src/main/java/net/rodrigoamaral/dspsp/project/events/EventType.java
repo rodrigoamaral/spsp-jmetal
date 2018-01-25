@@ -13,7 +13,7 @@ public enum EventType {
     private int value;
     private static Map<Integer, EventType> map = new HashMap<>();
 
-    private EventType(int value) {
+    EventType(int value) {
         this.value = value;
     }
 

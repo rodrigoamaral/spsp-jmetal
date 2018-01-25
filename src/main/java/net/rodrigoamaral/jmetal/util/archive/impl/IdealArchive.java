@@ -3,14 +3,12 @@ package net.rodrigoamaral.jmetal.util.archive.impl;
 
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.archive.impl.AbstractBoundedArchive;
-import org.uma.jmetal.util.comparator.EqualSolutionsComparator;
 import org.uma.jmetal.util.distance.Distance;
 import org.uma.jmetal.util.distance.impl.EuclideanDistanceBetweenSolutionsInObjectiveSpace;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 

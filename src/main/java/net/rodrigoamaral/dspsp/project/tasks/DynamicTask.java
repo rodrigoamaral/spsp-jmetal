@@ -1,4 +1,4 @@
-package net.rodrigoamaral.dspsp.project;
+package net.rodrigoamaral.dspsp.project.tasks;
 
 
 import net.rodrigoamaral.dspsp.project.events.IEventSubject;
@@ -6,14 +6,16 @@ import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements IEventSubject {
     private double finishedEffort;
     private int originalIndex;
+    private int maximumHeadcount;
     private static final double FINISH_THRESHOLD = 10E-10;
 
     private boolean available = false;
 
-    public DynamicTask(int id, double effort, int originalIndex) {
+    public DynamicTask(int id, double effort, int originalIndex, int maximumHeadcount) {
         super(id, effort);
         this.originalIndex = originalIndex;
         this.finishedEffort = 0;
+        this.maximumHeadcount = maximumHeadcount;
     }
 
      public DynamicTask(DynamicTask task) {
@@ -23,6 +25,7 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
          this.setFinish(task.getFinish());
          this.setFinishedEffort(task.getFinishedEffort());
          this.originalIndex = task.index();
+         this.maximumHeadcount = task.getMaximumHeadcount();
      }
 
     public double getFinishedEffort() {
@@ -55,6 +58,10 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
 
     public double getRemainingEffort() {
         return getEffort() - getFinishedEffort();
+    }
+
+    public int getMaximumHeadcount() {
+        return maximumHeadcount;
     }
 
     @Override

@@ -4,6 +4,7 @@ import net.rodrigoamaral.dspsp.project.*;
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.project.events.EventType;
 import net.rodrigoamaral.dspsp.project.events.IEventSubject;
+import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
 import net.rodrigoamaral.dspsp.util.instances.DynamicInstance;
 import net.rodrigoamaral.dspsp.util.instances.InstanceParser;
 import net.rodrigoamaral.spsp.project.Project;
@@ -80,7 +81,8 @@ public class DynamicProjectConfigLoader {
     private DynamicTask loadTask(int taskIndex) {
         int taskId = taskIndex + 1;
         double effort = config.getTask_effort_real_secnario_total().get(taskIndex);
-        return new DynamicTask(taskId, effort, taskIndex);
+        int maximumHeadcount = config.getTask_headcount_total().get(taskIndex);
+        return new DynamicTask(taskId, effort, taskIndex, maximumHeadcount);
     }
 
     private void loadTaskSkill(int taskIndex) {

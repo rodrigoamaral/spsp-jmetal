@@ -52,4 +52,14 @@ public class DSPSPConstraintEvaluator implements IConstraintEvaluator {
         return violatedConstraints;
     }
 
+    @Override
+    public DedicationMatrix repair(DedicationMatrix dm, DynamicProject project) {
+        for (IConstraint c: constraints) {
+            dm = c.repair(dm, project);
+        }
+//        System.out.println("Solution " + dm);
+
+        return dm;
+    }
+
 }
