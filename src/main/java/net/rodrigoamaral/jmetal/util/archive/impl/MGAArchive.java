@@ -3,9 +3,6 @@ package net.rodrigoamaral.jmetal.util.archive.impl;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.archive.impl.AbstractBoundedArchive;
 import org.uma.jmetal.util.comparator.DominanceComparator;
-import org.uma.jmetal.util.comparator.EqualSolutionsComparator;
-import org.uma.jmetal.util.distance.Distance;
-import org.uma.jmetal.util.distance.impl.EuclideanDistanceBetweenSolutionsInObjectiveSpace;
 
 import java.util.Collections;
 import java.util.Comparator;
