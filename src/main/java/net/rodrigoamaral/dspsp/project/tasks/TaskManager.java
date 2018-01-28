@@ -38,7 +38,6 @@ public class TaskManager {
 
 
     public static double adjustedEffort(DedicationMatrix dm, DynamicTask t) {
-        // REVIEW: TaskManager.teamSizePenalty: should we really use remaining effort here?
         double effort = t.getRemainingEffort();
         if (TaskManager.teamSize(t, dm) > t.getMaximumHeadcount()) {
             effort = effort * TaskManager.teamSizePenalty(t, dm);
@@ -46,7 +45,6 @@ public class TaskManager {
         return effort;
     }
 
-//  REVIEW: Check if generateRemainingEffort matches the description in the paper
     public static double generateRemainingEffort(DynamicTask task,
                                                  List<DynamicEmployee> employees,
                                                  DedicationMatrix solution) {
@@ -60,6 +58,11 @@ public class TaskManager {
             totalEffort = nd.sample();
         }
         return totalEffort - fe.effort;
+    }
+
+    public static double sampleEstimatedEffort(DynamicTask task) {
+        NormalDistribution nd = new NormalDistribution(task.getEffort(), task.getEffortDeviation());
+        return nd.sample();
     }
 
     static public double totalDedication(DynamicTask task, List<DynamicEmployee> employees, DedicationMatrix solution) {

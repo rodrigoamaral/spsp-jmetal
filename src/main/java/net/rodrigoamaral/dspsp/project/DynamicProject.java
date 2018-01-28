@@ -7,7 +7,6 @@ import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
 import net.rodrigoamaral.dspsp.project.tasks.TaskManager;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import net.rodrigoamaral.logging.SPSPLogger;
-import net.rodrigoamaral.spsp.project.Task;
 import org.uma.jmetal.solution.DoubleSolution;
 
 import java.util.*;
@@ -204,12 +203,13 @@ public class DynamicProject {
      * @param lastSchedule
      * @param event
      */
-    public void update(DynamicEvent event, DoubleSolution lastSchedule) throws Exception {
+    public double update(DynamicEvent event, DoubleSolution lastSchedule) throws Exception {
         // REFACTOR: lastSchedule should be a DedicationMatrix to avoid dependencies with jMetal
         setPreviousSchedule(lastSchedule);
-        updateFinishedEffort(activeTasks, availableEmployees);
+        double partialDuration = updateFinishedEffort(activeTasks, availableEmployees);
         updateCurrentStatus(event);
         setLastSchedulingTime(event.getTime());
+        return partialDuration;
     }
 
     public void updateCurrentStatus(DynamicEvent event) {
@@ -239,11 +239,21 @@ public class DynamicProject {
         } else if (event.getType() == EventType.EMPLOYEE_RETURN) {
             getEmployeeById(id).setAvailable(true);
         }
+//        availableEmployees = filterAvailableEmployees();
     }
 
     private void updateTaskAvailability(DynamicEvent event) {
+//        checkTaskAvailabilityCriteria();
         List<Integer> incomingTasksIDs = getIncomingTasks(event);
         makeTasksAvailable(incomingTasksIDs, event);
+//        availableTasks = filterAvailableTasks();
+    }
+
+    private void checkTaskAvailabilityCriteria() {
+        for (DynamicTask task: availableTasks) {
+            boolean available = TaskManager.isAvailable(task, availableEmployees, this);
+            task.setAvailable(available);
+        }
     }
 
     private void makeTasksAvailable(List<Integer> incomingTaskIDs, DynamicEvent event) {
@@ -311,23 +321,43 @@ public class DynamicProject {
         } else {
             DedicationMatrix normalizedSchedule = normalize(this.previousSchedule, activeTasks);
             partialDuration = getPartialDuration(activeTasks, availableEmployees, normalizedSchedule);
+
             for (DynamicTask task : activeTasks) {
+
                 double totalDedication = TaskManager.totalDedication(task, availableEmployees, normalizedSchedule);
                 double totalFitness = TaskManager.totalFitness(this, task, availableEmployees, normalizedSchedule, totalDedication);
                 double costDriveValue = TaskManager.costDriveValue(totalFitness);
                 double finishedEffort = partialDuration * (totalDedication / costDriveValue);
+
                 task.addFinishedEffort(finishedEffort);
+
                 if (task.isFinished()) {
                     task.setAvailable(false);
                     taskPrecedenceGraph.remove(task.index());
                     ////
                     SPSPLogger.info("... Task " + task.index() + " is COMPLETE");
                     ////
+                } else {
+//                    task.setRealEffort(reestimateEffort(task));
+                    ////
+                    SPSPLogger.info("... Task " + task.index() + " effort estimated to " + task.getRealEffort() + " (finished " + task.getFinishedEffort() + ")");
+                    ////
                 }
             }
         }
         availableTasks = filterAvailableTasks();
         return partialDuration;
+    }
+
+    private double reestimateEffort(DynamicTask task) {
+        double realEffort = task.getRealEffort();
+        double finishedEffort = task.getFinishedEffort();
+
+        while (realEffort <= finishedEffort) {
+            realEffort = TaskManager.sampleEstimatedEffort(task);
+        }
+
+        return realEffort;
     }
 
     private double getPartialDuration(List<DynamicTask> activeTasks, List<DynamicEmployee> availableEmployees, DedicationMatrix normalizedSchedule) {

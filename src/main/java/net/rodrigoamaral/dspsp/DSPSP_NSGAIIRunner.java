@@ -32,6 +32,7 @@ import java.util.List;
 public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
     private static int schedulings = 0;
+    private static double totalDuration = 0;
 
     private static void incrementCounter() {
         schedulings += 1;
@@ -105,7 +106,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
             SPSPLogger.info("Rescheduling "+ schedulings +" complete in " + DurationFormatUtils.formatDuration(result.getComputingTime(), "HH:mm:ss,SSS") + ". ");
             SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
-
+            SPSPLogger.info("Project current duration: " + totalDuration);
             incrementCounter();
 
             writeSolutionFile(result.getSchedules(), "NSGA2", event.getId());
@@ -128,7 +129,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
                                                DynamicEvent event,
                                                DoubleSolution lastSchedule) throws Exception {
 
-        project.update(event, lastSchedule);
+        totalDuration += project.update(event, lastSchedule);
 
         DSPSProblem problem = loadProjectInstance(project);
 
@@ -219,7 +220,8 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
             algorithm = new DSPSP_NSGAIIBuilder<>(problem, crossover, mutation)
                     .setSelectionOperator(selection)
-                    .setMaxEvaluations(25000)
+                    .setMaxEvaluations(2500)
+//                    .setMaxEvaluations(25000)
                     .setPopulationSize(100)
                     .build() ;
             return this;
