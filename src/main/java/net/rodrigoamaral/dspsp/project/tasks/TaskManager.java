@@ -2,6 +2,7 @@ package net.rodrigoamaral.dspsp.project.tasks;
 
 import net.rodrigoamaral.dspsp.project.DynamicEmployee;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
+import net.rodrigoamaral.dspsp.project.DynamicTaskPrecedenceGraph;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
@@ -13,6 +14,27 @@ import java.util.Set;
 public class TaskManager {
 
     final static double Z = 5;
+
+    public static boolean isAvailable(DynamicTask task,
+                                      List<DynamicEmployee> employees,
+                                      DynamicProject project) {
+        return (!task.isFinished()) &&
+                (missingSkills(task, employees) == 0) &&
+                (employeesHaveAllSkillsForPredecessors(task, employees, project));
+    }
+
+    private static boolean employeesHaveAllSkillsForPredecessors(DynamicTask task, List<DynamicEmployee> employees, DynamicProject project) {
+        DynamicTaskPrecedenceGraph tpg = project.getTaskPrecedenceGraph();
+
+        for (Integer t: tpg.getTaskPredecessors(task.index())) {
+            DynamicTask predecessor = project.getTaskByIndex(t);
+            if (missingSkills(predecessor, employees) > 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
 
     public static double adjustedEffort(DedicationMatrix dm, DynamicTask t) {

@@ -5,6 +5,7 @@ import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.project.events.EventType;
 import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
+import net.rodrigoamaral.dspsp.project.tasks.TaskManager;
 import net.rodrigoamaral.dspsp.util.instances.DynamicInstance;
 import net.rodrigoamaral.dspsp.util.instances.InstanceParser;
 import net.rodrigoamaral.spsp.project.Project;
@@ -57,7 +58,9 @@ public class DynamicProjectConfigLoader {
     private void loadAvailableDisconnectedTasks() {
         for (int t: project.getTaskPrecedenceGraph().getDisconnectedTasks()) {
             if (t < config.getTask_number()) {
-                project.getTaskByIndex(t).setAvailable(true);
+                DynamicTask newTask = project.getTaskByIndex(t);
+                boolean available = TaskManager.isAvailable(newTask, project.getEmployees(), project);
+                newTask.setAvailable(available);
             }
         }
     }

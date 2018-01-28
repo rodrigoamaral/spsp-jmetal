@@ -7,6 +7,7 @@ import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
 import net.rodrigoamaral.dspsp.project.tasks.TaskManager;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import net.rodrigoamaral.logging.SPSPLogger;
+import net.rodrigoamaral.spsp.project.Task;
 import org.uma.jmetal.solution.DoubleSolution;
 
 import java.util.*;
@@ -256,7 +257,9 @@ public class DynamicProject {
             List<Integer> predecessors = chooseRandomTasks();
             for (int p: predecessors) {
                 taskPrecedenceGraph.addEdge(p, t);
-                getTaskByIndex(t).setAvailable(true);
+                DynamicTask newTask = getTaskByIndex(t);
+                boolean available = TaskManager.isAvailable(newTask, availableEmployees, this);
+                newTask.setAvailable(available);
                 ////
                 SPSPLogger.info("... Task " + t + " added after task " + p);
                 ////
@@ -266,7 +269,9 @@ public class DynamicProject {
             List<Integer> successors = chooseRandomTasks();
             for (int s: successors) {
                 taskPrecedenceGraph.addEdge(urgentTaskIndex, s);
-                getTaskByIndex(urgentTaskIndex).setAvailable(true);
+                DynamicTask newUrgentTask = getTaskByIndex(urgentTaskIndex);
+                boolean available = TaskManager.isAvailable(newUrgentTask, availableEmployees, this);
+                newUrgentTask.setAvailable(available);
                 ////
                 SPSPLogger.info("... Urgent Task " + urgentTaskIndex + " added before task " + s);
                 ////
