@@ -164,6 +164,7 @@ public class JMetalDSPSPAdapter {
     }
 
     public double penalizeObjective(int objectiveIndex, DedicationMatrix dm, int missingSkills) {
+        System.out.println("Will penalize " + dm);
         return getObjectives().get(objectiveIndex).penalize(project, dm, missingSkills);
     }
 }

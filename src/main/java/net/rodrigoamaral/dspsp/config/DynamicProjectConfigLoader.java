@@ -84,7 +84,7 @@ public class DynamicProjectConfigLoader {
     private DynamicTask loadTask(int taskIndex) {
         int taskId = taskIndex + 1;
         double initialEstimatedEffort = config.getTask_effort_mu_total().get(taskIndex);
-        double realEffort = config.getTask_effort_real_secnario_total().get(taskIndex);
+        double realEffort = config.getTask_effort_mu_total().get(taskIndex);
         double effortDeviation = config.getTask_effort_sigma_total().get(taskIndex);
         int maximumHeadcount = config.getTask_headcount_total().get(taskIndex);
         return new DynamicTask(taskId,

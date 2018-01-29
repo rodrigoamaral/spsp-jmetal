@@ -338,7 +338,7 @@ public class DynamicProject {
                     SPSPLogger.info("... Task " + task.index() + " is COMPLETE");
                     ////
                 } else {
-//                    task.setRealEffort(reestimateEffort(task));
+                    task.setRealEffort(reestimateEffort(task));
                     ////
                     SPSPLogger.info("... Task " + task.index() + " effort estimated to " + task.getRealEffort() + " (finished " + task.getFinishedEffort() + ")");
                     ////
