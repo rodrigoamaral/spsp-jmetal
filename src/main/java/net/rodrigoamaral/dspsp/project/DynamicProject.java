@@ -518,8 +518,6 @@ public class DynamicProject {
         return sum(doubleList) / doubleList.size();
     }
 
-
-    // REVIEW: There are inititally available tasks that aren't in the TPG. How to deal with this?
     public List<DynamicTask> filterAvailableTasks() {
         List<DynamicTask> availableTasks = new ArrayList<>();
         for (DynamicTask task: getTasks()) {
@@ -548,21 +546,17 @@ public class DynamicProject {
                 activeTasks.add(task);
             }
         }
-//        for (int t: taskPrecedenceGraph.getDisconnectedTasks()) {
-//            DynamicTask task = getTaskByIndex(t);
-//            if (task.isAvailable()) {
-//                activeTasks.add(task);
-//            }
-//        }
         return activeTasks;
     }
 
     public boolean isFinished() {
+
         for (DynamicTask task: getTasks()) {
             if (!task.isFinished()) {
                 return false;
             }
         }
+
         return true;
     }
 

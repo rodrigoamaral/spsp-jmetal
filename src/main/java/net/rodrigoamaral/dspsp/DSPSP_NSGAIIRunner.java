@@ -98,7 +98,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
                 break;
             }
 
-            SPSPLogger.info("Rescheduling "+ schedulings + " : " + event.description());
+            SPSPLogger.info("\nRescheduling "+ schedulings + " : " + event.description());
 
             SchedulingResult result = reschedule(project, event, currentSchedule);
 
