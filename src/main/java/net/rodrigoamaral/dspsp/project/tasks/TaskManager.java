@@ -50,13 +50,17 @@ public class TaskManager {
                                                  DedicationMatrix solution) {
 
         double mean = adjustedEffort(solution, task);
-        double sd = mean * 0.5;
+        double sd = task.getEffortDeviation();
+
         NormalDistribution nd = new NormalDistribution(mean, sd);
         double totalEffort = nd.sample();
+
         FinishedEffort fe = getFinishedEffort(task, employees, solution);
+
         while (!validEffortValue(totalEffort, fe.effort)) {
             totalEffort = nd.sample();
         }
+
         return totalEffort - fe.effort;
     }
 
