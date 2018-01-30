@@ -18,11 +18,20 @@ public class SPSPLogger {
         logger.setLevel(Level.ALL);
 
         ConsoleHandler ch = new ConsoleHandler();
-        ch.setLevel(Level.INFO);
+        ch.setLevel(Level.FINE);
         ch.setFormatter(new SPSPLogFormatter());
         logger.addHandler(ch);
 
         // TODO: Implement a log file handler
+    }
+
+
+    public static void trace(String msg) {
+        logger.finer(msg);
+    }
+
+    public static void debug(String msg) {
+        logger.fine(msg);
     }
 
     public static void info(String msg) {
@@ -33,7 +42,7 @@ public class SPSPLogger {
         logger.warning(msg);
     }
 
-    public static void severe(String msg) {
+    public static void error(String msg) {
         logger.severe(msg);
     }
 }
