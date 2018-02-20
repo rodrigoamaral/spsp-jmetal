@@ -1,8 +1,5 @@
 package net.rodrigoamaral.spsp.solution;
 
-/**
- * Created by rodrigo on 08/10/16.
- */
 public class SolutionEncoder {
     private int employees;
     private int tasks;
@@ -12,7 +9,6 @@ public class SolutionEncoder {
         this.employees = employees;
         this.tasks = tasks;
         this.dedicationMatrix = new double[size()];
-//        populateFakeSolution();
     }
 
     public int getEmployeeNumber() {

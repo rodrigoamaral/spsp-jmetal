@@ -7,9 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-/**
- * Created by rodrigo on 11/01/18.
- */
 public class SPSPLogFormatter extends SimpleFormatter {
 
     private static final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
