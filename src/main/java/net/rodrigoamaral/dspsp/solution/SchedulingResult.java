@@ -32,7 +32,4 @@ public class SchedulingResult {
         return computingTime;
     }
 
-    public boolean isProjectFinished() {
-        return projectFinished;
-    }
 }

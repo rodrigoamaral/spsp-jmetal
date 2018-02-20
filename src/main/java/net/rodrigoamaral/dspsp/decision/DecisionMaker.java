@@ -20,7 +20,6 @@ public class DecisionMaker {
     private List<DoubleSolution> schedules;
     final private ComparisonMatrix cm;
     final static private double ALPHA = 0.001;
-    final private int NUMBER_OF_OBJECTIVES;
 
     public DecisionMaker(List<DoubleSolution> schedules_, ComparisonMatrix cm) throws Exception {
         if (schedules_ == null || schedules_.size() < 1) {
@@ -28,7 +27,6 @@ public class DecisionMaker {
         }
         this.schedules = schedules_;
         this.cm = cm;
-        NUMBER_OF_OBJECTIVES = this.schedules.get(0).getNumberOfObjectives();
     }
 
     private DoubleSolution choose(double[] weights) {

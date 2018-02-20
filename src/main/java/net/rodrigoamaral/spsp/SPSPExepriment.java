@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SPSPExepriment {
-    private static final int INDEPENDENT_RUNS = 25;
 
     public static void main(String[] args) {
         if (args.length != 1) {

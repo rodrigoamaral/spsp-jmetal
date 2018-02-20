@@ -150,52 +150,18 @@ public class DynamicProject {
         return cloned;
     }
 
-    public List<DynamicTask> resetTasksDuration(List<DynamicTask> tasks_) {
-        for (DynamicTask t : tasks_) {
-            t.setDuration(0);
-            t.setStart(0);
-            t.setFinish(0);
-        }
-        return tasks_;
-    }
-
-    public List<DynamicTask> fillTasksDuration(DedicationMatrix dm, List<DynamicTask> tasks, List<DynamicEmployee> employees) {
-        tasks = resetTasksDuration(tasks);
-        for (DynamicTask t : tasks) {
-            double taskDedication = 0;
-            for (DynamicEmployee e : employees) {
-                taskDedication += dm.getDedication(e.index(), t.index());
-            }
-            if (taskDedication > 0) {
-                double effort = TaskManager.adjustedEffort(dm, t);
-                t.setDuration(effort / taskDedication);
-            }
-        }
-        return tasks;
-    }
-
-    public boolean hasDependencies(DynamicTask t) {
-        return hasDependencies(t, getTaskPrecedenceGraph());
-    }
-
-    public boolean hasDependencies(DynamicTask t, DynamicTaskPrecedenceGraph tpg_) {
-        ArrayList<Integer> taskDependencies = tpg_.getTaskDependencies();
-        return taskDependencies.get(t.index()) != 0;
-    }
-
     /**
      * Updates project state based on the dynamic event and current schedule
      *
      * @param lastSchedule
      * @param event
      */
-    public double update(DynamicEvent event, DoubleSolution lastSchedule) throws Exception {
+    public void update(DynamicEvent event, DoubleSolution lastSchedule) throws Exception {
         // REFACTOR: lastSchedule should be a DedicationMatrix to avoid dependencies with jMetal
         setPreviousSchedule(lastSchedule);
-        double partialDuration = updateFinishedEffort(availableEmployees, event.getTime());
+        updateFinishedEffort(availableEmployees, event.getTime());
         updateCurrentStatus(event);
         setLastSchedulingTime(event.getTime());
-        return partialDuration;
     }
 
     public void updateCurrentStatus(DynamicEvent event) {
@@ -304,7 +270,7 @@ public class DynamicProject {
         return incomingTasks;
     }
 
-    private double updateFinishedEffort(List<DynamicEmployee> availableEmployees_, double currentTime) {
+    private void updateFinishedEffort(List<DynamicEmployee> availableEmployees_, double currentTime) {
 
         Map<Integer, EffortParameters> efforts = new HashMap<>();
 
@@ -427,8 +393,6 @@ public class DynamicProject {
 
         availableTasks = filterAvailableTasks();
         totalDuration = currentTime;
-
-        return totalDuration;
     }
 
     private double reestimateEffort(DynamicTask task) {
@@ -635,10 +599,6 @@ public class DynamicProject {
             remainingEffort += task.getRemainingEffort();
         }
         return remainingEffort;
-    }
-
-    public int taskTeamSize(DynamicTask task, DedicationMatrix solution) {
-        return TaskManager.teamSize(task, solution);
     }
 
     public List<DynamicEmployee> taskTeam(DynamicTask task, DedicationMatrix solution) {

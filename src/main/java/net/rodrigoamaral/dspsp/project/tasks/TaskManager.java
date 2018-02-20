@@ -109,18 +109,6 @@ public class TaskManager {
         return totalProficiency / totalDedication;
     }
 
-    static public double totalFitness(DynamicProject project, DynamicTask task, List<DynamicEmployee> employees, DedicationMatrix solution, double totalDedication) {
-        double totalProficiency = 0;
-        for (DynamicEmployee e: employees) {
-            totalProficiency += (taskProficiency(project, task, e) * solution.getDedication(e.index(), task.index()));
-        }
-        return totalProficiency / totalDedication;
-    }
-
-    static private double taskProficiency(DynamicProject project, DynamicTask task, DynamicEmployee employee) {
-        return project.getTaskProficiency().get(employee.index()).get(task.index());
-    }
-
     static private boolean validEffortValue(double totalEffort, double finishedEffort) {
         return totalEffort > finishedEffort;
     }

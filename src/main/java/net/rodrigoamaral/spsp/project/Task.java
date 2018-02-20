@@ -34,16 +34,8 @@ public class Task {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public double getEffort() {
         return effort;
-    }
-
-    public void setEffort(double effort) {
-        this.effort = effort;
     }
 
     public double getDuration() {

@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface IObjectiveEvaluator {
     IObjectiveEvaluator addObjective(IObjective objective);
-    List<IObjective> getObjectives();
+
     double evaluate(int index, Project project, DedicationMatrix solution);
     int size();
 }

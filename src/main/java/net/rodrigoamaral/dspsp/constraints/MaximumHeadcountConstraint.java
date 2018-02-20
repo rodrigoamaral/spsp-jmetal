@@ -8,15 +8,6 @@ import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import java.util.*;
 
 public class MaximumHeadcountConstraint implements IConstraint {
-    @Override
-    public boolean isViolated(DynamicProject project, DedicationMatrix dm) {
-        return false;
-    }
-
-    @Override
-    public double violationDegree(DynamicProject project, DedicationMatrix dm) {
-        return 0;
-    }
 
     @Override
     public DedicationMatrix repair(DedicationMatrix dm, DynamicProject project) {

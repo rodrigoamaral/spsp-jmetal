@@ -11,12 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class NoEmployeeOverworkConstraint implements IConstraint {
-    @Override
-    public boolean isViolated(DynamicProject project, DedicationMatrix dm) {
-        return violationDegree(project, dm) > 0;
-    }
 
-    @Override
     public double violationDegree(DynamicProject project, DedicationMatrix dm) {
         Collection<DynamicEmployee> employees = project.getAvailableEmployees();
         Collection<DynamicTask> tasks = project.getActiveTasks();

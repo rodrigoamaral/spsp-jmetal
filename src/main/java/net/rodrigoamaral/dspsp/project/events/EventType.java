@@ -27,10 +27,6 @@ public enum EventType {
         return map.get(value);
     }
 
-    public int getValue() {
-        return value;
-    }
-
     @Override
     public String toString() {
         return "EventType{" +

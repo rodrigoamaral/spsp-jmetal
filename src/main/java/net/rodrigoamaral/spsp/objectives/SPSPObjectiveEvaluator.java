@@ -29,11 +29,6 @@ public class SPSPObjectiveEvaluator implements IObjectiveEvaluator {
     }
 
     @Override
-    public List<IObjective> getObjectives() {
-        return objectives;
-    }
-
-    @Override
     public double evaluate(int index, Project project, DedicationMatrix solution) {
         return objectives.get(index).evaluate(project, solution);
     }

@@ -32,7 +32,6 @@ import java.util.List;
 public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
     private static int reschedulings = 0;
-    private static double totalDuration = 0;
 
     private static void incrementCounter() {
         reschedulings += 1;
@@ -119,7 +118,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
                                                DynamicEvent event,
                                                DoubleSolution lastSchedule) throws Exception {
 
-        totalDuration = project.update(event, lastSchedule);
+        project.update(event, lastSchedule);
 
         DSPSProblem problem = loadProjectInstance(project);
 

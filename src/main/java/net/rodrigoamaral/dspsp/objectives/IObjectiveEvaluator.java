@@ -14,9 +14,4 @@ import java.util.Map;
  *
  */
 public interface IObjectiveEvaluator {
-    IObjectiveEvaluator addObjective(Integer key, IObjective objective);
-    Map<Integer, IObjective> getObjectives();
-    IObjective get(Integer key);
-    double evaluate(int index, DynamicProject project, DedicationMatrix solution);
-    int size();
 }
