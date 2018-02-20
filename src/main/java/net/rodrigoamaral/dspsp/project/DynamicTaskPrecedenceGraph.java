@@ -23,6 +23,23 @@ public class DynamicTaskPrecedenceGraph {
         }
     }
 
+    public DynamicTaskPrecedenceGraph(DynamicTaskPrecedenceGraph tpg) {
+        visited = new Vector(tpg.visited);
+        successors = new Vector<>();
+        for (Vector<Integer> vs: tpg.successors) {
+            successors.add(new Vector<>(vs));
+        }
+        vertexDegrees = new ArrayList<>(tpg.vertexDegrees);
+        predecessors = new Vector<>();
+        for (Vector<Integer> vs: tpg.predecessors) {
+            predecessors.add(new Vector<>(vs));
+        }
+    }
+
+    public DynamicTaskPrecedenceGraph copy() {
+        return new DynamicTaskPrecedenceGraph(this);
+    }
+
     public ArrayList<Integer> getTaskDependencies() {
         return vertexDegrees;
     }
@@ -77,7 +94,7 @@ public class DynamicTaskPrecedenceGraph {
 
     public List<Integer> getIndependentTasks() {
         List<Integer> independentTasks = new ArrayList<>();
-        for (Integer task: getSorting()) {
+        for (int task = 0; task < predecessors.size(); task++) {
             if (getTaskPredecessors(task).isEmpty()) {
                 independentTasks.add(task);
             }
@@ -118,7 +135,12 @@ public class DynamicTaskPrecedenceGraph {
     }
 
     public boolean isEmpty() {
-        return getSorting().isEmpty();
+        for (Vector<Integer> vs: predecessors) {
+            if (!vs.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void remove(int index) {
@@ -127,8 +149,8 @@ public class DynamicTaskPrecedenceGraph {
                 vs.removeElement(index);
             }
         }
-        successors.set(index, new Vector<>());
-        predecessors.set(index, new Vector<>());
+        successors.get(index).clear();
+        predecessors.get(index).clear();
         vertexDegrees.set(index, 0);
     }
 }

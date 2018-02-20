@@ -1,9 +1,11 @@
 package net.rodrigoamaral.dspsp.project;
 
 import net.rodrigoamaral.dspsp.adapters.SolutionConverter;
+import net.rodrigoamaral.dspsp.objectives.Efficiency;
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.project.events.EventType;
 import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
+import net.rodrigoamaral.dspsp.project.tasks.EffortParameters;
 import net.rodrigoamaral.dspsp.project.tasks.TaskManager;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import net.rodrigoamaral.logging.SPSPLogger;
@@ -18,30 +20,28 @@ import static net.rodrigoamaral.util.DoubleUtils.sum;
 
 public class DynamicProject {
 
+    public static final int SCENARIO_SAMPLE_SIZE = 30;
+    public static final double ROBUSTNESS_COST_WEIGHT = 1;
+    // REVIEW: We're dismissing the influence of K in this implementation by setting it to 1. Is this correct?
+    public static final int K = 1;
+    private static final int CROB = 100;
+    double totalDuration;
+    double totalCost;
     private List<DynamicTask> tasks;
     private List<DynamicTask> availableTasks;
     private List<DynamicTask> activeTasks;
     private List<DynamicEmployee> employees;
-
     private List<DynamicEmployee> availableEmployees;
-
     private DynamicTaskPrecedenceGraph taskPrecedenceGraph;
     private List<DynamicEvent> events;
     private Map<Integer, Integer> taskIndices;
     private Map<Integer, Integer> employeeIndices;
-
     private Map<Integer, List<Double>> taskProficiency;
-
     private List<Double> taskArrivalTimes;
-
     private DedicationMatrix previousSchedule;
-
     private double lastSchedulingTime;
+    private List<Map<Integer, Double>> sampleEffortScenarios;
 
-    //    REFACTOR : Move SCENARIO_SAMPLE_SIZE initialization elsewhere
-    public static final int SCENARIO_SAMPLE_SIZE = 30;
-    //    REFACTOR: Move ROBUSTNESS_COST_WEIGHT initialization elsewhere
-    public static final double ROBUSTNESS_COST_WEIGHT = 1;
     public DynamicProject() {
         tasks = new ArrayList<>();
         employees = new ArrayList<>();
@@ -50,8 +50,11 @@ public class DynamicProject {
         employeeIndices = new HashMap<>();
         taskProficiency = new HashMap<>();
         taskArrivalTimes = new ArrayList<>();
+        sampleEffortScenarios = new ArrayList<>(SCENARIO_SAMPLE_SIZE);
         previousSchedule = null;
         lastSchedulingTime = 0;
+        totalDuration = 0.0;
+        totalCost = 0.0;
     }
 
     public List<DynamicTask> getTasks() {
@@ -90,8 +93,16 @@ public class DynamicProject {
         this.lastSchedulingTime = lastSchedulingTime;
     }
 
+    public DedicationMatrix getPreviousSchedule() {
+        return previousSchedule;
+    }
+
     public void setPreviousSchedule(DoubleSolution previousSchedule) {
-        this.previousSchedule =  new SolutionConverter(this).convert(previousSchedule);
+        this.previousSchedule = new SolutionConverter(this).convert(previousSchedule);
+    }
+
+    public List<Map<Integer, Double>> getSampleEffortScenarios() {
+        return sampleEffortScenarios;
     }
 
     public DynamicTask getTaskById(int id) {
@@ -134,7 +145,7 @@ public class DynamicProject {
 
     public List<DynamicTask> cloneTasks(Collection<DynamicTask> tasks_) {
         List<DynamicTask> cloned = new ArrayList<>();
-        for (DynamicTask task: tasks_) {
+        for (DynamicTask task : tasks_) {
             cloned.add(new DynamicTask(task));
         }
         return cloned;
@@ -151,9 +162,9 @@ public class DynamicProject {
 
     public List<DynamicTask> fillTasksDuration(DedicationMatrix dm, List<DynamicTask> tasks, List<DynamicEmployee> employees) {
         tasks = resetTasksDuration(tasks);
-        for (DynamicTask t : tasks){
+        for (DynamicTask t : tasks) {
             double taskDedication = 0;
-            for (DynamicEmployee e : employees){
+            for (DynamicEmployee e : employees) {
                 taskDedication += dm.getDedication(e.index(), t.index());
             }
             if (taskDedication > 0) {
@@ -173,62 +184,54 @@ public class DynamicProject {
         return taskDependencies.get(t.index()) != 0;
     }
 
-    public List<DynamicTask> fillTasksStartAndFinish(DedicationMatrix dm,
-                                                     List<DynamicTask> tasks,
-                                                     List<DynamicEmployee> employees,
-                                                     DynamicTaskPrecedenceGraph tpg) {
-
-        tasks = fillTasksDuration(dm, tasks, employees);
-        for (DynamicTask t: tasks) {
-            if (hasDependencies(t)){
-                double start = -1;
-                Vector<Integer> taskPredecessors = tpg.getTaskPredecessors(t.index());
-                for (Integer taskIndex: taskPredecessors) {
-                    DynamicTask predecessor = getTasks().get(taskIndex);
-                    start = Math.max(start, predecessor.getFinish());
-                }
-                t.setStart(start);
-                t.setFinish(t.getStart() + t.getDuration());
-            } else {
-                t.setStart(0);
-                t.setFinish(t.getStart() + t.getDuration());
-            }
-        }
-        return tasks;
-    }
-
     /**
      * Updates project state based on the dynamic event and current schedule
      *
      * @param lastSchedule
      * @param event
      */
-    public void update(DynamicEvent event, DoubleSolution lastSchedule) throws Exception {
+    public double update(DynamicEvent event, DoubleSolution lastSchedule) throws Exception {
         // REFACTOR: lastSchedule should be a DedicationMatrix to avoid dependencies with jMetal
         setPreviousSchedule(lastSchedule);
-        updateFinishedEffort(activeTasks, availableEmployees);
+        double partialDuration = updateFinishedEffort(availableEmployees, event.getTime());
+//        double partialDuration = updateFinishedEffort(activeTasks, availableEmployees);
         updateCurrentStatus(event);
         setLastSchedulingTime(event.getTime());
+        return partialDuration;
     }
 
     public void updateCurrentStatus(DynamicEvent event) {
-        ////
-        SPSPLogger.info(">>> " + event.description() + " at " + event.getTime());
-        ////
         updateEmployeeAvailability(event);
         updateTaskAvailability(event);
         updateCurrentStatus();
     }
 
     public void updateCurrentStatus() {
-        availableTasks = filterAvailableTasks();
         availableEmployees = filterAvailableEmployees();
+        availableTasks = filterAvailableTasks();
         activeTasks = filterActiveTasks();
+        sampleEffortScenarios = generateEffortScenarioSample(availableTasks, SCENARIO_SAMPLE_SIZE);
         ////
-        SPSPLogger.info("... Available employees: " + availableEmployees);
-        SPSPLogger.info("... Available tasks: " + availableTasks);
-        SPSPLogger.info("... Active tasks: " + activeTasks);
+        SPSPLogger.info("Available employees: " + availableEmployees);
+        SPSPLogger.info("Available tasks: " + availableTasks);
+        SPSPLogger.info("Active tasks: " + activeTasks);
         ////
+    }
+
+    private List<Map<Integer, Double>> generateEffortScenarioSample(List<DynamicTask> tasks, int scenarioCount) {
+
+        List<Map<Integer, Double>> effortScenarioSample = new ArrayList<>(scenarioCount);
+
+        for (int i = 0; i < scenarioCount; i++) {
+            Map<Integer, Double> taskEffortSample = new HashMap<>(tasks.size());
+            for (DynamicTask task : tasks) {
+                double effortSample = TaskManager.generateEffortSample(task);
+                taskEffortSample.put(task.index(), effortSample);
+            }
+            effortScenarioSample.add(taskEffortSample);
+        }
+
+        return effortScenarioSample;
     }
 
     private void updateEmployeeAvailability(DynamicEvent event) {
@@ -238,12 +241,22 @@ public class DynamicProject {
         } else if (event.getType() == EventType.EMPLOYEE_RETURN) {
             getEmployeeById(id).setAvailable(true);
         }
+//        availableEmployees = filterAvailableEmployees();
     }
 
     private void updateTaskAvailability(DynamicEvent event) {
+//        checkTaskAvailabilityCriteria();
         List<Integer> incomingTasksIDs = getIncomingTasks(event);
         makeTasksAvailable(incomingTasksIDs, event);
+//        availableTasks = filterAvailableTasks();
     }
+//
+//    private void checkTaskAvailabilityCriteria() {
+//        for (DynamicTask task: availableTasks) {
+//            boolean available = TaskManager.isAvailable(task, availableEmployees, this);
+//            task.setAvailable(available);
+//        }
+//    }
 
     private void makeTasksAvailable(List<Integer> incomingTaskIDs, DynamicEvent event) {
         int urgentTaskIndex = -1;
@@ -252,23 +265,27 @@ public class DynamicProject {
                 urgentTaskIndex = incomingTaskIDs.remove(incomingTaskIDs.size() - 1);
             }
         }
-        for (int t: incomingTaskIDs) {
+        for (int t : incomingTaskIDs) {
             List<Integer> predecessors = chooseRandomTasks();
-            for (int p: predecessors) {
+            for (int p : predecessors) {
                 taskPrecedenceGraph.addEdge(p, t);
-                getTaskByIndex(t).setAvailable(true);
+                DynamicTask newTask = getTaskByIndex(t);
+                boolean available = TaskManager.isAvailable(newTask, availableEmployees, this, this.getTaskPrecedenceGraph());
+                newTask.setAvailable(available);
                 ////
-                SPSPLogger.info("... Task " + t + " added after task " + p);
+                SPSPLogger.info("Regular T_" + t + " added after T_" + p + " (T_"+p+" -> T_" + t +")");
                 ////
             }
         }
         if (urgentTaskIndex > -1) {
             List<Integer> successors = chooseRandomTasks();
-            for (int s: successors) {
+            for (int s : successors) {
                 taskPrecedenceGraph.addEdge(urgentTaskIndex, s);
-                getTaskByIndex(urgentTaskIndex).setAvailable(true);
+                DynamicTask newUrgentTask = getTaskByIndex(urgentTaskIndex);
+                boolean available = TaskManager.isAvailable(newUrgentTask, availableEmployees, this, this.getTaskPrecedenceGraph());
+                newUrgentTask.setAvailable(available);
                 ////
-                SPSPLogger.info("... Urgent Task " + urgentTaskIndex + " added before task " + s);
+                SPSPLogger.info("Urgent T_" + urgentTaskIndex + " added before T_" + s + " (T_"+ urgentTaskIndex +" -> T_" + s +")");
                 ////
             }
         }
@@ -299,58 +316,157 @@ public class DynamicProject {
         return incomingTasks;
     }
 
-    private double updateFinishedEffort(List<DynamicTask> activeTasks, List<DynamicEmployee> availableEmployees) throws Exception {
-        double partialDuration;
-        if (activeTasks.isEmpty()) {
-            throw new Exception("Problem instance not solvable!");
-        } else {
-            DedicationMatrix normalizedSchedule = normalize(this.previousSchedule, activeTasks);
-            partialDuration = getPartialDuration(activeTasks, availableEmployees, normalizedSchedule);
-            for (DynamicTask task : activeTasks) {
-                double totalDedication = TaskManager.totalDedication(task, availableEmployees, normalizedSchedule);
-                double totalFitness = TaskManager.totalFitness(this, task, availableEmployees, normalizedSchedule, totalDedication);
-                double costDriveValue = TaskManager.costDriveValue(totalFitness);
-                double finishedEffort = partialDuration * (totalDedication / costDriveValue);
-                task.addFinishedEffort(finishedEffort);
-                if (task.isFinished()) {
-                    task.setAvailable(false);
-                    taskPrecedenceGraph.remove(task.index());
-                    ////
-                    SPSPLogger.info("... Task " + task.index() + " is COMPLETE");
-                    ////
+    private double updateFinishedEffort(List<DynamicEmployee> availableEmployees_, double currentTime) {
+
+        Map<Integer, EffortParameters> efforts = new HashMap<>();
+
+        double duration = 0.0;
+        double effortDuration = 0.0;
+        boolean durationBelowCurrentTime = true;
+
+        DynamicTaskPrecedenceGraph localTPG = taskPrecedenceGraph.copy();
+        List<DynamicTask> localAvailableTasks = cloneTasks(availableTasks);
+
+        while ((!localTPG.isEmpty() || !localAvailableTasks.isEmpty()) && durationBelowCurrentTime) {
+
+            List<DynamicTask> localActiveTasks = filterActiveTasks(localTPG, localAvailableTasks);
+
+            if (localActiveTasks.isEmpty()) {
+                SPSPLogger.debug("localAvailableTasks = " + localAvailableTasks);
+                throw new RuntimeException("Problem instance not solvable!");
+            }
+
+            DedicationMatrix normalizedSchedule = normalize(this.previousSchedule, localActiveTasks);
+
+            double partialDuration = Double.POSITIVE_INFINITY;
+
+            for (DynamicTask localTask : localActiveTasks) {
+                EffortParameters ep = TaskManager.getEffortProperties(localTask, availableEmployees_, normalizedSchedule);
+                efforts.put(localTask.index(), ep);
+                partialDuration = Math.min(partialDuration, ep.timeSpent);
+            }
+
+            duration += partialDuration;
+
+            effortDuration = partialDuration;
+
+            if (duration + lastSchedulingTime > currentTime) {
+                effortDuration -= (duration + lastSchedulingTime - currentTime);
+                durationBelowCurrentTime = false;
+            }
+
+            SPSPLogger.debug(
+                    "partialDuration = " + partialDuration + "; " +
+                    "effortDuration = " + effortDuration + "; " +
+                    "delta = " + (currentTime - lastSchedulingTime)
+            );
+
+
+            // Updates finished effort for the local active tasks
+            for (DynamicTask localTask : localActiveTasks) {
+
+                EffortParameters ep = efforts.get(localTask.index());
+                double finished = ep.finishedEffort(effortDuration);
+                localTask.addFinishedEffort(finished);
+                ////
+                SPSPLogger.debug("localTask " + localTask + " finished effort: (" + (localTask.getFinishedEffort() - finished) + " + " + finished + ") = " + localTask.getFinishedEffort());
+                ////
+            }
+
+            // Calculates cost
+            double partialCost = 0;
+
+            for (DynamicTask localTask : localActiveTasks) {
+                for (DynamicEmployee e : availableEmployees_) {
+                    partialCost += taskCostByEmployee(e, localTask, normalizedSchedule, effortDuration);
                 }
             }
-        }
-        availableTasks = filterAvailableTasks();
-        return partialDuration;
-    }
 
-    private double getPartialDuration(List<DynamicTask> activeTasks, List<DynamicEmployee> availableEmployees, DedicationMatrix normalizedSchedule) {
-        if (activeTasks.isEmpty()) {
-            return 0;
-        }
-        double partialDuration = Double.POSITIVE_INFINITY;
-        for (DynamicTask task : activeTasks) {
-            double totalDedication = TaskManager.totalDedication(task, availableEmployees, normalizedSchedule);
-            double totalFitness = TaskManager.totalFitness(this, task, availableEmployees, normalizedSchedule, totalDedication);
-            double costDriveValue = TaskManager.costDriveValue(totalFitness);
-            double timeSpent = TaskManager.timeSpent(task, costDriveValue, totalDedication);
-            if (timeSpent < partialDuration) {
-                partialDuration = timeSpent;
+            totalCost += partialCost;
+
+            // Updates local tasks state
+            if (durationBelowCurrentTime) {
+                for (DynamicTask localTask : localActiveTasks) {
+                    if (localTask.isFinished()) {
+                        ////
+                        SPSPLogger.debug("Local task " + localTask +" COMPLETE");
+                        ////
+//                        task.setAvailable(false);
+                        localTPG.remove(localTask.index());
+                        localAvailableTasks.remove(localTask);
+                    }
+                }
+            }
+
+        } // while
+
+        // Update finished effort for the actual project active tasks
+        for (DynamicTask globalTask : activeTasks) {
+
+            EffortParameters ep = efforts.get(globalTask.index());
+            globalTask.addFinishedEffort(ep.finishedEffort(effortDuration));
+
+            if (globalTask.isFinished()) {
+                globalTask.setAvailable(false);
+                taskPrecedenceGraph.remove(globalTask.index());
+                ////
+                SPSPLogger.info(
+                        String.format(
+                                Locale.US,
+                                "%-4s is COMPLETE: %7.4f / %7.4f (%6.2f %%)",
+                                globalTask,
+                                globalTask.getFinishedEffort(),
+                                globalTask.getRealEffort(),
+                                globalTask.finishedEffortRatio() * 100
+                        )
+                );
+                ////
+            } else {
+                globalTask.setRealEffort(reestimateEffort(globalTask));
+                ////
+                SPSPLogger.info(
+                        String.format(
+                                Locale.US,
+                                "%-4s finished effort: %7.4f / %7.4f (%6.2f %%)",
+                                globalTask,
+                                globalTask.getFinishedEffort(),
+                                globalTask.getRealEffort(),
+                                globalTask.finishedEffortRatio() * 100
+                        )
+                );
+                ////
             }
         }
-        return partialDuration;
+
+        availableTasks = filterAvailableTasks();
+        totalDuration = currentTime;
+
+        return totalDuration;
+    }
+
+    private double reestimateEffort(DynamicTask task) {
+
+        double realEffort = task.getRealEffort();
+        double finishedEffort = task.getFinishedEffort();
+
+        while (realEffort <= finishedEffort) {
+            realEffort = TaskManager.sampleEstimatedEffort(task);
+        }
+
+        return realEffort;
     }
 
     private DedicationMatrix normalize(DedicationMatrix dm, List<DynamicTask> activeTasks) {
+
         DedicationMatrix normalized = new DedicationMatrix(employees.size(), tasks.size());
-//        normalized.reset();
-        for (DynamicTask t: activeTasks) {
-            for (DynamicEmployee e: availableEmployees) {
+
+        for (DynamicTask t : activeTasks) {
+            for (DynamicEmployee e : availableEmployees) {
                 double n = dm.getDedication(e.index(), t.index()) / max(1, dedicationSum(dm, activeTasks, e) / e.getMaxDedication());
                 normalized.setDedication(e.index(), t.index(), n);
             }
         }
+
         return normalized;
     }
 
@@ -360,59 +476,59 @@ public class DynamicProject {
 
     private List<Double> activeTasksDedication(DedicationMatrix dm, List<DynamicTask> activeTasks, DynamicEmployee employee) {
         List<Double> result = new ArrayList<>();
-        for (DynamicTask task: activeTasks) {
+        for (DynamicTask task : activeTasks) {
             result.add(dm.getDedication(employee.index(), task.index()));
         }
         return result;
     }
 
 
-    public double calculateDuration(DedicationMatrix dm) {
-        // REVIEW: Does the paper consider only the ACTIVE tasks???
-//        return calculateDuration(dm, availableTasks, getEmployees(), getTaskPrecedenceGraph());
-        return calculateDuration(dm, activeTasks, getEmployees(), getTaskPrecedenceGraph());
-    }
+//    public double calculateDuration(DedicationMatrix dm) {
+//        // REVIEW: Does the paper consider only the ACTIVE tasks???
+////        return calculateDuration(dm, availableTasks, getEmployees(), getTaskPrecedenceGraph());
+//        return calculateDuration(dm, activeTasks, getEmployees(), getTaskPrecedenceGraph());
+//    }
+//
+//    public double calculateDuration(DedicationMatrix dm, List<DynamicTask> tasks_, List<DynamicEmployee> employees_, DynamicTaskPrecedenceGraph tpg_) {
+//        tasks_ = fillTasksStartAndFinish(dm, tasks_, employees_, tpg_);
+//        double duration = 0;
+//        for (DynamicTask t: tasks_) {
+//            duration = Math.max(duration, t.getFinish());
+//        }
+//        return duration;
+//    }
 
-    public double calculateDuration(DedicationMatrix dm, List<DynamicTask> tasks_, List<DynamicEmployee> employees_, DynamicTaskPrecedenceGraph tpg_) {
-        tasks_ = fillTasksStartAndFinish(dm, tasks_, employees_, tpg_);
-        double duration = 0;
-        for (DynamicTask t: tasks_) {
-            duration = Math.max(duration, t.getFinish());
-        }
-        return duration;
-    }
-
-    private double taskCostByEmployee(DynamicEmployee e, DynamicTask t, DedicationMatrix solution) {
+    private double taskCostByEmployee(DynamicEmployee e, DynamicTask t, DedicationMatrix solution, double duration) {
         double employeeDedication = solution.getDedication(e.index(), t.index());
-        double regularCost = e.getSalary() * employeeDedication * t.getDuration();
-        return regularCost + getOvertimeCost(e, t, employeeDedication - 1)  * t.getDuration();
+        double regularCost = e.getSalary() * employeeDedication * duration;
+        return regularCost + getOvertimeCost(e, employeeDedication - 1, duration);
     }
 
-    public double calculateCost(DedicationMatrix solution) {
-        calculateDuration(solution);
-        double projectCost = 0;
-        for (DynamicEmployee e: getEmployees()) {
-            for (DynamicTask t: availableTasks) {
-                projectCost += taskCostByEmployee(e, t, solution);
-            }
-        }
-        return projectCost;
-    }
+//    public double calculateCost(DedicationMatrix solution) {
+//        calculateDuration(solution);
+//        double projectCost = 0;
+//        for (DynamicEmployee e: getEmployees()) {
+//            for (DynamicTask t: availableTasks) {
+//                projectCost += taskCostByEmployee(e, t, solution);
+//            }
+//        }
+//        return projectCost;
+//    }
 
-    public double calculateCost(DedicationMatrix solution, List<DynamicTask> tasks_, List<DynamicEmployee> employees_, DynamicTaskPrecedenceGraph tpg_) {
-        calculateDuration(solution, tasks_, employees_, tpg_);
-        double projectCost = 0;
-        for (DynamicEmployee e: employees_) {
-            for (DynamicTask t: tasks_) {
-                projectCost += taskCostByEmployee(e, t, solution);
-            }
-        }
-        return projectCost;
-    }
+//    public double calculateCost(DedicationMatrix solution, List<DynamicTask> tasks_, List<DynamicEmployee> employees_, DynamicTaskPrecedenceGraph tpg_) {
+//        calculateDuration(solution, tasks_, employees_, tpg_);
+//        double projectCost = 0;
+//        for (DynamicEmployee e: employees_) {
+//            for (DynamicTask t: tasks_) {
+//                projectCost += taskCostByEmployee(e, t, solution);
+//            }
+//        }
+//        return projectCost;
+//    }
 
 
-    private double getOvertimeCost(DynamicEmployee e, DynamicTask t, double overdedication) {
-        double overtimeCost = e.getOvertimeSalary() * overdedication * t.getDuration();
+    private double getOvertimeCost(DynamicEmployee e, double overdedication, double duration) {
+        double overtimeCost = e.getOvertimeSalary() * overdedication * duration;
         overtimeCost = overtimeCost > 0 ? overtimeCost : 0;
         return overtimeCost;
     }
@@ -425,24 +541,24 @@ public class DynamicProject {
         this.events = events;
     }
 
-    public double calculateRobustness(DedicationMatrix solution) {
-        double duration = calculateDuration(solution);
-        double cost = calculateCost(solution);
+    public double calculateRobustness(DedicationMatrix solution, Efficiency efficiency) {
 
+//        System.out.println("DynamicProject.calculateRobustness");
         List<Double> durationDistances = new ArrayList<>();
         List<Double> costDistances = new ArrayList<>();
 
-        for (int i = 0; i < SCENARIO_SAMPLE_SIZE; i++) {
-            List<DynamicTask> scenarioAvailableTasks = cloneTasks(availableTasks);
-            for (DynamicTask task: scenarioAvailableTasks) {
-                double remainingEffort = TaskManager.generateRemainingEffort(task, availableEmployees, solution);
-                task.setEffort(remainingEffort);
+        List<DynamicTask> scenarioAvailableTasks = cloneTasks(availableTasks);
+
+        for (Map<Integer, Double> effortScenario : getSampleEffortScenarios()) {
+            for (DynamicTask t : scenarioAvailableTasks) {
+                t.setRealEffort(effortScenario.get(t.index()));
             }
-            double scenarioDuration = calculateDuration(solution, scenarioAvailableTasks, availableEmployees, getTaskPrecedenceGraph());
-            double scenarioCost = calculateCost(solution, scenarioAvailableTasks, availableEmployees, getTaskPrecedenceGraph());
-            durationDistances.add(efficiencyDistance(scenarioDuration, duration));
-            costDistances.add(efficiencyDistance(scenarioCost, cost));
+            Efficiency scenario = evaluateEfficiency(solution, scenarioAvailableTasks);
+
+            durationDistances.add(efficiencyDistance(scenario.duration, efficiency.duration));
+            costDistances.add(efficiencyDistance(scenario.cost, efficiency.cost));
         }
+
         return Math.sqrt(avg(durationDistances)) + ROBUSTNESS_COST_WEIGHT * Math.sqrt(avg(costDistances));
     }
 
@@ -454,8 +570,8 @@ public class DynamicProject {
         }
 
         double stabilityValue = 0;
-        for (DynamicEmployee e: availableEmployees) {
-            for (DynamicTask t: availableTasks) {
+        for (DynamicEmployee e : availableEmployees) {
+            for (DynamicTask t : availableTasks) {
                 double currentDedication = solution.getDedication(e.index(), t.index());
                 double previousDedication = previousSchedule.getDedication(e.index(), t.index());
                 double w = reschedulingPenalty(currentDedication, previousDedication);
@@ -470,7 +586,7 @@ public class DynamicProject {
         if (currentDedication > 0 && previousDedication == 0) {
             return 2;
         } else if (currentDedication == 0 && previousDedication > 0) {
-            return  1.5;
+            return 1.5;
         }
         return 1;
     }
@@ -483,11 +599,9 @@ public class DynamicProject {
         return sum(doubleList) / doubleList.size();
     }
 
-
-    // REVIEW: There are inititally available tasks that aren't in the TPG. How to deal with this?
     public List<DynamicTask> filterAvailableTasks() {
         List<DynamicTask> availableTasks = new ArrayList<>();
-        for (DynamicTask task: getTasks()) {
+        for (DynamicTask task : getTasks()) {
             if (task.isAvailable()) {
                 availableTasks.add(task);
             }
@@ -497,7 +611,7 @@ public class DynamicProject {
 
     private List<DynamicEmployee> filterAvailableEmployees() {
         List<DynamicEmployee> availableEmployees = new ArrayList<>();
-        for (DynamicEmployee employee: getEmployees()) {
+        for (DynamicEmployee employee : getEmployees()) {
             if (employee.isAvailable()) {
                 availableEmployees.add(employee);
             }
@@ -507,27 +621,37 @@ public class DynamicProject {
 
     private List<DynamicTask> filterActiveTasks() {
         List<DynamicTask> activeTasks = new ArrayList<>();
-        for (int t: taskPrecedenceGraph.getIndependentTasks()) {
+        for (int t : taskPrecedenceGraph.getIndependentTasks()) {
             DynamicTask task = getTaskByIndex(t);
             if (task.isAvailable()) {
                 activeTasks.add(task);
             }
         }
-//        for (int t: taskPrecedenceGraph.getDisconnectedTasks()) {
-//            DynamicTask task = getTaskByIndex(t);
-//            if (task.isAvailable()) {
-//                activeTasks.add(task);
-//            }
-//        }
         return activeTasks;
     }
 
+    private List<DynamicTask> filterActiveTasks(DynamicTaskPrecedenceGraph tpg, List<DynamicTask> tasks) {
+        List<DynamicTask> active = new ArrayList<>();
+
+        for (DynamicTask task : tasks) {
+            for (int t : tpg.getIndependentTasks()) {
+                if (task.index() == t && task.isAvailable()) {
+                    active.add(task);
+                }
+            }
+        }
+
+        return active;
+    }
+
     public boolean isFinished() {
-        for (DynamicTask task: getTasks()) {
+
+        for (DynamicTask task : getTasks()) {
             if (!task.isFinished()) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -541,7 +665,7 @@ public class DynamicProject {
 
     public double getAvailableEmployeeMaxDedication() {
         double max = 0;
-        for (DynamicEmployee employee: this.getAvailableEmployees()) {
+        for (DynamicEmployee employee : this.getAvailableEmployees()) {
             if (employee.getMaxDedication() > max) {
                 max = employee.getMaxDedication();
             }
@@ -551,7 +675,7 @@ public class DynamicProject {
 
     public double getAvailableEmployeeMinDedication() {
         double min = POSITIVE_INFINITY;
-        for (DynamicEmployee employee: this.getAvailableEmployees()) {
+        for (DynamicEmployee employee : this.getAvailableEmployees()) {
             if (employee.getMaxDedication() < min) {
                 min = employee.getMaxDedication();
             }
@@ -561,7 +685,7 @@ public class DynamicProject {
 
     public double getTotalEstimatedRemainingEffort() {
         double remainingEffort = 0;
-        for (DynamicTask task: getAvailableTasks()) {
+        for (DynamicTask task : getAvailableTasks()) {
             remainingEffort += task.getRemainingEffort();
         }
         return remainingEffort;
@@ -573,7 +697,7 @@ public class DynamicProject {
 
     public List<DynamicEmployee> taskTeam(DynamicTask task, DedicationMatrix solution) {
         List<DynamicEmployee> team = new ArrayList<>();
-        for (int e: TaskManager.team(task, solution)) {
+        for (int e : TaskManager.team(task, solution)) {
             team.add(getEmployeeByIndex(e));
         }
         return team;
@@ -586,5 +710,99 @@ public class DynamicProject {
                 "employees=" + employees + ",\n\t" +
                 "taskPrecedenceGraph=" + taskPrecedenceGraph +
                 "\n}";
+    }
+
+    public Efficiency evaluateEfficiency(DedicationMatrix dm) {
+        return evaluateEfficiency(dm, availableTasks);
+    }
+
+    public Efficiency evaluateEfficiency(DedicationMatrix dm, List<DynamicTask> tasks) {
+        double duration = 0;
+        double cost = 0;
+        double partialCost = 0;
+
+        DynamicTaskPrecedenceGraph localTPG = taskPrecedenceGraph.copy();
+        List<DynamicTask> localAvailableTasks = cloneTasks(tasks);
+
+        while (!localTPG.isEmpty() || !localAvailableTasks.isEmpty()) {
+
+            List<DynamicTask> localActiveTasks = filterActiveTasks(localTPG, localAvailableTasks);
+
+            if (localActiveTasks.isEmpty()) {
+                SPSPLogger.debug("localAvailableTasks = " + localAvailableTasks);
+                throw new RuntimeException("Problem instance not solvable!");
+            }
+
+            DedicationMatrix normDM = normalize(dm, localActiveTasks);
+
+            // Duration calculation
+            double partialDuration = Double.POSITIVE_INFINITY;
+
+            for (DynamicTask localTask : localActiveTasks) {
+                EffortParameters ep = TaskManager.getEffortProperties(localTask, availableEmployees, normDM);
+                partialDuration = Math.min(partialDuration, ep.timeSpent);
+                double finishedEffort = ep.finishedEffort(partialDuration);
+                localTask.addFinishedEffort(finishedEffort);
+            }
+
+            duration += partialDuration;
+
+            // Cost calculation
+            for (DynamicEmployee e : availableEmployees) {
+                for (DynamicTask t : localActiveTasks) {
+                    partialCost += taskCostByEmployee(e, t, normDM, partialDuration);
+                }
+            }
+
+            cost += partialCost;
+
+            // Finished tasks removal
+            for (DynamicTask localTask : localActiveTasks) {
+                if (localTask.isFinished()) {
+                    localTask.setAvailable(false);
+                    localTPG.remove(localTask.index());
+                    localAvailableTasks.remove(localTask);
+                }
+            }
+        }
+
+        return new Efficiency(duration, cost);
+    }
+
+    public double penalizeDuration(int missingSkills) {
+        double minEmployeeDedication = getAvailableEmployeeMinDedication();
+        double estimatedRemainingEffort = getTotalEstimatedRemainingEffort();
+
+        return 14 * K * missingSkills * estimatedRemainingEffort / minEmployeeDedication;
+    }
+
+    public double penalizeCost(int missingSkills) {
+        double cost = 0;
+        for (DynamicEmployee employee : getAvailableEmployees()) {
+            for (DynamicTask task : getAvailableTasks()) {
+                cost += employee.getOvertimeSalary() * task.getRemainingEffort();
+            }
+        }
+        return 14 * missingSkills * cost;
+    }
+
+    public double penalizeRobustness(int missingSkills) {
+        return 2 * CROB * missingSkills;
+    }
+
+    public double penalizeStability(int missingSkills) {
+        int numberOfAvailableEmployees = getAvailableEmployees().size();
+        int numberOfAvailableTasks = getAvailableTasks().size();
+        double maxDedication = getAvailableEmployeeMaxDedication();
+
+        return 2 * missingSkills * numberOfAvailableEmployees * numberOfAvailableTasks * maxDedication;
+    }
+
+    public double getTotalDuration() {
+        return totalDuration;
+    }
+
+    public double getTotalCost() {
+        return totalCost;
     }
 }

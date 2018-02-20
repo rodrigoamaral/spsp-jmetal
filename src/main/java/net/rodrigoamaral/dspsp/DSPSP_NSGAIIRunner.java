@@ -1,5 +1,6 @@
 package net.rodrigoamaral.dspsp;
 
+import net.rodrigoamaral.dspsp.cli.CLI;
 import net.rodrigoamaral.dspsp.decision.ComparisonMatrix;
 import net.rodrigoamaral.dspsp.decision.DecisionMaker;
 import net.rodrigoamaral.dspsp.nsgaii.DSPSP_NSGAIIBuilder;
@@ -8,7 +9,6 @@ import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.solution.SchedulingResult;
 import net.rodrigoamaral.jmetal.util.fileoutput.SolutionListOutput;
 import net.rodrigoamaral.logging.SPSPLogger;
-import org.apache.commons.cli.*;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.operator.CrossoverOperator;
@@ -32,6 +32,7 @@ import java.util.List;
 public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
     private static int schedulings = 0;
+    private static double totalDuration = 0;
 
     private static void incrementCounter() {
         schedulings += 1;
@@ -39,26 +40,10 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
 
     public static void main(String[] args) throws Exception {
-        Options options = new Options();
-        options.addOption("h", "help", false, "Show this help");
 
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse(options, args);
-        if (cmd.hasOption("h")) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("DSPSP_NSGAIIRunner", options);
-            System.exit(0);
-        }
-        String filename = "";
-        String referenceParetoFront = "" ;
-        if (cmd.getArgList().size() == 1) {
-            filename = cmd.getArgList().get(0);
-        }
-        run(filename, referenceParetoFront);
-    }
+        final CLI cli = new CLI(args);
 
-
-    private static void run(String inputFile, String refPF) throws Exception {
+        String inputFile = cli.getInstanceInputFile();
 
         SPSPLogger.info("Parsing instance file: " + inputFile);
 
@@ -66,14 +51,17 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
         SPSPLogger.info("Parsing complete. Performing initial scheduling...");
 
+        run(problem);
+    }
+
+
+    private static void run(DSPSProblem problem) throws Exception {
+
         AlgorithmAssembler algorithmAssembler = new AlgorithmAssembler(problem).invoke();
         Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
         DynamicProject project = algorithmAssembler.getProject();
 
-        ComparisonMatrix comparisonMatrix = new ComparisonMatrix();
-
-        AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
-                .execute() ;
+        AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm).execute() ;
 
         List<DoubleSolution> population = algorithm.getResult() ;
 
@@ -81,9 +69,13 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
         SPSPLogger.info("Initial scheduling complete.");
         SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
+
+        writeSolutionFile(population, "NSGA2", null);
+
         incrementCounter();
 
         // Decides on the best initial schedule
+        ComparisonMatrix comparisonMatrix = new ComparisonMatrix();
         DoubleSolution initialSchedule = new DecisionMaker(population, comparisonMatrix)
                 .chooseInitialSchedule();
 
@@ -97,15 +89,16 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
                 break;
             }
 
-            SPSPLogger.info("Rescheduling "+ schedulings + " : " + event.description());
-
+//            SPSPLogger.info("\nRescheduling "+ schedulings + " : " + event.description());
+            SPSPLogger.rescheduling(schedulings, event);
             SchedulingResult result = reschedule(project, event, currentSchedule);
 
             totalComputingTime += result.getComputingTime();
 
             SPSPLogger.info("Rescheduling "+ schedulings +" complete in " + DurationFormatUtils.formatDuration(result.getComputingTime(), "HH:mm:ss,SSS") + ". ");
             SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
-
+            SPSPLogger.info("Project current duration: " + project.getTotalDuration());
+            SPSPLogger.info("Project current cost    : " + project.getTotalCost());
             incrementCounter();
 
             writeSolutionFile(result.getSchedules(), "NSGA2", event.getId());
@@ -116,19 +109,19 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         }
 
 
-        SPSPLogger.info("Total execution time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS") + " ms");
+        SPSPLogger.info("Total execution time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
 
         printFinalSolutionSet(population);
-        if (!refPF.equals("")) {
-            printQualityIndicators(population, refPF) ;
-        }
+//        if (!refPF.equals("")) {
+//            printQualityIndicators(population, refPF) ;
+//        }
     }
 
     private static SchedulingResult reschedule(DynamicProject project,
                                                DynamicEvent event,
                                                DoubleSolution lastSchedule) throws Exception {
 
-        project.update(event, lastSchedule);
+        totalDuration = project.update(event, lastSchedule);
 
         DSPSProblem problem = loadProjectInstance(project);
 
@@ -162,23 +155,27 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
                 .setFunFileOutputContext(new DefaultFileOutputContext(funFile))
                 .print();
 
-        SPSPLogger.info("Random seed: " + JMetalRandom.getInstance().getSeed());
-        SPSPLogger.info("Objectives values have been written to file " + funFile);
-        SPSPLogger.info("Variables values have been written to file " + varFile);
+        SPSPLogger.trace("Random seed: " + JMetalRandom.getInstance().getSeed());
+        SPSPLogger.info("Objective values file: " + funFile);
+        SPSPLogger.info("Variables values file: " + varFile);
     }
 
-    public static void writeSolutionFile(List<? extends Solution<?>> population, String algorithm, int reschedulingId) {
-        String varFile = "D_VAR_"+algorithm+"."+reschedulingId+".csv";
-        String funFile = "D_FUN_"+algorithm+"."+reschedulingId+".csv";
+    public static void writeSolutionFile(List<? extends Solution<?>> population, String algorithm, Integer reschedulingId) {
+        String varFile = "D_VAR_" + algorithm + ".initial.csv";
+        String funFile = "D_FUN_" + algorithm + ".initial.csv";
+        if (reschedulingId != null) {
+            varFile = "D_VAR_" + algorithm + "." + reschedulingId + ".csv";
+            funFile = "D_FUN_" + algorithm + "." + reschedulingId + ".csv";
+        }
         new SolutionListOutput(population)
                 .setSeparator(";")
                 .setVarFileOutputContext(new DefaultFileOutputContext(varFile))
                 .setFunFileOutputContext(new DefaultFileOutputContext(funFile))
                 .print();
 
-        SPSPLogger.info("Random seed: " + JMetalRandom.getInstance().getSeed());
-        SPSPLogger.info("Objectives values have been written to file " + funFile);
-        SPSPLogger.info("Variables values have been written to file " + varFile);
+        SPSPLogger.trace("Random seed: " + JMetalRandom.getInstance().getSeed());
+        SPSPLogger.info("Objective values file: " + funFile);
+        SPSPLogger.info("Variables values file: " + varFile);
     }
 
     private static class AlgorithmAssembler {
@@ -219,7 +216,8 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
             algorithm = new DSPSP_NSGAIIBuilder<>(problem, crossover, mutation)
                     .setSelectionOperator(selection)
-                    .setMaxEvaluations(25000)
+                    .setMaxEvaluations(2500)
+//                    .setMaxEvaluations(25000)
                     .setPopulationSize(100)
                     .build() ;
             return this;

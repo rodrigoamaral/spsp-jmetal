@@ -24,7 +24,7 @@ public class NoEmployeeOverworkConstraint implements IConstraint {
         Collection<DynamicEmployee> employees = project.getAvailableEmployees();
         Collection<DynamicTask> tasks = project.getActiveTasks();
         // REFACTOR: Get duration objective from some kind of cache
-        double projectDuration = project.calculateDuration(dm);
+        double projectDuration = project.evaluateEfficiency(dm).duration;
         double projectOverwork = 0.0;
         for (DynamicEmployee e: employees) {
             double employeeOverDedication = 0.0;

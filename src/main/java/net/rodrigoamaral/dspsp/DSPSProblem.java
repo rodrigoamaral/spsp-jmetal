@@ -16,15 +16,9 @@ import java.io.FileNotFoundException;
  * @author Rodrigo Amaral
  *
  */
-//public class SPSProblem extends AbstractDoubleProblem implements ConstrainedProblem<DoubleSolution>{
 public class DSPSProblem extends AbstractDoubleProblem {
 
     private JMetalDSPSPAdapter dspsp;
-    public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree;
-    public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints;
-    private static final double PENALTY = 1.5;
-    private int evaluationCounter;
-
 
     public DSPSProblem(String projectPropertiesFileName) throws FileNotFoundException {
         dspsp = new JMetalDSPSPAdapter(projectPropertiesFileName);
@@ -43,47 +37,13 @@ public class DSPSProblem extends AbstractDoubleProblem {
         setNumberOfConstraints(dspsp.getNumberOfConstraints());
         setLowerLimit(dspsp.getLowerLimit());
         setUpperLimit(dspsp.getUpperLimit());
-        overallConstraintViolationDegree = new OverallConstraintViolation<>();
-        numberOfViolatedConstraints = new NumberOfViolatedConstraints<>();
-        evaluationCounter = 0;
     }
-
-
-//    @Override
-//    public void evaluate(DoubleSolution solution) {
-//        int missingSkills = dspsp.missingSkills();
-//        if (missingSkills > 0) {
-//            for (int i = 0; i < dspsp.getNumberOfObjectives(); i++) {
-//                solution.setObjective(i, dspsp.penalizeObjective(i, solution, missingSkills));
-//            }
-//        }
-//        for (int i = 0; i < dspsp.getNumberOfObjectives(); i++){
-//            solution.setObjective(i, dspsp.evaluateObjective(i, solution));
-//        }
-//        evaluateConstraints(solution);
-//        // Solutions with violated constraints are penalized
-//        if (numberOfViolatedConstraints.getAttribute(solution) > 0) {
-//            for (int i = 0; i < dspsp.getNumberOfObjectives(); i++){
-//                solution.setObjective(i, solution.getObjective(i) * PENALTY);
-//            }
-//        }
-//        evaluationCounter++;
-//    }
 
     @Override
     public void evaluate(DoubleSolution solution) {
-        solution = dspsp.evaluateObjectives(solution);
-        evaluationCounter++;
-    }
-
-    private void evaluateConstraints(DoubleSolution solution) {
-        Integer violated = dspsp.getNumberOfViolatedConstraints(solution);
-        numberOfViolatedConstraints.setAttribute(solution, violated);
-        overallConstraintViolationDegree.setAttribute(solution, Double.valueOf(violated));
-    }
-
-    public int getEvaluationCounter() {
-        return evaluationCounter;
+//        long start = System.currentTimeMillis();
+        dspsp.evaluateObjectives(solution);
+//        System.out.println(System.currentTimeMillis() - start);
     }
 
     public DynamicProject getProject() {

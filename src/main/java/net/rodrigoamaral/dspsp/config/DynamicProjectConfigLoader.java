@@ -5,6 +5,7 @@ import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.project.events.EventType;
 import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
+import net.rodrigoamaral.dspsp.project.tasks.TaskManager;
 import net.rodrigoamaral.dspsp.util.instances.DynamicInstance;
 import net.rodrigoamaral.dspsp.util.instances.InstanceParser;
 import net.rodrigoamaral.spsp.project.Project;
@@ -57,7 +58,9 @@ public class DynamicProjectConfigLoader {
     private void loadAvailableDisconnectedTasks() {
         for (int t: project.getTaskPrecedenceGraph().getDisconnectedTasks()) {
             if (t < config.getTask_number()) {
-                project.getTaskByIndex(t).setAvailable(true);
+                DynamicTask newTask = project.getTaskByIndex(t);
+                boolean available = TaskManager.isAvailable(newTask, project.getEmployees(), project, project.getTaskPrecedenceGraph());
+                newTask.setAvailable(available);
             }
         }
     }
@@ -80,9 +83,16 @@ public class DynamicProjectConfigLoader {
 
     private DynamicTask loadTask(int taskIndex) {
         int taskId = taskIndex + 1;
-        double effort = config.getTask_effort_real_secnario_total().get(taskIndex);
+        double initialEstimatedEffort = config.getTask_effort_mu_total().get(taskIndex);
+        double realEffort = config.getTask_effort_mu_total().get(taskIndex);
+        double effortDeviation = config.getTask_effort_sigma_total().get(taskIndex);
         int maximumHeadcount = config.getTask_headcount_total().get(taskIndex);
-        return new DynamicTask(taskId, effort, taskIndex, maximumHeadcount);
+        return new DynamicTask(taskId,
+                               initialEstimatedEffort,
+                               realEffort,
+                               effortDeviation,
+                               taskIndex,
+                               maximumHeadcount);
     }
 
     private void loadTaskSkill(int taskIndex) {

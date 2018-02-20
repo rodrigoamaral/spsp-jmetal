@@ -12,7 +12,7 @@ public class RobustnessObjective implements IObjective {
 
     @Override
     public double evaluate(DynamicProject project, DedicationMatrix solution) {
-        return project.calculateRobustness(solution);
+        return project.calculateRobustness(solution, null);
     }
 
     @Override

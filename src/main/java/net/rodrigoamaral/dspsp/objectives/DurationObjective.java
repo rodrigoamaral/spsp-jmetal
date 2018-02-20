@@ -13,7 +13,7 @@ public class DurationObjective implements IObjective {
 
     @Override
     public double evaluate(DynamicProject project, DedicationMatrix solution) {
-        return project.calculateDuration(solution);
+        return project.evaluateEfficiency(solution).duration;
     }
 
     @Override

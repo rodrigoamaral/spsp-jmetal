@@ -9,7 +9,7 @@ import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 public class CostObjective implements IObjective {
     @Override
     public double evaluate(DynamicProject project, DedicationMatrix solution) {
-        return project.calculateCost(solution);
+        return project.evaluateEfficiency(solution).cost;
     }
 
     @Override
