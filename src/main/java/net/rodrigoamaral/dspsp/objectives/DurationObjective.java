@@ -5,7 +5,6 @@ import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
 public class DurationObjective implements IObjective {
 
-    // REVIEW: We're dismissing the influence of K in this implementation by setting it to 1. Is this correct?
     public static final int K = 1;
 
     @Override

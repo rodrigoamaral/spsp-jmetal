@@ -511,7 +511,6 @@ public class DynamicProject {
 
     public double calculateStability(DedicationMatrix solution) {
 
-//        REFACTOR: Avoid invoking calculateStability method for the initial scheduling
         if (previousSchedule == null) {
             return 0;
         }
