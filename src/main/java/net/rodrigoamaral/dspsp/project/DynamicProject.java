@@ -22,7 +22,6 @@ public class DynamicProject {
 
     public static final int SCENARIO_SAMPLE_SIZE = 30;
     public static final double ROBUSTNESS_COST_WEIGHT = 1;
-    // REVIEW: We're dismissing the influence of K in this implementation by setting it to 1. Is this correct?
     public static final int K = 1;
     private static final int CROB = 100;
     double totalDuration;
@@ -194,7 +193,6 @@ public class DynamicProject {
         // REFACTOR: lastSchedule should be a DedicationMatrix to avoid dependencies with jMetal
         setPreviousSchedule(lastSchedule);
         double partialDuration = updateFinishedEffort(availableEmployees, event.getTime());
-//        double partialDuration = updateFinishedEffort(activeTasks, availableEmployees);
         updateCurrentStatus(event);
         setLastSchedulingTime(event.getTime());
         return partialDuration;
@@ -241,22 +239,12 @@ public class DynamicProject {
         } else if (event.getType() == EventType.EMPLOYEE_RETURN) {
             getEmployeeById(id).setAvailable(true);
         }
-//        availableEmployees = filterAvailableEmployees();
     }
 
     private void updateTaskAvailability(DynamicEvent event) {
-//        checkTaskAvailabilityCriteria();
         List<Integer> incomingTasksIDs = getIncomingTasks(event);
         makeTasksAvailable(incomingTasksIDs, event);
-//        availableTasks = filterAvailableTasks();
     }
-//
-//    private void checkTaskAvailabilityCriteria() {
-//        for (DynamicTask task: availableTasks) {
-//            boolean available = TaskManager.isAvailable(task, availableEmployees, this);
-//            task.setAvailable(available);
-//        }
-//    }
 
     private void makeTasksAvailable(List<Integer> incomingTaskIDs, DynamicEvent event) {
         int urgentTaskIndex = -1;
@@ -391,7 +379,6 @@ public class DynamicProject {
                         ////
                         SPSPLogger.debug("Local task " + localTask +" COMPLETE");
                         ////
-//                        task.setAvailable(false);
                         localTPG.remove(localTask.index());
                         localAvailableTasks.remove(localTask);
                     }
@@ -482,50 +469,11 @@ public class DynamicProject {
         return result;
     }
 
-
-//    public double calculateDuration(DedicationMatrix dm) {
-//        // REVIEW: Does the paper consider only the ACTIVE tasks???
-////        return calculateDuration(dm, availableTasks, getEmployees(), getTaskPrecedenceGraph());
-//        return calculateDuration(dm, activeTasks, getEmployees(), getTaskPrecedenceGraph());
-//    }
-//
-//    public double calculateDuration(DedicationMatrix dm, List<DynamicTask> tasks_, List<DynamicEmployee> employees_, DynamicTaskPrecedenceGraph tpg_) {
-//        tasks_ = fillTasksStartAndFinish(dm, tasks_, employees_, tpg_);
-//        double duration = 0;
-//        for (DynamicTask t: tasks_) {
-//            duration = Math.max(duration, t.getFinish());
-//        }
-//        return duration;
-//    }
-
     private double taskCostByEmployee(DynamicEmployee e, DynamicTask t, DedicationMatrix solution, double duration) {
         double employeeDedication = solution.getDedication(e.index(), t.index());
         double regularCost = e.getSalary() * employeeDedication * duration;
         return regularCost + getOvertimeCost(e, employeeDedication - 1, duration);
     }
-
-//    public double calculateCost(DedicationMatrix solution) {
-//        calculateDuration(solution);
-//        double projectCost = 0;
-//        for (DynamicEmployee e: getEmployees()) {
-//            for (DynamicTask t: availableTasks) {
-//                projectCost += taskCostByEmployee(e, t, solution);
-//            }
-//        }
-//        return projectCost;
-//    }
-
-//    public double calculateCost(DedicationMatrix solution, List<DynamicTask> tasks_, List<DynamicEmployee> employees_, DynamicTaskPrecedenceGraph tpg_) {
-//        calculateDuration(solution, tasks_, employees_, tpg_);
-//        double projectCost = 0;
-//        for (DynamicEmployee e: employees_) {
-//            for (DynamicTask t: tasks_) {
-//                projectCost += taskCostByEmployee(e, t, solution);
-//            }
-//        }
-//        return projectCost;
-//    }
-
 
     private double getOvertimeCost(DynamicEmployee e, double overdedication, double duration) {
         double overtimeCost = e.getOvertimeSalary() * overdedication * duration;
@@ -543,7 +491,6 @@ public class DynamicProject {
 
     public double calculateRobustness(DedicationMatrix solution, Efficiency efficiency) {
 
-//        System.out.println("DynamicProject.calculateRobustness");
         List<Double> durationDistances = new ArrayList<>();
         List<Double> costDistances = new ArrayList<>();
 

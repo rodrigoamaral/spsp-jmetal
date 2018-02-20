@@ -15,12 +15,12 @@ public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee imp
 
     public DynamicEmployee(int id, float salary) {
         super(id, salary);
-        skillsProficiency = new ArrayList();
+        skillsProficiency = new ArrayList<>();
     }
 
     public DynamicEmployee(int id, float salary, float _overtimeSalary, int originalIndex) {
         super(id, salary);
-        skillsProficiency = new ArrayList();
+        skillsProficiency = new ArrayList<>();
         overtimeSalary = _overtimeSalary;
         this.originalIndex = originalIndex;
     }
@@ -40,7 +40,7 @@ public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee imp
         return skillsProficiency;
     }
 
-    public void setSkillsProficiency(List skillsProficiency) {
+    public void setSkillsProficiency(List<Double> skillsProficiency) {
         this.skillsProficiency = skillsProficiency;
     }
 

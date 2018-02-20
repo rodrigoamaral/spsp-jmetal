@@ -3,9 +3,6 @@ package net.rodrigoamaral.dspsp.objectives;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
-/**
- * Created by rodrigo on 08/03/17.
- */
 public class DurationObjective implements IObjective {
 
     // REVIEW: We're dismissing the influence of K in this implementation by setting it to 1. Is this correct?

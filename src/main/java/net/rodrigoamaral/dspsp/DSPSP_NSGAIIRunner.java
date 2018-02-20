@@ -90,7 +90,6 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
                 break;
             }
 
-//            SPSPLogger.info("\nRescheduling "+ reschedulings + " : " + event.description());
             SPSPLogger.rescheduling(reschedulings, event);
             SchedulingResult result = reschedule(project, event, currentSchedule);
 
@@ -113,9 +112,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         SPSPLogger.info("Total execution time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
 
         printFinalSolutionSet(population);
-//        if (!refPF.equals("")) {
-//            printQualityIndicators(population, refPF) ;
-//        }
+
     }
 
     private static SchedulingResult reschedule(DynamicProject project,
@@ -218,7 +215,6 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
             algorithm = new DSPSP_NSGAIIBuilder<>(problem, crossover, mutation)
                     .setSelectionOperator(selection)
                     .setMaxEvaluations(2500)
-//                    .setMaxEvaluations(25000)
                     .setPopulationSize(100)
                     .build() ;
             return this;

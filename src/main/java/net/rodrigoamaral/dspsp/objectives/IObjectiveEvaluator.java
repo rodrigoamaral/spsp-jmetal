@@ -3,7 +3,6 @@ package net.rodrigoamaral.dspsp.objectives;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
-import java.util.List;
 import java.util.Map;
 
 /**

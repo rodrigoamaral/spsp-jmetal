@@ -19,7 +19,6 @@ public class DedicationMatrix {
         for (int i = 0; i < employees; i++) {
             for (int j = 0; j < tasks; j++) {
                 matrix[i][j] = 0;
-//                matrix[i][j] = Math.random();
             }
         }
     }
@@ -51,14 +50,6 @@ public class DedicationMatrix {
         }
         return taskDedication;
     }
-
-//    public void reset() {
-//        for (int i = 0; i < employees; i++) {
-//            for (int j = 0; j < tasks; j++) {
-//                matrix[i][j] = 0;
-//            }
-//        }
-//    }
 
     public static void main(String[] args) {
         DedicationMatrix dm = new DedicationMatrix(3, 3);

@@ -4,14 +4,12 @@ import net.rodrigoamaral.dspsp.adapters.JMetalDSPSPAdapter;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
-import org.uma.jmetal.util.solutionattribute.impl.NumberOfViolatedConstraints;
-import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 
 import java.io.FileNotFoundException;
 
 /**
  *
- * Wraps our MODPSP model as a jMetal DoubleProblem.
+ * Wraps MODPSP model as a jMetal DoubleProblem.
  *
  * @author Rodrigo Amaral
  *
@@ -41,9 +39,7 @@ public class DSPSProblem extends AbstractDoubleProblem {
 
     @Override
     public void evaluate(DoubleSolution solution) {
-//        long start = System.currentTimeMillis();
         dspsp.evaluateObjectives(solution);
-//        System.out.println(System.currentTimeMillis() - start);
     }
 
     public DynamicProject getProject() {

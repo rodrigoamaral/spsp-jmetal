@@ -3,11 +3,17 @@ package net.rodrigoamaral.dspsp.cli;
 import net.rodrigoamaral.logging.SPSPLogger;
 import org.apache.commons.cli.*;
 
+/**
+ * Provides a command line inteface to the program
+ *
+ * @author Rodrigo Amaral
+ */
 public class CLI {
 
     private String instanceInputFile;
 
     public CLI(String[] args) throws ParseException {
+
         Options options = new Options();
         options.addOption("h", "help", false, "Show this help");
         options.addOption("d", "debug", false, "Set debug logging level");

@@ -6,7 +6,6 @@ public class DynamicEvent {
     private double time;
     private EventType type;
     private IEventSubject subject;
-//    private double arrivalTime;
 
     public DynamicEvent() { }
 
@@ -15,7 +14,6 @@ public class DynamicEvent {
         this.time = time;
         this.type = type;
         this.subject = subject;
-//        this.arrivalTime =  arrivalTime;
     }
 
     public int getId() {
@@ -50,14 +48,6 @@ public class DynamicEvent {
         this.subject = subject;
     }
 
-//    public double getArrivalTime() {
-//        return arrivalTime;
-//    }
-//
-//    public void setArrivalTime(double arrivalTime) {
-//        this.arrivalTime = arrivalTime;
-//    }
-
     @Override
     public String toString() {
         return "DynamicEvent{" +
@@ -65,7 +55,6 @@ public class DynamicEvent {
                 ", time=" + time +
                 ", type=" + type +
                 ", subject=" + subject +
-//                ", arrivalTime=" + arrivalTime +
                 '}';
     }
 
