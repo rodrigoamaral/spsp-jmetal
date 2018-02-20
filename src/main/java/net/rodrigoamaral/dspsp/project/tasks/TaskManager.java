@@ -17,14 +17,13 @@ public class TaskManager {
 
     public static boolean isAvailable(DynamicTask task,
                                       List<DynamicEmployee> employees,
-                                      DynamicProject project) {
+                                      DynamicProject project, DynamicTaskPrecedenceGraph tpg) {
         return (!task.isFinished()) &&
                 (missingSkills(task, employees) == 0) &&
-                (employeesHaveAllSkillsForPredecessors(task, employees, project));
+                (employeesHaveAllSkillsForPredecessors(task, employees, project, tpg));
     }
 
-    private static boolean employeesHaveAllSkillsForPredecessors(DynamicTask task, List<DynamicEmployee> employees, DynamicProject project) {
-        DynamicTaskPrecedenceGraph tpg = project.getTaskPrecedenceGraph();
+    private static boolean employeesHaveAllSkillsForPredecessors(DynamicTask task, List<DynamicEmployee> employees, DynamicProject project, DynamicTaskPrecedenceGraph tpg) {
 
         for (Integer t: tpg.getTaskPredecessors(task.index())) {
             DynamicTask predecessor = project.getTaskByIndex(t);
@@ -45,23 +44,19 @@ public class TaskManager {
         return effort;
     }
 
-    public static double generateRemainingEffort(DynamicTask task,
-                                                 List<DynamicEmployee> employees,
-                                                 DedicationMatrix solution) {
+    public static double generateEffortSample(DynamicTask task) {
 
-        double mean = adjustedEffort(solution, task);
+        double mean = task.getEffort();
         double sd = task.getEffortDeviation();
 
         NormalDistribution nd = new NormalDistribution(mean, sd);
         double totalEffort = nd.sample();
 
-        FinishedEffort fe = getFinishedEffort(task, employees, solution);
-
-        while (!validEffortValue(totalEffort, fe.effort)) {
+        while (!validEffortValue(totalEffort, task.getFinishedEffort())) {
             totalEffort = nd.sample();
         }
 
-        return totalEffort - fe.effort;
+        return totalEffort;
     }
 
     public static double sampleEstimatedEffort(DynamicTask task) {
@@ -77,17 +72,16 @@ public class TaskManager {
         return totalDedication;
     }
 
-    static public FinishedEffort getFinishedEffort(DynamicTask task,
-                                                   List<DynamicEmployee> employees,
-                                                   DedicationMatrix solution) {
+    static public EffortParameters getEffortProperties(DynamicTask task,
+                                                       List<DynamicEmployee> employees,
+                                                       DedicationMatrix solution) {
 
         double totalDedication = totalDedication(task,  employees, solution);
         double totalFitness = totalFitness(task, employees, solution, totalDedication);
         double costDriveValue = costDriveValue(totalFitness);
         double timeSpent = timeSpent(task, costDriveValue, totalDedication);
-        double finishedEffort = task.getFinishedEffort() + totalDedication * timeSpent / costDriveValue;
 
-        return new FinishedEffort(task.index(), totalDedication, totalFitness, costDriveValue, timeSpent, finishedEffort);
+        return new EffortParameters(task.index(), totalDedication, totalFitness, costDriveValue, timeSpent);
     }
 
     static public double costDriveValue(double totalFitness) {
@@ -118,7 +112,7 @@ public class TaskManager {
     static public double totalFitness(DynamicProject project, DynamicTask task, List<DynamicEmployee> employees, DedicationMatrix solution, double totalDedication) {
         double totalProficiency = 0;
         for (DynamicEmployee e: employees) {
-            totalProficiency += taskProficiency(project, task, e) * solution.getDedication(e.index(), task.index());
+            totalProficiency += (taskProficiency(project, task, e) * solution.getDedication(e.index(), task.index()));
         }
         return totalProficiency / totalDedication;
     }

@@ -4,13 +4,14 @@ import net.rodrigoamaral.dspsp.config.DynamicProjectConfigLoader;
 import net.rodrigoamaral.dspsp.objectives.*;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.constraints.*;
-import net.rodrigoamaral.dspsp.project.tasks.TaskManager;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
+import net.rodrigoamaral.logging.SPSPLogger;
 import org.uma.jmetal.solution.DoubleSolution;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -23,12 +24,21 @@ import java.util.List;
  */
 public class JMetalDSPSPAdapter {
 
+    public static final int DURATION = 0;
+    public static final int COST = 1;
+    public static final int ROBUSTNESS = 2;
+    public static final int STABILITY = 3;
+
+    public static final int[] STATIC_OBJECTIVES = {DURATION, COST, ROBUSTNESS};
+    public static final int[] DYNAMIC_OBJECTIVES = {DURATION, COST, ROBUSTNESS, STABILITY};
+
     private static final String problemName = "DSPSP";
     private DynamicProject project;
     private static final double LOWER_LIMIT = 0.0;
     private static final double UPPER_LIMIT = 1.0;
     private static final double MAX_OVERWORK = 0.2;
-    private IObjectiveEvaluator objectiveEvaluator;
+
+    private int[] objectives;
     private IConstraintEvaluator constraintEvaluator;
 
     private SolutionConverter converter;
@@ -47,15 +57,11 @@ public class JMetalDSPSPAdapter {
 
     public JMetalDSPSPAdapter(DynamicProject project) {
         this.project = project;
-        init();
+        initDynamic();
     }
 
     private void init() {
-        this.objectiveEvaluator = new DSPSPObjectiveEvaluator()
-                .addObjective(new DurationObjective())
-                .addObjective(new CostObjective())
-                .addObjective(new RobustnessObjective())
-                .addObjective(new StabilityObjective());
+        this.objectives = STATIC_OBJECTIVES;
         this.constraintEvaluator = new DSPSPConstraintEvaluator()
                 .addConstraint(new NoEmployeeOverworkConstraint())
                 .addConstraint(new AllTasksAllocatedConstraint())
@@ -63,6 +69,11 @@ public class JMetalDSPSPAdapter {
                 .addConstraint(new TaskSkillsConstraint())
                 ;
         this.converter = new SolutionConverter(this.project);
+    }
+
+    private void initDynamic() {
+        init();
+        this.objectives = DYNAMIC_OBJECTIVES;
     }
 
     public DynamicProject getProject() {
@@ -78,11 +89,7 @@ public class JMetalDSPSPAdapter {
     }
 
     public int getNumberOfObjectives() {
-        return objectiveEvaluator.size();
-    }
-
-    public List<IObjective> getObjectives() {
-        return objectiveEvaluator.getObjectives();
+        return objectives.length;
     }
 
     private List<Double> populateLimitList(double value) {
@@ -101,13 +108,6 @@ public class JMetalDSPSPAdapter {
         return populateLimitList(UPPER_LIMIT + MAX_OVERWORK);
     }
 
-//    public double evaluateObjective(int i, DoubleSolution solution) {
-//        DedicationMatrix dm = repair(solution);
-//        double evaluation = objectiveEvaluator.evaluate(i, project, dm);
-//        evaluation = penalizeObjective(evaluation, dm);
-//        return evaluation;
-//    }
-
     /**
      * Evaluates all objectives registered by the objectiveEvaluator in the
      * constructor. Before evaluation, it repairs the solution according to
@@ -119,18 +119,41 @@ public class JMetalDSPSPAdapter {
      * @return repaired solution
      */
     public DoubleSolution evaluateObjectives(DoubleSolution solution) {
+
         DedicationMatrix dm = repair(solution);
         int missingSkills = missingSkills();
+
         if (missingSkills > 0) {
-            for (int i = 0; i < getNumberOfObjectives(); i++) {
-                solution.setObjective(i, penalizeObjective(i, dm, missingSkills));
+
+            solution.setObjective(DURATION, project.penalizeDuration(missingSkills));
+            solution.setObjective(COST, project.penalizeCost(missingSkills));
+            solution.setObjective(ROBUSTNESS, project.penalizeRobustness(missingSkills));
+
+            if (project.getPreviousSchedule() != null) {
+                solution.setObjective(STABILITY, project.penalizeStability(missingSkills));
             }
+
         } else {
-            for (int i = 0; i < getNumberOfObjectives(); i++) {
-                double evaluation = objectiveEvaluator.evaluate(i, project, dm);
-                solution.setObjective(i, evaluation);
+
+
+//            System.out.println("\nJMetalDSPSPAdapter.evaluateObjectives");
+            Efficiency efficiency = project.evaluateEfficiency(dm);
+
+
+
+            double robustness = project.calculateRobustness(dm, efficiency);
+
+
+            solution.setObjective(DURATION, efficiency.duration);
+            solution.setObjective(COST, efficiency.cost);
+            solution.setObjective(ROBUSTNESS, robustness);
+
+            if (project.getPreviousSchedule() != null) {
+                double stability = project.calculateStability(dm);
+                solution.setObjective(STABILITY, stability);
             }
         }
+
         return solution;
     }
 
@@ -138,18 +161,13 @@ public class JMetalDSPSPAdapter {
         return constraintEvaluator.repair(converter.convert(solution), project);
     }
 
-//    private double penalizeObjective(double evaluation, DedicationMatrix dm) {
-////        return objectiveEvaluator.penalize(evaluation, dm, project);
-//        return 0;
+//    public Double getConstraintViolationDegree(DoubleSolution solution) {
+//        return constraintEvaluator.overallConstraintViolationDegree(project, converter.convert(solution));
 //    }
-
-    public Double getConstraintViolationDegree(DoubleSolution solution) {
-        return constraintEvaluator.overallConstraintViolationDegree(project, converter.convert(solution));
-    }
-
-    public Integer getNumberOfViolatedConstraints(DoubleSolution solution) {
-        return constraintEvaluator.numberOfViolatedConstraints(project, converter.convert(solution));
-    }
+//
+//    public Integer getNumberOfViolatedConstraints(DoubleSolution solution) {
+//        return constraintEvaluator.numberOfViolatedConstraints(project, converter.convert(solution));
+//    }
 
     public int getNumberOfConstraints() {
         return constraintEvaluator.size();
@@ -159,11 +177,4 @@ public class JMetalDSPSPAdapter {
         return project.missingSkills();
     }
 
-    public double penalizeObjective(int objectiveIndex, DoubleSolution solution, int missingSkills) {
-        return getObjectives().get(objectiveIndex).penalize(project, converter.convert(solution), missingSkills);
-    }
-
-    public double penalizeObjective(int objectiveIndex, DedicationMatrix dm, int missingSkills) {
-        return getObjectives().get(objectiveIndex).penalize(project, dm, missingSkills);
-    }
 }

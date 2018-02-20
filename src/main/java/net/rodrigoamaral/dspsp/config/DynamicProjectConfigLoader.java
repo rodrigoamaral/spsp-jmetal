@@ -59,7 +59,7 @@ public class DynamicProjectConfigLoader {
         for (int t: project.getTaskPrecedenceGraph().getDisconnectedTasks()) {
             if (t < config.getTask_number()) {
                 DynamicTask newTask = project.getTaskByIndex(t);
-                boolean available = TaskManager.isAvailable(newTask, project.getEmployees(), project);
+                boolean available = TaskManager.isAvailable(newTask, project.getEmployees(), project, project.getTaskPrecedenceGraph());
                 newTask.setAvailable(available);
             }
         }

@@ -33,31 +33,10 @@ public class DSPSPConstraintEvaluator implements IConstraintEvaluator {
     }
 
     @Override
-    public double overallConstraintViolationDegree(DynamicProject project, DedicationMatrix s) {
-        double violationDegree = 0.0;
-        for (IConstraint c: constraints) {
-            violationDegree = violationDegree + c.violationDegree(project, s);
-        }
-        return violationDegree;
-    }
-
-    @Override
-    public int numberOfViolatedConstraints(DynamicProject project, DedicationMatrix s) {
-        int violatedConstraints = 0;
-        for (IConstraint c: constraints) {
-            if (c.isViolated(project, s)) {
-                violatedConstraints++;
-            }
-        }
-        return violatedConstraints;
-    }
-
-    @Override
     public DedicationMatrix repair(DedicationMatrix dm, DynamicProject project) {
         for (IConstraint c: constraints) {
             dm = c.repair(dm, project);
         }
-//        System.out.println("Solution " + dm);
 
         return dm;
     }

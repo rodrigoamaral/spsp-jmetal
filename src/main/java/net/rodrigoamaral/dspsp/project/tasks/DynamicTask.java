@@ -3,6 +3,8 @@ package net.rodrigoamaral.dspsp.project.tasks;
 
 import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 
+import java.util.ArrayList;
+
 public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements IEventSubject {
     private double realEffort;
     private double effortDeviation;
@@ -35,8 +37,10 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
          this.setStart(task.getStart());
          this.setFinish(task.getFinish());
          this.setFinishedEffort(task.getFinishedEffort());
+         this.setSkills(new ArrayList<>(task.getSkills()));
          this.originalIndex = task.index();
          this.maximumHeadcount = task.getMaximumHeadcount();
+         this.available = task.isAvailable();
      }
 
     public double getRealEffort() {
@@ -68,6 +72,9 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
     }
 
     public void addFinishedEffort(double effort) {
+        if (effort < 0) {
+            throw new IllegalArgumentException("Task " + this.index() + ": Finished effort value must be positive or zero.");
+        }
         this.finishedEffort += effort;
     }
 
@@ -85,6 +92,10 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
 
     public double getRemainingEffort() {
         return getRealEffort() - getFinishedEffort();
+    }
+
+    public double finishedEffortRatio() {
+        return getFinishedEffort() / getRealEffort();
     }
 
     public int getMaximumHeadcount() {

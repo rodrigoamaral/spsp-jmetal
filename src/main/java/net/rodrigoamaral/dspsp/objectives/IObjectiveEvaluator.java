@@ -4,6 +4,7 @@ import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -14,8 +15,9 @@ import java.util.List;
  *
  */
 public interface IObjectiveEvaluator {
-    IObjectiveEvaluator addObjective(IObjective objective);
-    List<IObjective> getObjectives();
+    IObjectiveEvaluator addObjective(Integer key, IObjective objective);
+    Map<Integer, IObjective> getObjectives();
+    IObjective get(Integer key);
     double evaluate(int index, DynamicProject project, DedicationMatrix solution);
     int size();
 }
