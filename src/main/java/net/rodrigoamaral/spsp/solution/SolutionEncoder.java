@@ -15,14 +15,4 @@ public class SolutionEncoder {
         return employees * tasks;
     }
 
-    public int encode(int employee, int task) {
-        return (employee * this.tasks) + task;
-    }
-
-    //    private void populateFakeSolution() {
-//        for (int i = 0; i < dedicationMatrix.length; i++) {
-//            dedicationMatrix[i] = Math.random();
-//        }
-//    }
-
 }

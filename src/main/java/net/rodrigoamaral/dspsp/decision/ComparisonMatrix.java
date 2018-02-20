@@ -113,11 +113,4 @@ public class ComparisonMatrix {
         return sb.toString();
     }
 
-    public static void main(String[] args) {
-        ComparisonMatrix m = new ComparisonMatrix();
-        System.out.println(m);
-        System.out.println("Initial weights: " + Arrays.toString(m.initialWeights()));
-        System.out.println("Rescheduling weights: " + Arrays.toString(m.reschedulingWeights()));
-    }
-
 }

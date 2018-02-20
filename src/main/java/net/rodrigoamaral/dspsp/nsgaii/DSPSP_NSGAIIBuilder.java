@@ -22,7 +22,7 @@ import java.util.List;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public class DSPSP_NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NSGAII<S>> {
-    public enum NSGAIIVariant {NSGAII, SteadyStateNSGAII, Measures, NSGAII45}
+    public enum NSGAIIVariant {}
 
     /**
      * NSGAIIBuilder class
@@ -81,21 +81,6 @@ public class DSPSP_NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuil
         return this;
     }
 
-    public DSPSP_NSGAIIBuilder<S> setSolutionListEvaluator(SolutionListEvaluator<S> evaluator) {
-        if (evaluator == null) {
-            throw new JMetalException("evaluator is null");
-        }
-        this.evaluator = evaluator;
-
-        return this;
-    }
-
-
-    public DSPSP_NSGAIIBuilder<S> setVariant(NSGAIIBuilder.NSGAIIVariant variant) {
-        this.variant = variant;
-
-        return this;
-    }
 
     public NSGAII<S> build() {
         NSGAII<S> algorithm = null ;
@@ -113,32 +98,4 @@ public class DSPSP_NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuil
         return algorithm ;
     }
 
-    /* Getters */
-    public Problem<S> getProblem() {
-        return problem;
-    }
-
-    public int getMaxIterations() {
-        return maxEvaluations;
-    }
-
-    public int getPopulationSize() {
-        return populationSize;
-    }
-
-    public CrossoverOperator<S> getCrossoverOperator() {
-        return crossoverOperator;
-    }
-
-    public MutationOperator<S> getMutationOperator() {
-        return mutationOperator;
-    }
-
-    public SelectionOperator<List<S>, S> getSelectionOperator() {
-        return selectionOperator;
-    }
-
-    public SolutionListEvaluator<S> getSolutionListEvaluator() {
-        return evaluator;
-    }
 }

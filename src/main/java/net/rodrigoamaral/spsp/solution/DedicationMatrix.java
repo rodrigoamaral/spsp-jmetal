@@ -39,31 +39,4 @@ public class DedicationMatrix {
         return matrix[employee][task];
     }
 
-    public double[] getEmployeeDedication(int employee) {
-        return matrix[employee];
-    }
-
-    public double[] getTaskDedication(int task) {
-        double[] taskDedication = new double[employees];
-        for (int i = 0; i < tasks; i++) {
-            taskDedication[i] = matrix[i][task];
-        }
-        return taskDedication;
-    }
-
-    public static void main(String[] args) {
-        DedicationMatrix dm = new DedicationMatrix(3, 3);
-        System.out.println("\n>>> By DynamicEmployee\n");
-        for (int i = 0; i < dm.getEmployees(); i++) {
-            for (int j = 0; j < dm.getTasks(); j++) {
-                System.out.println("DynamicEmployee " + i +",  DynamicTask " + j +" = " + dm.getEmployeeDedication(i)[j]);
-            }
-        }
-        System.out.println("\n>>> By DynamicTask\n");
-        for (int j = 0; j < dm.getTasks(); j++) {
-            for (int i = 0; i < dm.getEmployees(); i++) {
-                System.out.println("DynamicTask " + j +", DynamicEmployee " + i +" = " + dm.getTaskDedication(j)[i]);
-            }
-        }
-    }
 }

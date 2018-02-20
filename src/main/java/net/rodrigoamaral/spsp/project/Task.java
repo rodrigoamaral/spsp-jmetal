@@ -26,10 +26,6 @@ public class Task {
         this.skills =  new ArrayList<>();
     }
 
-    public Task(int id) {
-        this.id = id;
-    }
-
     public int getId() {
         return id;
     }

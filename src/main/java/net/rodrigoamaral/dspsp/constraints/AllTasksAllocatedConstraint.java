@@ -10,10 +10,6 @@ import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
  */
 public class AllTasksAllocatedConstraint implements IConstraint {
 
-    public double violationDegree(DynamicProject p, DedicationMatrix dm) {
-        return 0;
-    }
-
     @Override
     public DedicationMatrix repair(DedicationMatrix dm, DynamicProject project) {
         for (DynamicEmployee employee: project.getAvailableEmployees()) {

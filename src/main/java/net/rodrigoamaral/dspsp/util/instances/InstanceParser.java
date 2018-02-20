@@ -25,12 +25,5 @@ public class InstanceParser {
         return di;
     }
 
-    public static void main(String[] args) {
-        InstanceParser parser = new InstanceParser();
-        List<DynamicInstance> instances = new ArrayList<>();
-        for (int i = 1; i <= 18; i++) {
-            instances.add(parser.parse("project-conf/dynamic/dynamic_example_new" + i + ".json"));
-        }
-    }
 
 }

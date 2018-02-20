@@ -20,12 +20,6 @@ public class SolutionConverter {
         tasks = _project.getTasks().size();
     }
 
-    public SolutionConverter(int _employees, int _tasks) {
-        employees = _employees;
-        tasks = _tasks;
-    }
-
-
     /**
      * Converts a {@link DoubleSolution} into a {@link DedicationMatrix}.
      *
