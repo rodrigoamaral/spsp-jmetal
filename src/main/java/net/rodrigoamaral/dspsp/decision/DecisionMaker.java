@@ -21,9 +21,9 @@ public class DecisionMaker {
     final private ComparisonMatrix cm;
     final static private double ALPHA = 0.001;
 
-    public DecisionMaker(List<DoubleSolution> schedules_, ComparisonMatrix cm) throws Exception {
+    public DecisionMaker(List<DoubleSolution> schedules_, ComparisonMatrix cm) {
         if (schedules_ == null || schedules_.size() < 1) {
-           throw new Exception("Schedule list cannot be null or empty");
+           throw new IllegalArgumentException("Schedule list cannot be null or empty");
         }
         this.schedules = schedules_;
         this.cm = cm;

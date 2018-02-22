@@ -33,7 +33,7 @@ public class DynamicProjectConfigLoader {
         config = loadFromFile(configFile);
     }
 
-    private static DynamicInstance loadFromFile(String fileName) throws FileNotFoundException {
+    public static DynamicInstance loadFromFile(String fileName) throws FileNotFoundException {
         InstanceParser parser = new InstanceParser();
         return parser.parse(fileName);
     }
