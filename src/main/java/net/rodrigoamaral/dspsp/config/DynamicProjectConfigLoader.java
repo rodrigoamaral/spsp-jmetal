@@ -45,6 +45,7 @@ public class DynamicProjectConfigLoader {
      */
     public DynamicProject createProject() {
         project = new DynamicProject();
+        loadInstanceDescription();
         loadTasks();
         loadEmployees();
         loadTaskPrecedenceGraph(project.getTasks());
@@ -53,6 +54,17 @@ public class DynamicProjectConfigLoader {
         loadTaskProficiency();
         project.updateCurrentStatus();
         return project;
+    }
+
+    private void loadInstanceDescription() {
+        String description = String.format("sT%d_dT%d_E%d_SK%d-%d",
+                config.getTask_number(),
+                config.getNewtask_nmb(),
+                config.getEmployee_number(),
+                config.getEmployee_skill_min(),
+                config.getEmployee_skill_max()
+                );
+        project.setInstanceDescription(description);
     }
 
     private void loadAvailableDisconnectedTasks() {
@@ -148,17 +160,20 @@ public class DynamicProjectConfigLoader {
     }
 
     private void loadEventTimeline() {
+
         int numberOfEvents = config.getDynamic_time().size();
         List<DynamicEvent> events = new ArrayList<>(numberOfEvents);
+
         for (int i = 0; i < numberOfEvents; i++) {
+
             double time = config.getDynamic_time().get(i);
             int eventCode = config.getDynamic_class().get(i);
             int urgentTaskId = config.getDynamic_rushjob_number().get(i) + config.getTask_number();
             int leavingEmployeeId = config.getDynamic_labour_leave_number().get(i);
             int returningEmployeeId = config.getDynamic_labour_return_number().get(i);
-//            double arrivalTime = config.getArrival_time().get(i);
             EventType type = EventType.valueOf(eventCode);
             IEventSubject subject = null;
+
             switch (type) {
                 case NEW_URGENT_TASK:
                     subject = project.getTaskById(urgentTaskId);
@@ -170,6 +185,7 @@ public class DynamicProjectConfigLoader {
                     subject = project.getEmployeeById(returningEmployeeId);
                     break;
             }
+
             events.add(new DynamicEvent(i, time, type, subject));
         }
         project.setEvents(events);

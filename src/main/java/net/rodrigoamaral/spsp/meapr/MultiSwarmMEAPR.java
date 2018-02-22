@@ -6,13 +6,9 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
-import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
-import org.uma.jmetal.util.pseudorandom.JMetalRandom;
-import org.uma.jmetal.util.solutionattribute.impl.GenericSolutionAttribute;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class MultiSwarmMEAPR implements Algorithm {
@@ -20,37 +16,23 @@ public class MultiSwarmMEAPR implements Algorithm {
     private List<MEAPR> swarms;
     private DoubleProblem problem;
 
-    private double c1Max;
-    private double c1Min;
-
-    private double c2Max;
-    private double c2Min;
-    private double r1Max;
-    private double r1Min;
-    private double r2Max;
-    private double r2Min;
-    private double weightMax;
-    private double weightMin;
-    private double changeVelocity1;
-    private double changeVelocity2;
     private int swarmSize;
     private int numberOfSwarms;
 
     private int maxIterations;
     private int swapInterval;
-    private int iterations;
 
     private int archiveSize;
     private ArchiveType firstArchiveType;
     private ArchiveType secondArchiveType;
     private ArchiveType currentArchiveType;
 
-    private GenericSolutionAttribute<DoubleSolution, DoubleSolution> localBest;
-    private double[][] speed;
-
-    private JMetalRandom randomGenerator;
-
-    private Comparator<DoubleSolution> dominanceComparator;
+//    private GenericSolutionAttribute<DoubleSolution, DoubleSolution> localBest;
+//    private double[][] speed;
+//
+//    private JMetalRandom randomGenerator;
+//
+//    private Comparator<DoubleSolution> dominanceComparator;
 
     private MutationOperator<DoubleSolution> mutation;
 
@@ -85,25 +67,12 @@ public class MultiSwarmMEAPR implements Algorithm {
         this.currentArchiveType = firstArchiveType;
         this.globalArchive = new NonDominatedSolutionListArchive();
 
-        this.r1Max = r1Max;
-        this.r1Min = r1Min;
-        this.r2Max = r2Max;
-        this.r2Min = r2Min;
-        this.c1Max = c1Max;
-        this.c1Min = c1Min;
-        this.c2Max = c2Max;
-        this.c2Min = c2Min;
-        this.weightMax = weightMax;
-        this.weightMin = weightMin;
-        this.changeVelocity1 = changeVelocity1;
-        this.changeVelocity2 = changeVelocity2;
-
-        randomGenerator = JMetalRandom.getInstance();
+        //        randomGenerator = JMetalRandom.getInstance();
         this.evaluator = evaluator;
 
-        dominanceComparator = new DominanceComparator<DoubleSolution>();
-        localBest = new GenericSolutionAttribute<DoubleSolution, DoubleSolution>();
-        speed = new double[swarmSize][problem.getNumberOfVariables()];
+//        dominanceComparator = new DominanceComparator<DoubleSolution>();
+//        localBest = new GenericSolutionAttribute<DoubleSolution, DoubleSolution>();
+//        speed = new double[swarmSize][problem.getNumberOfVariables()];
 
         deltaMax = new double[problem.getNumberOfVariables()];
         deltaMin = new double[problem.getNumberOfVariables()];

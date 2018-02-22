@@ -10,16 +10,8 @@ import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Created by rodrigo on 07/03/17.
- */
 public class NoEmployeeOverworkConstraint implements IConstraint {
-    @Override
-    public boolean isViolated(DynamicProject project, DedicationMatrix dm) {
-        return violationDegree(project, dm) > 0;
-    }
 
-    @Override
     public double violationDegree(DynamicProject project, DedicationMatrix dm) {
         Collection<DynamicEmployee> employees = project.getAvailableEmployees();
         Collection<DynamicTask> tasks = project.getActiveTasks();

@@ -84,10 +84,6 @@ public class JMetalSPSPAdapter {
         return objectiveEvaluator.evaluate(i, project, converter.convert(solution));
     }
 
-    public Double getConstraintViolationDegree(DoubleSolution solution) {
-        return constraintEvaluator.overallConstraintViolationDegree(project, converter.convert(solution));
-    }
-
     public Integer getNumberOfViolatedConstraints(DoubleSolution solution) {
         return constraintEvaluator.numberOfViolatedConstraints(project, converter.convert(solution));
     }

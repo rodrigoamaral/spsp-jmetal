@@ -32,7 +32,6 @@ public class SolutionListOutput {
     private String funFileName = "FUN";
     private String separator = "\t";
     private List<? extends Solution<?>> solutionList;
-    private boolean selectFeasibleSolutions;
     private List<Boolean> isObjectiveToBeMinimized ;
 
     public SolutionListOutput(List<? extends Solution<?>> solutionList) {
@@ -41,7 +40,6 @@ public class SolutionListOutput {
         varFileContext.setSeparator(separator);
         funFileContext.setSeparator(separator);
         this.solutionList = solutionList;
-        selectFeasibleSolutions = false;
         isObjectiveToBeMinimized = null ;
     }
 
@@ -56,17 +54,6 @@ public class SolutionListOutput {
         funFileContext = fileContext;
         funFileContext.setSeparator(this.separator);
 
-        return this;
-    }
-
-    public SolutionListOutput setObjectiveMinimizingObjectiveList(List<Boolean> isObjectiveToBeMinimized) {
-        this.isObjectiveToBeMinimized = isObjectiveToBeMinimized ;
-
-        return this;
-    }
-
-    public SolutionListOutput selectFeasibleSolutions() {
-        selectFeasibleSolutions = true ;
         return this;
     }
 
@@ -164,21 +151,6 @@ public class SolutionListOutput {
         } catch (IOException e) {
             throw new JMetalException("Error printing objecives to file: ", e);
         }
-    }
-
-    /*
-     * Wrappers for printing with default configuration
-     */
-    public void printObjectivesToFile(String fileName) throws IOException {
-        printObjectivesToFile(new DefaultFileOutputContext(fileName), solutionList);
-    }
-
-    public void printObjectivesToFile(String fileName, List<Boolean> minimizeObjective) throws IOException {
-        printObjectivesToFile(new DefaultFileOutputContext(fileName), solutionList, minimizeObjective);
-    }
-
-    public void printVariablesToFile(String fileName) throws IOException {
-        printVariablesToFile(new DefaultFileOutputContext(fileName), solutionList);
     }
 
 }

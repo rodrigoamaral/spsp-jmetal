@@ -25,29 +25,5 @@ public class InstanceParser {
         return di;
     }
 
-    private DynamicInstance adjustIDs(DynamicInstance di) {
-        List<Integer> adjustedEmployeeIDs = new ArrayList<>();
-        List<Integer> adjustedTaskIDs = new ArrayList<>();
-
-        for (Integer e: di.getAvailable_employee()) {
-            adjustedEmployeeIDs.add(e - 1);
-        }
-
-        for (Integer t: di.getAvailable_task()) {
-            adjustedTaskIDs.add(t - 1);
-        }
-
-        di.setAvailable_employee(adjustedEmployeeIDs);
-        di.setAvailable_task(adjustedTaskIDs);
-        return di;
-    }
-
-    public static void main(String[] args) {
-        InstanceParser parser = new InstanceParser();
-        List<DynamicInstance> instances = new ArrayList<>();
-        for (int i = 1; i <= 18; i++) {
-            instances.add(parser.parse("project-conf/dynamic/dynamic_example_new" + i + ".json"));
-        }
-    }
 
 }

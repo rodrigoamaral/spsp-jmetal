@@ -61,7 +61,4 @@ public class SPSProblem extends AbstractDoubleProblem {
         overallConstraintViolationDegree.setAttribute(solution, Double.valueOf(violated));
     }
 
-    public int getEvaluationCounter() {
-        return evaluationCounter;
-    }
 }

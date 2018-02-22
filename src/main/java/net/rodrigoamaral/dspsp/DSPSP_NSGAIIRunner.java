@@ -31,32 +31,26 @@ import java.util.List;
 
 public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
-    private static int schedulings = 0;
-    private static double totalDuration = 0;
+    private static int reschedulings = 0;
 
     private static void incrementCounter() {
-        schedulings += 1;
+        reschedulings += 1;
     }
 
 
     public static void main(String[] args) throws Exception {
-
         final CLI cli = new CLI(args);
-
         String inputFile = cli.getInstanceInputFile();
-
-        SPSPLogger.info("Parsing instance file: " + inputFile);
-
         DSPSProblem problem = loadProjectInstance(inputFile);
 
-        SPSPLogger.info("Parsing complete. Performing initial scheduling...");
+        SPSPLogger.info("Parsing complete for instance " + problem.getInstanceDescription());
 
         run(problem);
     }
 
 
     private static void run(DSPSProblem problem) throws Exception {
-
+        SPSPLogger.info("Performing initial scheduling...");
         AlgorithmAssembler algorithmAssembler = new AlgorithmAssembler(problem).invoke();
         Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
         DynamicProject project = algorithmAssembler.getProject();
@@ -72,7 +66,6 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
         writeSolutionFile(population, "NSGA2", null);
 
-        incrementCounter();
 
         // Decides on the best initial schedule
         ComparisonMatrix comparisonMatrix = new ComparisonMatrix();
@@ -85,23 +78,24 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         DoubleSolution currentSchedule = initialSchedule;
         for (DynamicEvent event: reschedulingPoints) {
 
+            incrementCounter();
+
             if (project.isFinished()) {
                 break;
             }
 
-//            SPSPLogger.info("\nRescheduling "+ schedulings + " : " + event.description());
-            SPSPLogger.rescheduling(schedulings, event);
+            SPSPLogger.rescheduling(reschedulings, event);
             SchedulingResult result = reschedule(project, event, currentSchedule);
 
             totalComputingTime += result.getComputingTime();
 
-            SPSPLogger.info("Rescheduling "+ schedulings +" complete in " + DurationFormatUtils.formatDuration(result.getComputingTime(), "HH:mm:ss,SSS") + ". ");
+            SPSPLogger.info("Rescheduling "+ reschedulings +" complete in " + DurationFormatUtils.formatDuration(result.getComputingTime(), "HH:mm:ss,SSS") + ". ");
             SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
             SPSPLogger.info("Project current duration: " + project.getTotalDuration());
             SPSPLogger.info("Project current cost    : " + project.getTotalCost());
-            incrementCounter();
 
-            writeSolutionFile(result.getSchedules(), "NSGA2", event.getId());
+
+            writeSolutionFile(result.getSchedules(), "NSGA2", reschedulings);
 
             currentSchedule = new DecisionMaker(result.getSchedules(), comparisonMatrix).chooseNewSchedule();
 
@@ -112,16 +106,14 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         SPSPLogger.info("Total execution time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
 
         printFinalSolutionSet(population);
-//        if (!refPF.equals("")) {
-//            printQualityIndicators(population, refPF) ;
-//        }
+
     }
 
     private static SchedulingResult reschedule(DynamicProject project,
                                                DynamicEvent event,
                                                DoubleSolution lastSchedule) throws Exception {
 
-        totalDuration = project.update(event, lastSchedule);
+        project.update(event, lastSchedule);
 
         DSPSProblem problem = loadProjectInstance(project);
 
@@ -138,6 +130,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
     }
 
     private static DSPSProblem loadProjectInstance(String projectPropertiesFileName) throws FileNotFoundException {
+        SPSPLogger.info("Parsing instance file: " + projectPropertiesFileName);
         return new DSPSProblem(projectPropertiesFileName);
     }
 
@@ -160,12 +153,12 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
         SPSPLogger.info("Variables values file: " + varFile);
     }
 
-    public static void writeSolutionFile(List<? extends Solution<?>> population, String algorithm, Integer reschedulingId) {
+    public static void writeSolutionFile(List<? extends Solution<?>> population, String algorithm, Integer reschedulingCounter) {
         String varFile = "D_VAR_" + algorithm + ".initial.csv";
         String funFile = "D_FUN_" + algorithm + ".initial.csv";
-        if (reschedulingId != null) {
-            varFile = "D_VAR_" + algorithm + "." + reschedulingId + ".csv";
-            funFile = "D_FUN_" + algorithm + "." + reschedulingId + ".csv";
+        if (reschedulingCounter != null) {
+            varFile = "D_VAR_" + algorithm + "." + reschedulingCounter + ".csv";
+            funFile = "D_FUN_" + algorithm + "." + reschedulingCounter + ".csv";
         }
         new SolutionListOutput(population)
                 .setSeparator(";")
@@ -217,7 +210,6 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
             algorithm = new DSPSP_NSGAIIBuilder<>(problem, crossover, mutation)
                     .setSelectionOperator(selection)
                     .setMaxEvaluations(2500)
-//                    .setMaxEvaluations(25000)
                     .setPopulationSize(100)
                     .build() ;
             return this;

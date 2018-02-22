@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial"})
 public class DSPSP_NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
     protected final int maxEvaluations;
 
@@ -44,6 +44,7 @@ public class DSPSP_NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorith
 
         this.evaluator = evaluator;
     }
+
 
     @Override protected void initProgress() {
         evaluations = getMaxPopulationSize();

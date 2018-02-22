@@ -5,13 +5,11 @@ import net.rodrigoamaral.dspsp.objectives.*;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.constraints.*;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
-import net.rodrigoamaral.logging.SPSPLogger;
 import org.uma.jmetal.solution.DoubleSolution;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -44,7 +42,7 @@ public class JMetalDSPSPAdapter {
     private SolutionConverter converter;
 
     /**
-     * Creates a {@link DynamicProject} instance and all objectives and constraints
+     * Creates a {@link DynamicProject} instance and evaluate all objectives and constraints
      * needed for SPSP.
      *
      * @param configFile Relative path to the configuration file
@@ -135,14 +133,9 @@ public class JMetalDSPSPAdapter {
 
         } else {
 
-
-//            System.out.println("\nJMetalDSPSPAdapter.evaluateObjectives");
             Efficiency efficiency = project.evaluateEfficiency(dm);
 
-
-
             double robustness = project.calculateRobustness(dm, efficiency);
-
 
             solution.setObjective(DURATION, efficiency.duration);
             solution.setObjective(COST, efficiency.cost);
@@ -160,14 +153,6 @@ public class JMetalDSPSPAdapter {
     private DedicationMatrix repair(DoubleSolution solution) {
         return constraintEvaluator.repair(converter.convert(solution), project);
     }
-
-//    public Double getConstraintViolationDegree(DoubleSolution solution) {
-//        return constraintEvaluator.overallConstraintViolationDegree(project, converter.convert(solution));
-//    }
-//
-//    public Integer getNumberOfViolatedConstraints(DoubleSolution solution) {
-//        return constraintEvaluator.numberOfViolatedConstraints(project, converter.convert(solution));
-//    }
 
     public int getNumberOfConstraints() {
         return constraintEvaluator.size();

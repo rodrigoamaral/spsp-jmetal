@@ -30,10 +30,6 @@ public class Experimento {
 	private class Point {
 		double[] vector_;
 
-		public Point(double[] vector) {
-			vector_ = vector;
-		}
-
 		public Point(int size) {
 			vector_ = new double[size];
 			for (int i = 0; i < size; i++)

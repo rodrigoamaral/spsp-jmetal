@@ -24,7 +24,7 @@ public class DynamicTaskPrecedenceGraph {
     }
 
     public DynamicTaskPrecedenceGraph(DynamicTaskPrecedenceGraph tpg) {
-        visited = new Vector(tpg.visited);
+        visited = new Vector<>(tpg.visited);
         successors = new Vector<>();
         for (Vector<Integer> vs: tpg.successors) {
             successors.add(new Vector<>(vs));

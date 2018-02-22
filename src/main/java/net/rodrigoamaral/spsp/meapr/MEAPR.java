@@ -310,21 +310,4 @@ public class MEAPR extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
         }
     }
 
-    /* Getters */
-    public int getSwarmSize() {
-        return swarmSize;
-    }
-
-    public int getMaxIterations() {
-        return maxIterations;
-    }
-
-    public int getIterations() {
-        return iterations;
-    }
-
-    /* Setters */
-    public void setIterations(int iterations) {
-        this.iterations = iterations;
-    }
 } // MEAPR
