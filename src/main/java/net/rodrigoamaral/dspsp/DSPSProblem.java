@@ -45,4 +45,8 @@ public class DSPSProblem extends AbstractDoubleProblem {
     public DynamicProject getProject() {
         return dspsp.getProject();
     }
+
+    public String getInstanceDescription() {
+        return getProject().getInstanceDescription();
+    }
 }

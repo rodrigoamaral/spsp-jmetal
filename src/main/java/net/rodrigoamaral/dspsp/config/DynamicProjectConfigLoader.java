@@ -45,6 +45,7 @@ public class DynamicProjectConfigLoader {
      */
     public DynamicProject createProject() {
         project = new DynamicProject();
+        loadInstanceDescription();
         loadTasks();
         loadEmployees();
         loadTaskPrecedenceGraph(project.getTasks());
@@ -53,6 +54,17 @@ public class DynamicProjectConfigLoader {
         loadTaskProficiency();
         project.updateCurrentStatus();
         return project;
+    }
+
+    private void loadInstanceDescription() {
+        String description = String.format("sT%d_dT%d_E%d_SK%d-%d",
+                config.getTask_number(),
+                config.getNewtask_nmb(),
+                config.getEmployee_number(),
+                config.getEmployee_skill_min(),
+                config.getEmployee_skill_max()
+                );
+        project.setInstanceDescription(description);
     }
 
     private void loadAvailableDisconnectedTasks() {

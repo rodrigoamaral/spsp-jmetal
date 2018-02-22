@@ -39,23 +39,18 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
 
     public static void main(String[] args) throws Exception {
-
         final CLI cli = new CLI(args);
-
         String inputFile = cli.getInstanceInputFile();
-
-        SPSPLogger.info("Parsing instance file: " + inputFile);
-
         DSPSProblem problem = loadProjectInstance(inputFile);
 
-        SPSPLogger.info("Parsing complete. Performing initial scheduling...");
+        SPSPLogger.info("Parsing complete for instance " + problem.getInstanceDescription());
 
         run(problem);
     }
 
 
     private static void run(DSPSProblem problem) throws Exception {
-
+        SPSPLogger.info("Performing initial scheduling...");
         AlgorithmAssembler algorithmAssembler = new AlgorithmAssembler(problem).invoke();
         Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
         DynamicProject project = algorithmAssembler.getProject();
@@ -135,6 +130,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
     }
 
     private static DSPSProblem loadProjectInstance(String projectPropertiesFileName) throws FileNotFoundException {
+        SPSPLogger.info("Parsing instance file: " + projectPropertiesFileName);
         return new DSPSProblem(projectPropertiesFileName);
     }
 

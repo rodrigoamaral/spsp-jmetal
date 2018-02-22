@@ -40,6 +40,7 @@ public class DynamicProject {
     private DedicationMatrix previousSchedule;
     private double lastSchedulingTime;
     private List<Map<Integer, Double>> sampleEffortScenarios;
+    private String instanceDescription;
 
     public DynamicProject() {
         tasks = new ArrayList<>();
@@ -282,7 +283,7 @@ public class DynamicProject {
         List<DynamicTask> localAvailableTasks = cloneTasks(availableTasks);
 
         while ((!localTPG.isEmpty() || !localAvailableTasks.isEmpty()) && durationBelowCurrentTime) {
-
+//            System.out.println("localTPG.getIndependentTasks() = " + localTPG.getIndependentTasks());
             List<DynamicTask> localActiveTasks = filterActiveTasks(localTPG, localAvailableTasks);
 
             if (localActiveTasks.isEmpty()) {
@@ -710,5 +711,13 @@ public class DynamicProject {
 
     public double getTotalCost() {
         return totalCost;
+    }
+
+    public void setInstanceDescription(String instanceDescription) {
+        this.instanceDescription = instanceDescription;
+    }
+
+    public String getInstanceDescription() {
+        return instanceDescription;
     }
 }
