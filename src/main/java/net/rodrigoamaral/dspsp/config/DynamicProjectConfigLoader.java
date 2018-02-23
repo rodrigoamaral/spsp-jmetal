@@ -6,8 +6,8 @@ import net.rodrigoamaral.dspsp.project.events.EventType;
 import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
 import net.rodrigoamaral.dspsp.project.tasks.TaskManager;
-import net.rodrigoamaral.dspsp.util.instances.DynamicInstance;
-import net.rodrigoamaral.dspsp.util.instances.InstanceParser;
+import net.rodrigoamaral.dspsp.instances.DynamicInstance;
+import net.rodrigoamaral.dspsp.instances.InstanceParser;
 import net.rodrigoamaral.spsp.project.Project;
 
 import java.io.FileNotFoundException;
