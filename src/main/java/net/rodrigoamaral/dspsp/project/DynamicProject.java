@@ -157,7 +157,7 @@ public class DynamicProject {
      * @param lastSchedule
      * @param event
      */
-    public void update(DynamicEvent event, DoubleSolution lastSchedule) throws Exception {
+    public void update(DynamicEvent event, DoubleSolution lastSchedule) {
         // REFACTOR: lastSchedule should be a DedicationMatrix to avoid dependencies with jMetal
         setPreviousSchedule(lastSchedule);
         updateFinishedEffort(availableEmployees, event.getTime());

@@ -1,4 +1,4 @@
-package net.rodrigoamaral.dspsp.util.instances;
+package net.rodrigoamaral.dspsp.instances;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

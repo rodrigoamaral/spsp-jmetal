@@ -49,7 +49,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
     }
 
 
-    private static void run(DSPSProblem problem) throws Exception {
+    private static void run(DSPSProblem problem) {
         SPSPLogger.info("Performing initial scheduling...");
         AlgorithmAssembler algorithmAssembler = new AlgorithmAssembler(problem).invoke();
         Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
@@ -111,7 +111,7 @@ public class DSPSP_NSGAIIRunner extends AbstractAlgorithmRunner {
 
     private static SchedulingResult reschedule(DynamicProject project,
                                                DynamicEvent event,
-                                               DoubleSolution lastSchedule) throws Exception {
+                                               DoubleSolution lastSchedule) {
 
         project.update(event, lastSchedule);
 
