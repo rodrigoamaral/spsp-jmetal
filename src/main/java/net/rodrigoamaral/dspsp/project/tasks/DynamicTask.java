@@ -72,8 +72,8 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
     }
 
     public void addFinishedEffort(double effort) {
-        if (effort < 0) {
-            throw new IllegalArgumentException("Task " + this.index() + ": Finished effort value must be positive or zero.");
+        if (effort <= 0) {
+            throw new IllegalArgumentException("Task " + this.index() + ": Finished effort value must be greater than zero.");
         }
         this.finishedEffort += effort;
     }

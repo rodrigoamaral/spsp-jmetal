@@ -22,7 +22,6 @@ public class ExperimentCLI {
         Options options = new Options();
 
         options.addOption("h", "help", false, "Show this help");
-        options.addOption("d", "debug", false, "Set debug logging level");
         options.addOption("s", "settings", true, "Path to experiment settings JSON file");
 
         CommandLineParser cmdParser = new DefaultParser();
@@ -52,11 +51,6 @@ public class ExperimentCLI {
 
         final ExperimentSettingsParser parser = new ExperimentSettingsParser();
         this.experimentSettings = parser.parse(settingsFilename);
-
-        // Command line overrides settings file attibute
-        if (cmd.hasOption("d")) {
-            experimentSettings.setDebugMode(true);
-        }
     }
 
     public String[] getArgs() {

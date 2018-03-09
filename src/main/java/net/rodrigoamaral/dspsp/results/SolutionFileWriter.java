@@ -4,11 +4,13 @@ import net.rodrigoamaral.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 
+import java.io.File;
 import java.util.List;
 
 public class SolutionFileWriter {
     private static final String DEFAULT_SEPARATOR = ";";
     private static final String DEFAULT_EXT = ".csv";
+    public static final String RESULTS_DIR = "results";
 
     private final List<DoubleSolution> population;
     private String separator;
@@ -19,6 +21,12 @@ public class SolutionFileWriter {
     public SolutionFileWriter(final List<DoubleSolution> population) {
         this.population = population;
         this.separator = DEFAULT_SEPARATOR;
+        createResultsDirectory();
+    }
+
+    private void createResultsDirectory() {
+        File directory = new File(RESULTS_DIR);
+        directory.mkdir();
     }
 
     public SolutionFileWriter setAlgorithmID(final String algorithmID) {
@@ -44,6 +52,8 @@ public class SolutionFileWriter {
 
     private String getFilename(String type) {
             StringBuilder sb = new StringBuilder();
+            sb.append(RESULTS_DIR);
+            sb.append("/");
             sb.append(type);
             if (algorithmID != null) {
                 sb.append("-");

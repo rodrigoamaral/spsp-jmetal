@@ -26,3 +26,5 @@
 META-INF
 src/main/java/META-INF
 /project-conf/dynamic/
+/results/
+/logs/
