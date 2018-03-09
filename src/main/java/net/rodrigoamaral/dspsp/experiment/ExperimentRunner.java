@@ -3,7 +3,6 @@ package net.rodrigoamaral.dspsp.experiment;
 import net.rodrigoamaral.dspsp.DSPSProblem;
 import net.rodrigoamaral.dspsp.decision.ComparisonMatrix;
 import net.rodrigoamaral.dspsp.decision.DecisionMaker;
-import net.rodrigoamaral.dspsp.nsgaii.DSPSP_NSGAIIBuilder;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.results.SolutionFileWriter;
@@ -11,16 +10,8 @@ import net.rodrigoamaral.dspsp.solution.SchedulingResult;
 import net.rodrigoamaral.logging.SPSPLogger;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.uma.jmetal.algorithm.Algorithm;
-import org.uma.jmetal.operator.CrossoverOperator;
-import org.uma.jmetal.operator.MutationOperator;
-import org.uma.jmetal.operator.SelectionOperator;
-import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
-import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
-import org.uma.jmetal.operator.impl.selection.BinaryTournamentSelection;
-import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmRunner;
-import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -60,14 +51,14 @@ public class ExperimentRunner {
         return experimentSettings;
     }
 
-    private void runInstance(DSPSProblem problem) {
-        SPSPLogger.info("Starting simulation for instance " + problem.getInstanceDescription());
+    private void runInstance(DSPSProblem problem, AlgorithmAssembler assembler) {
+
+        SPSPLogger.info("Starting simulation -> algorithm: " + assembler.getAlgorithmID() + "; " +
+                                               "instance: " + problem.getInstanceDescription());
 
         SPSPLogger.info("Performing initial scheduling...");
 
-        AlgorithmAssembler algorithmAssembler = new AlgorithmAssembler(problem).invoke();
-        Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
-        DynamicProject project = algorithmAssembler.getProject();
+        Algorithm<List<DoubleSolution>> algorithm = assembler.assemble(problem);
 
         AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm).execute() ;
 
@@ -79,7 +70,7 @@ public class ExperimentRunner {
         SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
 
         new SolutionFileWriter(population)
-                .setAlgorithmID("nsga2")
+                .setAlgorithmID(assembler.getAlgorithmID())
                 .setInstanceID(problem.getInstanceDescription())
                 .write();
 
@@ -89,6 +80,7 @@ public class ExperimentRunner {
                 .chooseInitialSchedule();
 
         // Loops through rescheduling points
+        DynamicProject project = problem.getProject();
         List<DynamicEvent> reschedulingPoints = project.getEvents();
 
         DoubleSolution currentSchedule = initialSchedule;
@@ -104,7 +96,7 @@ public class ExperimentRunner {
 
             SPSPLogger.rescheduling(reschedulings, event);
 
-            SchedulingResult result = reschedule(project, event, currentSchedule);
+            SchedulingResult result = reschedule(project, event, currentSchedule, assembler);
 
             totalComputingTime += result.getComputingTime();
 
@@ -115,7 +107,7 @@ public class ExperimentRunner {
 
 
             new SolutionFileWriter(result.getSchedules())
-                    .setAlgorithmID("nsga2")
+                    .setAlgorithmID(algorithm.getName())
                     .setInstanceID(problem.getInstanceDescription())
                     .setReschedulingPoint(reschedulings)
                     .write();
@@ -130,15 +122,13 @@ public class ExperimentRunner {
         // TODO: Write final solution files
     }
 
-    private SchedulingResult reschedule(DynamicProject project, DynamicEvent event, DoubleSolution lastSchedule) {
+    private SchedulingResult reschedule(DynamicProject project, DynamicEvent event, DoubleSolution lastSchedule, AlgorithmAssembler assembler) {
+
         project.update(event, lastSchedule);
 
         DSPSProblem problem = loadProblemInstance(project);
 
-
-        AlgorithmAssembler algorithmAssembler = new AlgorithmAssembler(problem).invoke();
-        Algorithm<List<DoubleSolution>> algorithm = algorithmAssembler.getAlgorithm();
-
+        Algorithm<List<DoubleSolution>> algorithm = assembler.assemble(problem);
         AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
                 .execute();
 
@@ -147,63 +137,21 @@ public class ExperimentRunner {
                 problem.getProject().isFinished());
     }
 
-    private void run() {
+    /**
+     * Executes algorithms for each problem instance.
+     *
+     * Both instances and algorithms are passed in settings file loaded in
+     * experimentSettings.
+     *
+     */
+    public void run() {
         for (String instanceFile : experimentSettings.getInstanceFiles()) {
-            final DSPSProblem problem = loadProblemInstance(instanceFile);
-            runInstance(problem);
+            for (String algorithmID : experimentSettings.getAlgorithms()) {
+                final DSPSProblem problem = loadProblemInstance(instanceFile);
+                AlgorithmAssembler assembler = new AlgorithmAssembler(algorithmID);
+                runInstance(problem, assembler);
+            }
         }
     }
-
-    public static void main(String[] args) {
-        ExperimentCLI cli = new ExperimentCLI(args);
-        ExperimentRunner runner = new ExperimentRunner(cli.getExperimentSettings());
-        runner.run();
-    }
-
-    // REFACTOR: ExperimentRunner: check if AlgorithmAssembler can go outside this class
-//    private static class AlgorithmAssembler {
-//        private Problem<DoubleSolution> problem;
-//        private Algorithm<List<DoubleSolution>> algorithm;
-//        private DynamicProject project;
-//
-//        public AlgorithmAssembler(Problem<DoubleSolution> problem) {
-//            this.problem = problem;
-//        }
-//
-//        public Algorithm<List<DoubleSolution>> getAlgorithm() {
-//            return algorithm;
-//        }
-//
-//        public DynamicProject getProject() {
-//            return project;
-//        }
-//
-//        public ExperimentRunner.AlgorithmAssembler invoke() {
-//            CrossoverOperator<DoubleSolution> crossover;
-//            MutationOperator<DoubleSolution> mutation;
-//            SelectionOperator<List<DoubleSolution>, DoubleSolution> selection;
-//
-//            project = ((DSPSProblem) problem).getProject();
-//
-//            double crossoverProbability = 0.9 ;
-//            double crossoverDistributionIndex = 20.0 ;
-//
-//            crossover = new SBXCrossover(crossoverProbability, crossoverDistributionIndex) ;
-//
-//            double mutationProbability = 1.0 / problem.getNumberOfVariables() ;
-//            double mutationDistributionIndex = 20.0 ;
-//
-//            mutation = new PolynomialMutation(mutationProbability, mutationDistributionIndex) ;
-//
-//            selection = new BinaryTournamentSelection<>(new RankingAndCrowdingDistanceComparator<>());
-//
-//            algorithm = new DSPSP_NSGAIIBuilder<>(problem, crossover, mutation)
-//                    .setSelectionOperator(selection)
-//                    .setMaxEvaluations(2500)
-//                    .setPopulationSize(100)
-//                    .build() ;
-//            return this;
-//        }
-//    }
 
 }

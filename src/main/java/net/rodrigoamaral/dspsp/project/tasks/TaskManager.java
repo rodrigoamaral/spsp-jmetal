@@ -89,10 +89,16 @@ public class TaskManager {
     }
 
     static public double timeSpent(DynamicTask task, double costDriveValue, double totalDedication) {
+        if (totalDedication == 0) {
+            return 0;
+        }
         return task.getRemainingEffort() * costDriveValue / totalDedication;
     }
 
     static private double totalFitness(DynamicTask task, List<DynamicEmployee> employees, DedicationMatrix solution, double totalDedication) {
+        if (totalDedication == 0) {
+            return 0;
+        }
         double totalProficiency = 0;
         for (DynamicEmployee e: employees) {
             int id = e.index();

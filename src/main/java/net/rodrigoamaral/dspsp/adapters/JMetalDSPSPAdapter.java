@@ -1,10 +1,12 @@
 package net.rodrigoamaral.dspsp.adapters;
 
 import net.rodrigoamaral.dspsp.config.DynamicProjectConfigLoader;
+import net.rodrigoamaral.dspsp.exceptions.InvalidSolutionException;
 import net.rodrigoamaral.dspsp.objectives.*;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.constraints.*;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
+import net.rodrigoamaral.logging.SPSPLogger;
 import org.uma.jmetal.solution.DoubleSolution;
 
 import java.io.FileNotFoundException;
@@ -133,17 +135,29 @@ public class JMetalDSPSPAdapter {
 
         } else {
 
-            Efficiency efficiency = project.evaluateEfficiency(dm);
+            try {
+                Efficiency efficiency = project.evaluateEfficiency(dm);
+                double robustness = project.calculateRobustness(dm, efficiency);
 
-            double robustness = project.calculateRobustness(dm, efficiency);
+                solution.setObjective(DURATION, efficiency.duration);
+                solution.setObjective(COST, efficiency.cost);
+                solution.setObjective(ROBUSTNESS, robustness);
 
-            solution.setObjective(DURATION, efficiency.duration);
-            solution.setObjective(COST, efficiency.cost);
-            solution.setObjective(ROBUSTNESS, robustness);
+                if (project.getPreviousSchedule() != null) {
+                    double stability = project.calculateStability(dm);
+                    solution.setObjective(STABILITY, stability);
+                }
+            } catch (InvalidSolutionException e) {
 
-            if (project.getPreviousSchedule() != null) {
-                double stability = project.calculateStability(dm);
-                solution.setObjective(STABILITY, stability);
+                SPSPLogger.trace("Penalizing invalid solution: " + dm);
+
+                solution.setObjective(DURATION, project.penalizeDuration(1));
+                solution.setObjective(COST, project.penalizeCost(1));
+                solution.setObjective(ROBUSTNESS, project.penalizeRobustness(1));
+
+                if (project.getPreviousSchedule() != null) {
+                    solution.setObjective(STABILITY, project.penalizeStability(1));
+                }
             }
         }
 

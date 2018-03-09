@@ -19,5 +19,9 @@
     "project-conf/dynamic/dynamic_example_new16.json",
     "project-conf/dynamic/dynamic_example_new17.json",
     "project-conf/dynamic/dynamic_example_new18.json"
+  ],
+  "algorithms": [
+    "NSGAII",
+    "SMPSO"
   ]
 }

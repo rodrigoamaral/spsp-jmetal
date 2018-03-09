@@ -1,6 +1,7 @@
 package net.rodrigoamaral.dspsp.project;
 
 import net.rodrigoamaral.dspsp.adapters.SolutionConverter;
+import net.rodrigoamaral.dspsp.exceptions.InvalidSolutionException;
 import net.rodrigoamaral.dspsp.objectives.Efficiency;
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.project.events.EventType;
@@ -283,7 +284,6 @@ public class DynamicProject {
         List<DynamicTask> localAvailableTasks = cloneTasks(availableTasks);
 
         while ((!localTPG.isEmpty() || !localAvailableTasks.isEmpty()) && durationBelowCurrentTime) {
-//            System.out.println("localTPG.getIndependentTasks() = " + localTPG.getIndependentTasks());
             List<DynamicTask> localActiveTasks = filterActiveTasks(localTPG, localAvailableTasks);
 
             if (localActiveTasks.isEmpty()) {
@@ -454,7 +454,7 @@ public class DynamicProject {
         this.events = events;
     }
 
-    public double calculateRobustness(DedicationMatrix solution, Efficiency efficiency) {
+    public double calculateRobustness(DedicationMatrix solution, Efficiency efficiency) throws InvalidSolutionException {
 
         List<Double> durationDistances = new ArrayList<>();
         List<Double> costDistances = new ArrayList<>();
@@ -619,11 +619,11 @@ public class DynamicProject {
                 "\n}";
     }
 
-    public Efficiency evaluateEfficiency(DedicationMatrix dm) {
+    public Efficiency evaluateEfficiency(DedicationMatrix dm) throws InvalidSolutionException {
         return evaluateEfficiency(dm, availableTasks);
     }
 
-    public Efficiency evaluateEfficiency(DedicationMatrix dm, List<DynamicTask> tasks) {
+    public Efficiency evaluateEfficiency(DedicationMatrix dm, List<DynamicTask> tasks) throws InvalidSolutionException {
         double duration = 0;
         double cost = 0;
         double partialCost = 0;
@@ -649,7 +649,12 @@ public class DynamicProject {
                 EffortParameters ep = TaskManager.getEffortProperties(localTask, availableEmployees, normDM);
                 partialDuration = Math.min(partialDuration, ep.timeSpent);
                 double finishedEffort = ep.finishedEffort(partialDuration);
-                localTask.addFinishedEffort(finishedEffort);
+                try {
+                    localTask.addFinishedEffort(finishedEffort);
+                } catch (IllegalArgumentException iae) {
+                    SPSPLogger.trace(iae.getMessage());
+                    throw new InvalidSolutionException();
+                }
             }
 
             duration += partialDuration;

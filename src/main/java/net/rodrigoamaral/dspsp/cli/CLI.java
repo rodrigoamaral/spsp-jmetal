@@ -16,7 +16,6 @@ public class CLI {
 
         Options options = new Options();
         options.addOption("h", "help", false, "Show this help");
-        options.addOption("d", "debug", false, "Set debug logging level");
         options.addOption("i", "input", true, "Pass instance input file");
 
         CommandLineParser parser = new DefaultParser();
@@ -27,10 +26,6 @@ public class CLI {
         if (cmd.hasOption("h")) {
             formatter.printHelp("DSPSPRunner", options);
             System.exit(0);
-        }
-
-        if (cmd.hasOption("d")) {
-            SPSPLogger.setDebugLevel(true);
         }
 
         if (cmd.hasOption("i")) {
