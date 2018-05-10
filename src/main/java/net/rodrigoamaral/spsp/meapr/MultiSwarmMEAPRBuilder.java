@@ -57,8 +57,6 @@ public class MultiSwarmMEAPRBuilder implements AlgorithmBuilder {
         this.maxIterations = 50; // this.maxIterations = 50;
         this.swapInterval = 10;  // this.swapInterval = 10;
         this.archiveSize = 100;  // this.archiveSize = 100;
-//        this.firstArchiveType = ArchiveType.CrowdingDistanceArchive;
-//        this.secondArchiveType = ArchiveType.HypervolumeArchive;
         this.firstArchiveType = ArchiveType.CrowdingDistanceArchive;
         this.secondArchiveType = ArchiveType.IdealArchive;
 

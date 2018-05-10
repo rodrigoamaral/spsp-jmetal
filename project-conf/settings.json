@@ -4,6 +4,7 @@
     "project-conf/dynamic/dynamic_example_new2.json"
   ],
   "algorithms": [
+    "MS2MO",
     "SMPSO",
     "NSGAII"
   ]
