@@ -1,0 +1,8 @@
+{
+  "instanceFiles": [
+    "project-conf/dynamic/dynamic_example_new1.json"
+  ],
+  "algorithms": [
+    "NSGAII"
+  ]
+}
