@@ -13,8 +13,17 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class ExperimentSettings {
 
+    private Integer numberOfRuns;
     private List<String> instanceFiles;
     private List<String> algorithms;
+
+    public Integer getNumberOfRuns() {
+        return numberOfRuns;
+    }
+
+    public void setNumberOfRuns(Integer numberOfRuns) {
+        this.numberOfRuns = numberOfRuns;
+    }
 
     public List<String> getInstanceFiles() {
         return instanceFiles;

@@ -147,9 +147,12 @@ public class ExperimentRunner {
     public void run() {
         for (String instanceFile : experimentSettings.getInstanceFiles()) {
             for (String algorithmID : experimentSettings.getAlgorithms()) {
-                final DSPSProblem problem = loadProblemInstance(instanceFile);
-                AlgorithmAssembler assembler = new AlgorithmAssembler(algorithmID);
-                runInstance(problem, assembler);
+                for (int run = 1; run <= experimentSettings.getNumberOfRuns(); run++) {
+                    SPSPLogger.info("Run #: " + run);
+                    final DSPSProblem problem = loadProblemInstance(instanceFile);
+                    AlgorithmAssembler assembler = new AlgorithmAssembler(algorithmID);
+                    runInstance(problem, assembler);
+                }
             }
         }
     }
