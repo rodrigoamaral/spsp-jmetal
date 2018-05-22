@@ -103,6 +103,11 @@ public class SPSPLogger {
         logger.info(highlight(msg));
     }
 
+    public static void printRun(int i, int n) {
+        String msg = String.format("RUN %d of %d", i, n);
+        logger.info(highlight(msg));
+    }
+
     private static String highlight(String msg) {
 
         StringBuilder sb = new StringBuilder();

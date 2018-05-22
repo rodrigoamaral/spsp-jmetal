@@ -51,7 +51,7 @@ public class ExperimentRunner {
         return experimentSettings;
     }
 
-    private void runInstance(DSPSProblem problem, AlgorithmAssembler assembler) {
+    private void runInstance(DSPSProblem problem, AlgorithmAssembler assembler, int run) {
 
         SPSPLogger.info("Starting simulation -> algorithm: " + assembler.getAlgorithmID() + "; " +
                                                "instance: " + problem.getInstanceDescription());
@@ -109,6 +109,7 @@ public class ExperimentRunner {
             new SolutionFileWriter(result.getSchedules())
                     .setAlgorithmID(algorithm.getName())
                     .setInstanceID(problem.getInstanceDescription())
+                    .setRunNumber(run)
                     .setReschedulingPoint(reschedulings)
                     .write();
 
@@ -147,11 +148,12 @@ public class ExperimentRunner {
     public void run() {
         for (String instanceFile : experimentSettings.getInstanceFiles()) {
             for (String algorithmID : experimentSettings.getAlgorithms()) {
-                for (int run = 1; run <= experimentSettings.getNumberOfRuns(); run++) {
-                    SPSPLogger.info("Run #: " + run);
+                final Integer numberOfRuns = experimentSettings.getNumberOfRuns();
+                for (int run = 1; run <= numberOfRuns; run++) {
+                    SPSPLogger.printRun(run, numberOfRuns);
                     final DSPSProblem problem = loadProblemInstance(instanceFile);
                     AlgorithmAssembler assembler = new AlgorithmAssembler(algorithmID);
-                    runInstance(problem, assembler);
+                    runInstance(problem, assembler, run);
                 }
             }
         }
