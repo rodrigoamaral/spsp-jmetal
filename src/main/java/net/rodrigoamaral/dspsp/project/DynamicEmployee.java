@@ -3,28 +3,33 @@ package net.rodrigoamaral.dspsp.project;
 
 import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 public class DynamicEmployee extends net.rodrigoamaral.spsp.project.Employee implements IEventSubject {
 
-    private List<Double> skillsProficiency;
+    private HashMap<Integer, Double> skillsProficiency;
     private double overtimeSalary;
     private int originalIndex;
     private boolean available = true;
+    private HashMap<Integer, Double> proficiencyOnTask;
 
     public DynamicEmployee(int id, float salary, float _overtimeSalary, int originalIndex) {
         super(id, salary);
-        skillsProficiency = new ArrayList<>();
+        skillsProficiency = new HashMap<>();
+        proficiencyOnTask= new HashMap<>();
         overtimeSalary = _overtimeSalary;
         this.originalIndex = originalIndex;
     }
 
-    public List<Double> getSkillsProficiency() {
+    public HashMap<Integer, Double> getSkillsProficiency() {
         return skillsProficiency;
     }
 
-    public void setSkillsProficiency(List<Double> skillsProficiency) {
+    public HashMap<Integer, Double> getProficiencyOnTask() {
+        return proficiencyOnTask;
+    }
+
+    public void setSkillsProficiency(HashMap<Integer, Double> skillsProficiency) {
         this.skillsProficiency = skillsProficiency;
     }
 
