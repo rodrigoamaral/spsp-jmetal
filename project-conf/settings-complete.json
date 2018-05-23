@@ -1,5 +1,5 @@
 {
-  "debugMode": true,
+  "numberOfRuns": 30,
   "instanceFiles": [
     "project-conf/dynamic/dynamic_example_new1.json",
     "project-conf/dynamic/dynamic_example_new2.json",
@@ -22,6 +22,7 @@
   ],
   "algorithms": [
     "NSGAII",
-    "SMPSO"
+    "SMPSO",
+    "MS2MO"
   ]
 }

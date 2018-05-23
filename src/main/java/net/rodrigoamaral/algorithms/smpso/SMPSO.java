@@ -13,11 +13,13 @@
 
 package net.rodrigoamaral.algorithms.smpso;
 
+import net.rodrigoamaral.algorithms.ISwarm;
 import net.rodrigoamaral.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.algorithm.impl.AbstractParticleSwarmOptimization;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
+import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.archive.BoundedArchive;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
@@ -35,7 +37,7 @@ import java.util.List;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 @SuppressWarnings("serial")
-public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, List<DoubleSolution>> {
+public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, List<DoubleSolution>> implements ISwarm {
     private DoubleProblem problem;
 
     private double c1Max;
@@ -333,5 +335,17 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
     /* Setters */
     public void setIterations(int iterations) {
         this.iterations = iterations;
+    }
+
+    @Override
+    public void mergeArchive(Archive<DoubleSolution> archive) {
+        for (DoubleSolution s : archive.getSolutionList()) {
+            leaders.add(s);
+        }
+    }
+
+    @Override
+    public Archive<DoubleSolution> getLeaders() {
+        return leaders;
     }
 }

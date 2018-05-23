@@ -1,5 +1,6 @@
-package net.rodrigoamaral.spsp.meapr;
+package net.rodrigoamaral.algorithms.ms2mo;
 
+import net.rodrigoamaral.algorithms.ISwarm;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -7,10 +8,11 @@ import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
-import org.uma.jmetal.util.pseudorandom.JMetalRandom;
-import org.uma.jmetal.util.pseudorandom.PseudoRandomGenerator;
 
-public class MultiSwarmMEAPRBuilder implements AlgorithmBuilder {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MS2MOBuilder implements AlgorithmBuilder {
 
     private DoubleProblem problem;
 
@@ -27,7 +29,7 @@ public class MultiSwarmMEAPRBuilder implements AlgorithmBuilder {
     private double changeVelocity1;
     private double changeVelocity2;
 
-    private int numberOfSwarms;
+//    private int numberOfSwarms;
     private int swarmSize;
     private int maxIterations;
     private int swapInterval;
@@ -41,20 +43,23 @@ public class MultiSwarmMEAPRBuilder implements AlgorithmBuilder {
     protected SolutionListEvaluator<DoubleSolution> evaluator;
 
     TopologyType topology;
+    private List<ISwarm> swarms;
 
 
-    public MultiSwarmMEAPRBuilder(DoubleProblem problem) {
+    public MS2MOBuilder(DoubleProblem problem) {
         setDefaultParams(problem);
     }
 
     private void setDefaultParams(DoubleProblem problem) {
+        swarms = new ArrayList<>();
         this.problem = problem;
         this.mutationOperator = defaultMutationOperator();
         this.evaluator = new SequentialSolutionListEvaluator<DoubleSolution>() ;
         this.topology = TopologyType.BROADCAST;
-        this.numberOfSwarms = 10; // this.numberOfSwarms = 10;
+//        this.numberOfSwarms = 10; // this.numberOfSwarms = 10;
         this.swarmSize = 80;     // this.swarmSize = 160;
-        this.maxIterations = 50; // this.maxIterations = 50;
+//        this.maxIterations = 50; // this.maxIterations = 50;
+        this.maxIterations = 20; // this.maxIterations = 50;
         this.swapInterval = 10;  // this.swapInterval = 10;
         this.archiveSize = 100;  // this.archiveSize = 100;
         this.firstArchiveType = ArchiveType.CrowdingDistanceArchive;
@@ -80,26 +85,20 @@ public class MultiSwarmMEAPRBuilder implements AlgorithmBuilder {
         return new PolynomialMutation(mutationProbability, mutationDistributionIndex) ;
     }
 
-    public MultiSwarmMEAPR build() {
-        return new MultiSwarmMEAPR(problem, swarmSize, numberOfSwarms, mutationOperator, maxIterations,
-                swapInterval, topology, r1Min, r1Max, r2Min, r2Max, c1Min, c1Max, c2Min, c2Max,
-                weightMin, weightMax, changeVelocity1, changeVelocity2, evaluator, archiveSize,
+    public MS2MO build() {
+        if (swarms == null || swarms.size() == 0) {
+            throw new RuntimeException("MS2MO must have at least one swarm.");
+        }
+        return new MS2MO(swarms, maxIterations,
+                swapInterval, topology, archiveSize,
                 firstArchiveType, secondArchiveType);
     }
 
-    /* Getters */
-
-    /* Setters */
-
-    public MultiSwarmMEAPRBuilder setRandomGenerator(PseudoRandomGenerator randomGenerator) {
-        JMetalRandom.getInstance().setRandomGenerator(randomGenerator);
+    public MS2MOBuilder addSwarm(ISwarm swarm) {
+        swarms.add(swarm);
         return this;
     }
 
-    public MultiSwarmMEAPRBuilder setSolutionListEvaluator(SolutionListEvaluator<DoubleSolution> evaluator) {
-        this.evaluator = evaluator ;
-        return this;
-    }
 
 }
 

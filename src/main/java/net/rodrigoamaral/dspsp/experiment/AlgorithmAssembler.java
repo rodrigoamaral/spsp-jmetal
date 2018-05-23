@@ -1,5 +1,7 @@
 package net.rodrigoamaral.dspsp.experiment;
 
+import net.rodrigoamaral.algorithms.ISwarm;
+import net.rodrigoamaral.algorithms.ms2mo.MS2MOBuilder;
 import net.rodrigoamaral.algorithms.smpso.SMPSOBuilder;
 import net.rodrigoamaral.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.algorithm.Algorithm;
@@ -61,7 +63,7 @@ public class AlgorithmAssembler {
                     .setMaxEvaluations(2500)
                     .setPopulationSize(100)
                     .build();
-        } else if ("SMPSO".equals(algorithmID.toUpperCase())){
+        } else if ("SMPSO".equals(algorithmID.toUpperCase())) {
             BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
             return new SMPSOBuilder((DoubleProblem) problem, archive)
                     .setMutation(mutation)
@@ -70,7 +72,31 @@ public class AlgorithmAssembler {
                     .setRandomGenerator(new MersenneTwisterGenerator())
                     .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
                     .build();
-        } else {
+        }  else if ("MS2MO".equals(algorithmID.toUpperCase())) {
+            BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
+
+            ISwarm swarm = new SMPSOBuilder((DoubleProblem)problem, archive)
+                    .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
+                    .setMaxIterations(50)
+                    .setSwarmSize(100)
+                    .setRandomGenerator(new MersenneTwisterGenerator())
+                    .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+                    .build();
+
+            ISwarm swarm2 = new SMPSOBuilder((DoubleProblem)problem, archive)
+                    .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
+                    .setMaxIterations(50)
+                    .setSwarmSize(100)
+                    .setRandomGenerator(new MersenneTwisterGenerator())
+                    .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+                    .build();
+
+            return new MS2MOBuilder((DoubleProblem)problem)
+                    .addSwarm(swarm)
+                    .addSwarm(swarm2)
+                    .build();
+        }
+        else {
             throw new IllegalArgumentException("Invalid algorithm ID: " + algorithmID);
         }
 

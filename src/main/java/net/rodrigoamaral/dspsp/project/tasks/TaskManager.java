@@ -102,14 +102,8 @@ public class TaskManager {
         double totalProficiency = 0;
         for (DynamicEmployee e: employees) {
             int id = e.index();
-            for (int skill: task.getSkills()) {
-                for (int i = 0; i < e.getSkills().size(); i++) {
-                    if (e.getSkills().get(i) == skill) {
-                        double skillProficiency = e.getSkillsProficiency().get(i);
-                        totalProficiency += skillProficiency * solution.getDedication(id, task.index());
-                    }
-                }
-            }
+            double proficiencyOnTask = e.getProficiencyOnTask().get(task.index());
+            totalProficiency += (proficiencyOnTask * solution.getDedication(id, task.index()));
 
         }
         return totalProficiency / totalDedication;

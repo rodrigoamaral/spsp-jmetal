@@ -140,10 +140,11 @@ public class DynamicProjectConfigLoader {
     private void loadEmployeeSkill(int employeeIndex) {
         List<Integer> skills = config.getEmployee_skill_set().get(employeeIndex);
         List<Double> skillsProficiency = config.getEmployee_skill_proficieny_set().get(employeeIndex);
-
         DynamicEmployee emp = project.getEmployees().get(employeeIndex);
         emp.setSkills(skills);
-        emp.setSkillsProficiency(skillsProficiency);
+        for (int sk = 0; sk < skills.size(); sk++) {
+            emp.getSkillsProficiency().put(skills.get(sk), skillsProficiency.get(sk));
+        }
     }
 
     private void loadTaskPrecedenceGraph(List<DynamicTask> tasks) {
@@ -195,6 +196,9 @@ public class DynamicProjectConfigLoader {
         for (DynamicEmployee employee: project.getEmployees()) {
             int i = employee.index();
             project.getTaskProficiency().put(i, config.getTask_Proficieny_total().get(i));
+            for (int t = 0; t < config.getTask_Proficieny_total().get(i).size(); t++) {
+                employee.getProficiencyOnTask().put(t, config.getTask_Proficieny_total().get(i).get(t));
+            }
         }
     }
 

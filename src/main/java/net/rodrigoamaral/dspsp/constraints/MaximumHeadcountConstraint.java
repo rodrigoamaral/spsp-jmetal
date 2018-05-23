@@ -26,7 +26,7 @@ public class MaximumHeadcountConstraint implements IConstraint {
     }
 
     private List<DynamicEmployee> getTeamSortedByProficiencyInTask(DedicationMatrix dm, final DynamicProject project, final DynamicTask task) {
-        List<DynamicEmployee> team = new ArrayList<>(project.taskTeam(task, dm));
+        List<DynamicEmployee> team = new ArrayList<>(project.availableTaskTeam(task, dm));
 
         Collections.sort(team, new Comparator<DynamicEmployee>() {
             @Override

@@ -17,6 +17,7 @@ public class SolutionFileWriter {
     private String algorithmID;
     private String instanceID;
     private Integer reschedulingPoint;
+    private Integer runNumber;
 
     public SolutionFileWriter(final List<DoubleSolution> population) {
         this.population = population;
@@ -49,6 +50,10 @@ public class SolutionFileWriter {
         return this;
     }
 
+    public SolutionFileWriter setRunNumber(Integer runNumber) {
+        this.runNumber = runNumber;
+        return this;
+    }
 
     private String getFilename(String type) {
             StringBuilder sb = new StringBuilder();
@@ -62,6 +67,10 @@ public class SolutionFileWriter {
             if (instanceID != null) {
                 sb.append("-");
                 sb.append(instanceID.toUpperCase());
+            }
+            if (runNumber != null) {
+                sb.append("-");
+                sb.append(runNumber);
             }
             if (reschedulingPoint != null) {
                 sb.append("-");
