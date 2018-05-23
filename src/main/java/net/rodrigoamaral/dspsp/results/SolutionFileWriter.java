@@ -31,8 +31,8 @@ public class SolutionFileWriter {
 
         File objDir = new File(path + "/OBJ");
         File varDir = new File(path + "/VAR");
-        boolean createdObj = objDir.mkdirs();
-        boolean createdVar = varDir.mkdirs();
+        boolean createdObj = objDir.exists() || objDir.mkdirs();
+        boolean createdVar = varDir.exists() || varDir.mkdirs();
 
         return createdObj && createdVar;
     }
