@@ -602,10 +602,25 @@ public class DynamicProject {
         return remainingEffort;
     }
 
-    public List<DynamicEmployee> taskTeam(DynamicTask task, DedicationMatrix solution) {
+    /**
+     * Returns the task team among the available employees at the moment
+     * @param task
+     * @param solution
+     * @return
+     */
+    public List<DynamicEmployee> availableTaskTeam(DynamicTask task, DedicationMatrix solution) {
+        return taskTeam(task, solution, availableEmployees);
+    }
+
+    public List<DynamicEmployee> taskTeam(DynamicTask task, DedicationMatrix solution, List<DynamicEmployee> employees) {
         List<DynamicEmployee> team = new ArrayList<>();
         for (int e : TaskManager.team(task, solution)) {
-            team.add(getEmployeeByIndex(e));
+            DynamicEmployee teamEmployee = getEmployeeByIndex(e);
+            for (DynamicEmployee filterEmployee: employees) {
+                if (teamEmployee.index() == filterEmployee.index()) {
+                    team.add(teamEmployee);
+                }
+            }
         }
         return team;
     }
@@ -630,6 +645,41 @@ public class DynamicProject {
 
         DynamicTaskPrecedenceGraph localTPG = taskPrecedenceGraph.copy();
         List<DynamicTask> localAvailableTasks = cloneTasks(tasks);
+
+
+        // --------------------------
+        // Repairing overhead (begin)
+        // --------------------------
+
+        //// First headcount repair heuristic
+        dm = removeNonProficientEmployees(dm, localAvailableTasks);
+
+        //// Second headcount repair heuristic
+        for (DynamicTask t: localAvailableTasks) {
+            final List<DynamicEmployee> taskTeam = availableTaskTeam(t, dm);
+            List<DynamicEmployee> originalTeam = getSortedTeamByProficiencyInTask(taskTeam, t);
+            List<DynamicEmployee> repairedTeam = new ArrayList<>(originalTeam);
+
+            if (originalTeam.size() > t.getMaximumHeadcount()) {
+                for (DynamicEmployee e: originalTeam) {
+                    DynamicEmployee removed = repairedTeam.remove(0);
+                    if (missingSkills(t, repairedTeam) == 0) {
+                        dm.setDedication(e.index(), t.index(), 0);
+                    } else {
+                        repairedTeam.add(0, removed);
+                    }
+                }
+            }
+
+            // Penalizing task effort if max headcount constraint violated
+            if (repairedTeam.size() > t.getMaximumHeadcount()) {
+                t.setRealEffort(TaskManager.adjustedEffort(dm, t));
+            }
+
+        }
+        // --------------------------
+        // Repairing overhead (end)
+        // --------------------------
 
         while (!localTPG.isEmpty() || !localAvailableTasks.isEmpty()) {
 
@@ -679,6 +729,41 @@ public class DynamicProject {
         }
 
         return new Efficiency(duration, cost);
+    }
+
+    /**
+     * First headcount repair heuristic
+     * @param dm
+     * @param localAvailableTasks
+     * @return
+     */
+    private DedicationMatrix removeNonProficientEmployees(DedicationMatrix dm, final List<DynamicTask> localAvailableTasks) {
+        for (DynamicTask t: localAvailableTasks) {
+            for (DynamicEmployee e : availableEmployees) {
+                if (e.getProficiencyOnTask().get(t.index()) == 0) {
+                    dm.setDedication(e.index(), t.index(), 0);
+                }
+            }
+        }
+        return dm;
+    }
+
+    public List<DynamicEmployee> getSortedTeamByProficiencyInTask(final List<DynamicEmployee> team, final DynamicTask task) {
+        List<DynamicEmployee> sortedTeam = new ArrayList<>(team);
+
+        Collections.sort(sortedTeam, new Comparator<DynamicEmployee>() {
+            @Override
+            public int compare(DynamicEmployee e1, DynamicEmployee e2) {
+                double p1 = e1.getProficiencyOnTask().get(task.index());
+                double p2 = e2.getProficiencyOnTask().get(task.index());
+
+                if (p1 == p2) {
+                    return 0;
+                }
+                return p1 < p2 ? -1 : 1;
+            }
+        });
+        return sortedTeam;
     }
 
     public double penalizeDuration(int missingSkills) {
