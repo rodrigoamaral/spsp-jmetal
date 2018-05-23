@@ -1,6 +1,7 @@
 package net.rodrigoamaral.dspsp.results;
 
 import net.rodrigoamaral.jmetal.util.fileoutput.SolutionListOutput;
+import net.rodrigoamaral.logging.SPSPLogger;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 
@@ -10,7 +11,7 @@ import java.util.List;
 public class SolutionFileWriter {
     private static final String DEFAULT_SEPARATOR = ";";
     private static final String DEFAULT_EXT = ".csv";
-    public static final String RESULTS_DIR = "results";
+    public static final String BASE_RESULTS_DIR = "results";
 
     private final List<DoubleSolution> population;
     private String separator;
@@ -18,16 +19,36 @@ public class SolutionFileWriter {
     private String instanceID;
     private Integer reschedulingPoint;
     private Integer runNumber;
+    private String resultsPath;
 
     public SolutionFileWriter(final List<DoubleSolution> population) {
         this.population = population;
         this.separator = DEFAULT_SEPARATOR;
-        createResultsDirectory();
+        this.resultsPath = BASE_RESULTS_DIR;
     }
 
-    private void createResultsDirectory() {
-        File directory = new File(RESULTS_DIR);
-        directory.mkdir();
+    private boolean createResultsDirectory(String path) {
+
+        File objDir = new File(path + "/OBJ");
+        File varDir = new File(path + "/VAR");
+        boolean createdObj = objDir.mkdirs();
+        boolean createdVar = varDir.mkdirs();
+
+        return createdObj && createdVar;
+    }
+
+    private String buildResultsPath() {
+        StringBuilder sb = new StringBuilder(this.resultsPath);
+        sb.append("/");
+        sb.append(this.algorithmID);
+        sb.append("/");
+        sb.append(this.instanceID);
+        if (this.runNumber != null) {
+            sb.append("/");
+            sb.append(this.runNumber);
+        }
+        this.resultsPath = sb.toString();
+        return this.resultsPath;
     }
 
     public SolutionFileWriter setAlgorithmID(final String algorithmID) {
@@ -57,7 +78,9 @@ public class SolutionFileWriter {
 
     private String getFilename(String type) {
             StringBuilder sb = new StringBuilder();
-            sb.append(RESULTS_DIR);
+            sb.append(this.resultsPath);
+            sb.append("/");
+            sb.append(type);
             sb.append("/");
             sb.append(type);
             if (algorithmID != null) {
@@ -77,7 +100,7 @@ public class SolutionFileWriter {
                 sb.append(reschedulingPoint);
             } else {
                 sb.append("-");
-                sb.append("STATIC");
+                sb.append(0);
             }
 
             sb.append(DEFAULT_EXT);
@@ -93,6 +116,11 @@ public class SolutionFileWriter {
     }
 
     public void write() {
+        String path = buildResultsPath();
+        boolean created = createResultsDirectory(path);
+        if (!created) {
+            SPSPLogger.warning("Unable to create results directory (" + this.resultsPath + ")");
+        }
         new SolutionListOutput(population)
                 .setSeparator(separator)
                 .setVarFileOutputContext(new DefaultFileOutputContext(getVariablesFilename()))
