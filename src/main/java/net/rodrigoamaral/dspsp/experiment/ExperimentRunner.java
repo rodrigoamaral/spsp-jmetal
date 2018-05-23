@@ -72,6 +72,7 @@ public class ExperimentRunner {
         new SolutionFileWriter(population)
                 .setAlgorithmID(assembler.getAlgorithmID())
                 .setInstanceID(problem.getInstanceDescription())
+                .setRunNumber(run)
                 .write();
 
         // Decides on the best initial schedule
