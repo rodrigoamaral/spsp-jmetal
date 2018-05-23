@@ -95,7 +95,7 @@ public class ExperimentRunner {
                 break;
             }
 
-            SPSPLogger.rescheduling(reschedulings, event);
+            SPSPLogger.rescheduling(reschedulings, event, run, experimentSettings.getNumberOfRuns());
 
             SchedulingResult result = reschedule(project, event, currentSchedule, assembler);
 
