@@ -76,7 +76,7 @@ public class AlgorithmAssembler {
             BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
 
             ISwarm swarm = new SMPSOBuilder((DoubleProblem)problem, archive)
-                    .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
+                    .setMutation(mutation)
                     .setMaxIterations(50)
                     .setSwarmSize(100)
                     .setRandomGenerator(new MersenneTwisterGenerator())
@@ -84,7 +84,7 @@ public class AlgorithmAssembler {
                     .build();
 
             ISwarm swarm2 = new SMPSOBuilder((DoubleProblem)problem, archive)
-                    .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
+                    .setMutation(mutation)
                     .setMaxIterations(50)
                     .setSwarmSize(100)
                     .setRandomGenerator(new MersenneTwisterGenerator())
@@ -94,6 +94,7 @@ public class AlgorithmAssembler {
             return new MS2MOBuilder((DoubleProblem)problem)
                     .addSwarm(swarm)
                     .addSwarm(swarm2)
+                    .setMaxIterations(1)
                     .build();
         }
         else {
