@@ -53,7 +53,10 @@ public class ExperimentRunner {
 
     private void runInstance(DSPSProblem problem, AlgorithmAssembler assembler, int run) {
 
-        SPSPLogger.info("Starting simulation -> algorithm: " + assembler.getAlgorithmID() + "; " +
+        final String algorithmID = assembler.getAlgorithmID();
+
+
+        SPSPLogger.info("Starting simulation -> algorithm: " + algorithmID + "; " +
                                                "instance: " + problem.getInstanceDescription());
 
         SPSPLogger.info("Performing initial scheduling...");
@@ -70,7 +73,7 @@ public class ExperimentRunner {
         SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
 
         new SolutionFileWriter(population)
-                .setAlgorithmID(assembler.getAlgorithmID())
+                .setAlgorithmID(algorithmID)
                 .setInstanceID(problem.getInstanceDescription())
                 .setRunNumber(run)
                 .write();
@@ -108,7 +111,7 @@ public class ExperimentRunner {
 
 
             new SolutionFileWriter(result.getSchedules())
-                    .setAlgorithmID(algorithm.getName())
+                    .setAlgorithmID(algorithmID)
                     .setInstanceID(problem.getInstanceDescription())
                     .setRunNumber(run)
                     .setReschedulingPoint(reschedulings)
