@@ -28,3 +28,8 @@ src/main/java/META-INF
 /project-conf/dynamic/
 /results/
 /logs/
+
+# Hypervolume calculation #
+
+hypervolume/__pycache__/
+*.pyc
