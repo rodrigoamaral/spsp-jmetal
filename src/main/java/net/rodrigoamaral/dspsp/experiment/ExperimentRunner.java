@@ -76,6 +76,7 @@ public class ExperimentRunner {
                 .setAlgorithmID(algorithmID)
                 .setInstanceID(problem.getInstanceDescription())
                 .setRunNumber(run)
+                .setSeparator(" ")
                 .write();
 
         // Decides on the best initial schedule
@@ -115,6 +116,7 @@ public class ExperimentRunner {
                     .setInstanceID(problem.getInstanceDescription())
                     .setRunNumber(run)
                     .setReschedulingPoint(reschedulings)
+                    .setSeparator(" ")
                     .write();
 
             currentSchedule = new DecisionMaker(result.getSchedules(), comparisonMatrix).chooseNewSchedule();
