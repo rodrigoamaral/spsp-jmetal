@@ -7,6 +7,7 @@ import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public class SolutionFileWriter {
@@ -134,6 +135,8 @@ public class SolutionFileWriter {
             new NormalizedSolutionListOutput(getObjectivesFilename())
                     .print();
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

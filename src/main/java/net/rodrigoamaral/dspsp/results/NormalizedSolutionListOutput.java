@@ -29,13 +29,15 @@ public class NormalizedSolutionListOutput {
 
 
     // REFACTOR: Customize separator
-    public void print() throws FileNotFoundException {
+    public void print() throws IOException {
         ResultNormalizer rn = new ResultNormalizer();
         List<String> normalized = rn.normalize(getObjectivesFilename());
 
         if (normalized == null || normalized.isEmpty()) {
-            String msg = "Could not generate file " + getObjectivesFilename() + " (normalized front is empty).";
+            String msg = "Could not generate file " + getObjectivesFilename() + " (normalized front is empty)." +
+                    " Will generate dummy file instead.";
             SPSPLogger.warning(msg);
+            writeDummyFile();
         } else {
             int numberOfObjectives = normalized.get(0).split(" ").length;
 
@@ -59,5 +61,11 @@ public class NormalizedSolutionListOutput {
                 throw new JMetalException("Error printing normalized objecives to file: ", e);
             }
         }
+    }
+
+    private void writeDummyFile() throws IOException {
+        BufferedWriter bufferedWriter = context.getFileWriter();
+        bufferedWriter.write("1.099999 1.099999 1.099999 1.099999");
+        bufferedWriter.close();
     }
 }
