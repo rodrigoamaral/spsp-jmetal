@@ -3,6 +3,8 @@ package net.rodrigoamaral.dspsp.experiment;
 import net.rodrigoamaral.algorithms.ISwarm;
 import net.rodrigoamaral.algorithms.ms2mo.MS2MOBuilder;
 import net.rodrigoamaral.algorithms.smpso.SMPSOBuilder;
+import net.rodrigoamaral.algorithms.smpso.SMPSODynamic;
+import net.rodrigoamaral.algorithms.smpso.SMPSODynamicBuilder;
 import net.rodrigoamaral.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder;
@@ -30,6 +32,7 @@ import java.util.List;
 public class AlgorithmAssembler {
 
     private final String algorithmID;
+    private List<DoubleSolution> initialPopulation;
 
     public AlgorithmAssembler(final String algorithmID) {
         this.algorithmID = algorithmID;
@@ -37,6 +40,11 @@ public class AlgorithmAssembler {
 
     public String getAlgorithmID() {
         return algorithmID;
+    }
+
+    public Algorithm<List<DoubleSolution>> assemble(Problem<DoubleSolution> problem, List<DoubleSolution> initialPopulation) {
+        this.initialPopulation = initialPopulation;
+        return assemble(problem);
     }
 
     public Algorithm<List<DoubleSolution>> assemble(Problem<DoubleSolution> problem) {
@@ -66,6 +74,16 @@ public class AlgorithmAssembler {
         } else if ("SMPSO".equals(algorithmID.toUpperCase())) {
             BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
             return new SMPSOBuilder((DoubleProblem) problem, archive)
+                    .setMutation(mutation)
+                    .setMaxIterations(50)
+                    .setSwarmSize(100)
+                    .setRandomGenerator(new MersenneTwisterGenerator())
+                    .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+                    .build();
+        } else if ("SMPSODYNAMIC".equals(algorithmID.toUpperCase())) {
+            BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
+            return new SMPSODynamicBuilder((DoubleProblem) problem, archive)
+                    .setInitialPopulation(initialPopulation)
                     .setMutation(mutation)
                     .setMaxIterations(50)
                     .setSwarmSize(100)

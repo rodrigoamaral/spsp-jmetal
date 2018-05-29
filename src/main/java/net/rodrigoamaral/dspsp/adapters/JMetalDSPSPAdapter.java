@@ -129,7 +129,7 @@ public class JMetalDSPSPAdapter {
             solution.setObjective(COST, project.penalizeCost(missingSkills));
             solution.setObjective(ROBUSTNESS, project.penalizeRobustness(missingSkills));
 
-            if (project.getPreviousSchedule() != null) {
+            if (mustIncludeStability(solution)) {
                 solution.setObjective(STABILITY, project.penalizeStability(missingSkills));
             }
 
@@ -143,7 +143,7 @@ public class JMetalDSPSPAdapter {
                 solution.setObjective(COST, efficiency.cost);
                 solution.setObjective(ROBUSTNESS, robustness);
 
-                if (project.getPreviousSchedule() != null) {
+                if (mustIncludeStability(solution)) {
                     double stability = project.calculateStability(dm);
                     solution.setObjective(STABILITY, stability);
                 }
@@ -155,13 +155,17 @@ public class JMetalDSPSPAdapter {
                 solution.setObjective(COST, project.penalizeCost(1));
                 solution.setObjective(ROBUSTNESS, project.penalizeRobustness(1));
 
-                if (project.getPreviousSchedule() != null) {
+                if (mustIncludeStability(solution)) {
                     solution.setObjective(STABILITY, project.penalizeStability(1));
                 }
             }
         }
 
         return solution;
+    }
+
+    private boolean mustIncludeStability(DoubleSolution solution) {
+        return project.getPreviousSchedule() != null && solution.getNumberOfObjectives() > 3;
     }
 
     private DedicationMatrix repair(DoubleSolution solution) {
