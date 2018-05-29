@@ -2,6 +2,7 @@ package net.rodrigoamaral.dspsp.experiment;
 
 import net.rodrigoamaral.algorithms.ISwarm;
 import net.rodrigoamaral.algorithms.ms2mo.MS2MOBuilder;
+import net.rodrigoamaral.algorithms.nsgaii.NSGAIIDynamicBuilder;
 import net.rodrigoamaral.algorithms.smpso.SMPSOBuilder;
 import net.rodrigoamaral.algorithms.smpso.SMPSODynamic;
 import net.rodrigoamaral.algorithms.smpso.SMPSODynamicBuilder;
@@ -71,6 +72,13 @@ public class AlgorithmAssembler {
                     .setMaxEvaluations(2500)
                     .setPopulationSize(100)
                     .build();
+        } else if ("NSGAIIDYNAMIC".equals(algorithmID.toUpperCase())) {
+                return new NSGAIIDynamicBuilder(problem, crossover, mutation)
+                        .setInitialPopulation(initialPopulation)
+                        .setSelectionOperator(selection)
+                        .setMaxEvaluations(2500)
+                        .setPopulationSize(100)
+                        .build();
         } else if ("SMPSO".equals(algorithmID.toUpperCase())) {
             BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
             return new SMPSOBuilder((DoubleProblem) problem, archive)
