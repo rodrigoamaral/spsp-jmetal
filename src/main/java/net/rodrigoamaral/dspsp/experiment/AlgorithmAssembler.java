@@ -122,6 +122,32 @@ public class AlgorithmAssembler {
                     .addSwarm(swarm2)
                     .setMaxIterations(1)
                     .build();
+        } else if ("MS2MODYNAMIC".equals(algorithmID.toUpperCase())) {
+            BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
+
+            ISwarm swarm = new SMPSODynamicBuilder((DoubleProblem)problem, archive)
+                    .setInitialPopulation(initialPopulation)
+                    .setMutation(mutation)
+                    .setMaxIterations(50)
+                    .setSwarmSize(100)
+                    .setRandomGenerator(new MersenneTwisterGenerator())
+                    .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+                    .build();
+
+            ISwarm swarm2 = new SMPSODynamicBuilder((DoubleProblem)problem, archive)
+                    .setInitialPopulation(initialPopulation)
+                    .setMutation(mutation)
+                    .setMaxIterations(50)
+                    .setSwarmSize(100)
+                    .setRandomGenerator(new MersenneTwisterGenerator())
+                    .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+                    .build();
+
+            return new MS2MOBuilder((DoubleProblem)problem)
+                    .addSwarm(swarm)
+                    .addSwarm(swarm2)
+                    .setMaxIterations(1)
+                    .build();
         }
         else {
             throw new IllegalArgumentException("Invalid algorithm ID: " + algorithmID);
