@@ -370,13 +370,13 @@ public class DynamicProject {
                                 "%-4s is COMPLETE: %7.4f / %7.4f (%6.2f %%)",
                                 globalTask,
                                 globalTask.getFinishedEffort(),
-                                globalTask.getRealEffort(),
+                                globalTask.getEffort(),
                                 globalTask.finishedEffortRatio() * 100
                         )
                 );
                 ////
             } else {
-                globalTask.setRealEffort(reestimateEffort(globalTask));
+                globalTask.setEffort(reestimateEffort(globalTask));
                 ////
                 SPSPLogger.info(
                         String.format(
@@ -384,7 +384,7 @@ public class DynamicProject {
                                 "%-4s finished effort: %7.4f / %7.4f (%6.2f %%)",
                                 globalTask,
                                 globalTask.getFinishedEffort(),
-                                globalTask.getRealEffort(),
+                                globalTask.getEffort(),
                                 globalTask.finishedEffortRatio() * 100
                         )
                 );
@@ -398,7 +398,7 @@ public class DynamicProject {
 
     private double reestimateEffort(DynamicTask task) {
 
-        double realEffort = task.getRealEffort();
+        double realEffort = task.getEffort();
         double finishedEffort = task.getFinishedEffort();
 
         while (realEffort <= finishedEffort) {
@@ -463,7 +463,7 @@ public class DynamicProject {
 
         for (Map<Integer, Double> effortScenario : getSampleEffortScenarios()) {
             for (DynamicTask t : scenarioAvailableTasks) {
-                t.setRealEffort(effortScenario.get(t.index()));
+                t.setEffort(effortScenario.get(t.index()));
             }
             Efficiency scenario = evaluateEfficiency(solution, scenarioAvailableTasks);
 
@@ -673,7 +673,7 @@ public class DynamicProject {
 
             // Penalizing task effort if max headcount constraint violated
             if (repairedTeam.size() > t.getMaximumHeadcount()) {
-                t.setRealEffort(TaskManager.adjustedEffort(dm, t));
+                t.setEffort(TaskManager.adjustedEffort(dm, t));
             }
 
         }
