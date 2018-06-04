@@ -1,10 +1,12 @@
 package net.rodrigoamaral.dspsp.adapters;
 
 import net.rodrigoamaral.dspsp.config.DynamicProjectConfigLoader;
-import net.rodrigoamaral.dspsp.exceptions.InvalidSolutionException;
-import net.rodrigoamaral.dspsp.objectives.*;
-import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.constraints.*;
+import net.rodrigoamaral.dspsp.exceptions.InvalidSolutionException;
+import net.rodrigoamaral.dspsp.objectives.Efficiency;
+import net.rodrigoamaral.dspsp.project.DynamicEmployee;
+import net.rodrigoamaral.dspsp.project.DynamicProject;
+import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import net.rodrigoamaral.logging.SPSPLogger;
 import org.uma.jmetal.solution.DoubleSolution;
@@ -129,7 +131,7 @@ public class JMetalDSPSPAdapter {
             solution.setObjective(COST, project.penalizeCost(missingSkills));
             solution.setObjective(ROBUSTNESS, project.penalizeRobustness(missingSkills));
 
-            if (project.getPreviousSchedule() != null) {
+            if (mustIncludeStability(solution)) {
                 solution.setObjective(STABILITY, project.penalizeStability(missingSkills));
             }
 
@@ -143,7 +145,7 @@ public class JMetalDSPSPAdapter {
                 solution.setObjective(COST, efficiency.cost);
                 solution.setObjective(ROBUSTNESS, robustness);
 
-                if (project.getPreviousSchedule() != null) {
+                if (mustIncludeStability(solution)) {
                     double stability = project.calculateStability(dm);
                     solution.setObjective(STABILITY, stability);
                 }
@@ -155,7 +157,7 @@ public class JMetalDSPSPAdapter {
                 solution.setObjective(COST, project.penalizeCost(1));
                 solution.setObjective(ROBUSTNESS, project.penalizeRobustness(1));
 
-                if (project.getPreviousSchedule() != null) {
+                if (mustIncludeStability(solution)) {
                     solution.setObjective(STABILITY, project.penalizeStability(1));
                 }
             }
@@ -164,8 +166,42 @@ public class JMetalDSPSPAdapter {
         return solution;
     }
 
+    private boolean mustIncludeStability(DoubleSolution solution) {
+        return project.getPreviousSchedule() != null && solution.getNumberOfObjectives() > 3;
+    }
+
     private DedicationMatrix repair(DoubleSolution solution) {
+        solution = filterAvailableEmployees(solution);
+        solution = filterAvailableTasks(solution);
         return constraintEvaluator.repair(converter.convert(solution), project);
+    }
+
+    private DoubleSolution filterAvailableTasks(DoubleSolution solution) {
+        for (DynamicTask task : getProject().getTasks()) {
+            if (!task.isAvailable()) {
+                for (DynamicEmployee employee : getProject().getEmployees()) {
+                    solution.setVariableValue(
+                            SolutionConverter.encode(employee.index(), task.index()),
+                            0.0
+                    );
+                }
+            }
+        }
+        return solution;
+    }
+
+    private DoubleSolution filterAvailableEmployees(DoubleSolution solution) {
+        for (DynamicEmployee employee : getProject().getEmployees()) {
+            if (!employee.isAvailable()) {
+                for (DynamicTask task : getProject().getAvailableTasks()) {
+                    solution.setVariableValue(
+                            SolutionConverter.encode(employee.index(), task.index()),
+                            0.0
+                    );
+                }
+            }
+        }
+        return solution;
     }
 
     public int getNumberOfConstraints() {

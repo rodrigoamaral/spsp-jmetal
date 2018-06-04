@@ -76,4 +76,15 @@ public class SolutionConverter {
         return Math.floorDiv(index, tasks);
     }
 
+
+    /**
+     * Encode a (employeeIndex, taskIndex) pair into a vector position.
+     *
+     * @param employeeIndex
+     * @param taskIndex
+     * @return position in vector
+     */
+    public static int encode(int employeeIndex, int taskIndex) {
+        return employeeIndex * tasks + taskIndex;
+    }
 }

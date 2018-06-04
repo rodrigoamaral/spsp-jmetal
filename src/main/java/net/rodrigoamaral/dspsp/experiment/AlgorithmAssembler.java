@@ -2,7 +2,10 @@ package net.rodrigoamaral.dspsp.experiment;
 
 import net.rodrigoamaral.algorithms.ISwarm;
 import net.rodrigoamaral.algorithms.ms2mo.MS2MOBuilder;
+import net.rodrigoamaral.algorithms.nsgaii.NSGAIIDynamicBuilder;
 import net.rodrigoamaral.algorithms.smpso.SMPSOBuilder;
+import net.rodrigoamaral.algorithms.smpso.SMPSODynamic;
+import net.rodrigoamaral.algorithms.smpso.SMPSODynamicBuilder;
 import net.rodrigoamaral.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder;
@@ -30,6 +33,7 @@ import java.util.List;
 public class AlgorithmAssembler {
 
     private final String algorithmID;
+    private List<DoubleSolution> initialPopulation;
 
     public AlgorithmAssembler(final String algorithmID) {
         this.algorithmID = algorithmID;
@@ -37,6 +41,11 @@ public class AlgorithmAssembler {
 
     public String getAlgorithmID() {
         return algorithmID;
+    }
+
+    public Algorithm<List<DoubleSolution>> assemble(Problem<DoubleSolution> problem, List<DoubleSolution> initialPopulation) {
+        this.initialPopulation = initialPopulation;
+        return assemble(problem);
     }
 
     public Algorithm<List<DoubleSolution>> assemble(Problem<DoubleSolution> problem) {
@@ -63,9 +72,26 @@ public class AlgorithmAssembler {
                     .setMaxEvaluations(2500)
                     .setPopulationSize(100)
                     .build();
+        } else if ("NSGAIIDYNAMIC".equals(algorithmID.toUpperCase())) {
+                return new NSGAIIDynamicBuilder(problem, crossover, mutation)
+                        .setInitialPopulation(initialPopulation)
+                        .setSelectionOperator(selection)
+                        .setMaxEvaluations(2500)
+                        .setPopulationSize(100)
+                        .build();
         } else if ("SMPSO".equals(algorithmID.toUpperCase())) {
             BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
             return new SMPSOBuilder((DoubleProblem) problem, archive)
+                    .setMutation(mutation)
+                    .setMaxIterations(50)
+                    .setSwarmSize(100)
+                    .setRandomGenerator(new MersenneTwisterGenerator())
+                    .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+                    .build();
+        } else if ("SMPSODYNAMIC".equals(algorithmID.toUpperCase())) {
+            BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
+            return new SMPSODynamicBuilder((DoubleProblem) problem, archive)
+                    .setInitialPopulation(initialPopulation)
                     .setMutation(mutation)
                     .setMaxIterations(50)
                     .setSwarmSize(100)
@@ -76,7 +102,7 @@ public class AlgorithmAssembler {
             BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
 
             ISwarm swarm = new SMPSOBuilder((DoubleProblem)problem, archive)
-                    .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
+                    .setMutation(mutation)
                     .setMaxIterations(50)
                     .setSwarmSize(100)
                     .setRandomGenerator(new MersenneTwisterGenerator())
@@ -84,7 +110,7 @@ public class AlgorithmAssembler {
                     .build();
 
             ISwarm swarm2 = new SMPSOBuilder((DoubleProblem)problem, archive)
-                    .setMutation(new PolynomialMutation(mutationProbability, mutationDistributionIndex))
+                    .setMutation(mutation)
                     .setMaxIterations(50)
                     .setSwarmSize(100)
                     .setRandomGenerator(new MersenneTwisterGenerator())
@@ -94,6 +120,33 @@ public class AlgorithmAssembler {
             return new MS2MOBuilder((DoubleProblem)problem)
                     .addSwarm(swarm)
                     .addSwarm(swarm2)
+                    .setMaxIterations(1)
+                    .build();
+        } else if ("MS2MODYNAMIC".equals(algorithmID.toUpperCase())) {
+            BoundedArchive<DoubleSolution> archive = new CrowdingDistanceArchive<DoubleSolution>(100) ;
+
+            ISwarm swarm = new SMPSODynamicBuilder((DoubleProblem)problem, archive)
+                    .setInitialPopulation(initialPopulation)
+                    .setMutation(mutation)
+                    .setMaxIterations(50)
+                    .setSwarmSize(100)
+                    .setRandomGenerator(new MersenneTwisterGenerator())
+                    .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+                    .build();
+
+            ISwarm swarm2 = new SMPSODynamicBuilder((DoubleProblem)problem, archive)
+                    .setInitialPopulation(initialPopulation)
+                    .setMutation(mutation)
+                    .setMaxIterations(50)
+                    .setSwarmSize(100)
+                    .setRandomGenerator(new MersenneTwisterGenerator())
+                    .setSolutionListEvaluator(new SequentialSolutionListEvaluator<DoubleSolution>())
+                    .build();
+
+            return new MS2MOBuilder((DoubleProblem)problem)
+                    .addSwarm(swarm)
+                    .addSwarm(swarm2)
+                    .setMaxIterations(1)
                     .build();
         }
         else {

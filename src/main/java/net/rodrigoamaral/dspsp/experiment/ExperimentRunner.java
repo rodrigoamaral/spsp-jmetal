@@ -6,6 +6,8 @@ import net.rodrigoamaral.dspsp.decision.DecisionMaker;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
 import net.rodrigoamaral.dspsp.results.SolutionFileWriter;
+import net.rodrigoamaral.dspsp.solution.DynamicPopulationCreator;
+import net.rodrigoamaral.dspsp.solution.SchedulingHistory;
 import net.rodrigoamaral.dspsp.solution.SchedulingResult;
 import net.rodrigoamaral.logging.SPSPLogger;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -28,9 +30,12 @@ import java.util.List;
 public class ExperimentRunner {
 
     private final ExperimentSettings experimentSettings;
+    private SchedulingHistory history;
+    private int reschedulings;
 
     public ExperimentRunner(final ExperimentSettings experimentSettings) {
         this.experimentSettings = experimentSettings;
+        this.history = new SchedulingHistory();
     }
 
     private DSPSProblem loadProblemInstance(final String instanceFile) {
@@ -53,7 +58,11 @@ public class ExperimentRunner {
 
     private void runInstance(DSPSProblem problem, AlgorithmAssembler assembler, int run) {
 
-        SPSPLogger.info("Starting simulation -> algorithm: " + assembler.getAlgorithmID() + "; " +
+        final String algorithmID = assembler.getAlgorithmID();
+
+        reschedulings = 0;
+
+        SPSPLogger.info("Starting simulation -> algorithm: " + algorithmID + "; " +
                                                "instance: " + problem.getInstanceDescription());
 
         SPSPLogger.info("Performing initial scheduling...");
@@ -64,14 +73,18 @@ public class ExperimentRunner {
 
         List<DoubleSolution> population = algorithm.getResult() ;
 
+        history.put(reschedulings, population);
+
         long totalComputingTime = algorithmRunner.getComputingTime();
 
         SPSPLogger.info("Initial scheduling complete.");
         SPSPLogger.info("Elapsed time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
 
         new SolutionFileWriter(population)
-                .setAlgorithmID(assembler.getAlgorithmID())
+                .setAlgorithmID(algorithmID)
                 .setInstanceID(problem.getInstanceDescription())
+                .setRunNumber(run)
+                .setSeparator(" ")
                 .write();
 
         // Decides on the best initial schedule
@@ -85,7 +98,6 @@ public class ExperimentRunner {
 
         DoubleSolution currentSchedule = initialSchedule;
 
-        int reschedulings = 0;
         for (DynamicEvent event: reschedulingPoints) {
 
             reschedulings++;
@@ -94,9 +106,12 @@ public class ExperimentRunner {
                 break;
             }
 
-            SPSPLogger.rescheduling(reschedulings, event);
+            SPSPLogger.rescheduling(reschedulings, event, run, experimentSettings.getNumberOfRuns());
 
             SchedulingResult result = reschedule(project, event, currentSchedule, assembler);
+
+            history.put(reschedulings, result.getSchedules());
+
 
             totalComputingTime += result.getComputingTime();
 
@@ -107,10 +122,11 @@ public class ExperimentRunner {
 
 
             new SolutionFileWriter(result.getSchedules())
-                    .setAlgorithmID(algorithm.getName())
+                    .setAlgorithmID(algorithmID)
                     .setInstanceID(problem.getInstanceDescription())
                     .setRunNumber(run)
                     .setReschedulingPoint(reschedulings)
+                    .setSeparator(" ")
                     .write();
 
             currentSchedule = new DecisionMaker(result.getSchedules(), comparisonMatrix).chooseNewSchedule();
@@ -129,9 +145,17 @@ public class ExperimentRunner {
 
         DSPSProblem problem = loadProblemInstance(project);
 
-        Algorithm<List<DoubleSolution>> algorithm = assembler.assemble(problem);
-        AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
-                .execute();
+        Algorithm<List<DoubleSolution>> algorithm;
+
+        // First rescheduling doesn't take initial population
+        if (reschedulings > 1) {
+            List<DoubleSolution> initialPopulation = new DynamicPopulationCreator(problem, history).create(reschedulings);
+            algorithm = assembler.assemble(problem, initialPopulation);
+        } else {
+            algorithm = assembler.assemble(problem);
+        }
+
+        AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm).execute();
 
         return new SchedulingResult(algorithm.getResult(),
                 algorithmRunner.getComputingTime(),
