@@ -46,7 +46,7 @@ public class TaskManager {
 
     public static double generateEffortSample(DynamicTask task) {
 
-        double mean = task.getEffort();
+        double mean = task.getMeanEstimatedEffort();
         double sd = task.getEffortDeviation();
 
         NormalDistribution nd = new NormalDistribution(mean, sd);
@@ -60,7 +60,7 @@ public class TaskManager {
     }
 
     public static double sampleEstimatedEffort(DynamicTask task) {
-        NormalDistribution nd = new NormalDistribution(task.getEffort(), task.getEffortDeviation());
+        NormalDistribution nd = new NormalDistribution(task.getMeanEstimatedEffort(), task.getEffortDeviation());
         return nd.sample();
     }
 

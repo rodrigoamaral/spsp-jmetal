@@ -14,7 +14,7 @@ import java.util.List;
 public class Task {
 
     private int id;
-    private double effort;
+    protected double effort;
     private double duration;
     private double start;
     private double finish;
