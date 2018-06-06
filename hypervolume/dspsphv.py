@@ -21,8 +21,9 @@ def dim(fname):
 def extract_instance_data(fname):
     filepath, filename = os.path.split(fname)
     filename, ext = os.path.splitext(filename)
+    exec_num = filepath.split("/")[-2]
     tmp = filename.split("-")
-    return [tmp[1], tmp[2] + "-" + tmp[3], tmp[4], tmp[5]]
+    return [tmp[1], tmp[2] + "-" + tmp[3], exec_num, tmp[5]]
 
 
 def get_reference_string(fname):
