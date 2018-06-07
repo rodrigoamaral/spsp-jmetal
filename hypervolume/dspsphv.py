@@ -33,11 +33,16 @@ def get_reference_string(fname):
 def main():
     with open("metrics.csv", "w") as out:
         writer = csv.writer(out, delimiter=" ")
-        for fname in list_result_files():
+        result_files = list_result_files()
+        s = len(result_files)
+        for i, fname in enumerate(result_files):
             data = extract_instance_data(fname)
             data.append(hv(fname, get_reference_string(fname)))
             writer.writerow(data)
+            print("Calculating hypervolume. Please wait... ({:5.1f}%)".format((i * 100) / s), end="\r")
+        print("\nDone.")
 
 
 if __name__ == '__main__':
+
     main()
