@@ -23,6 +23,11 @@
   "algorithms": [
     "NSGAII",
     "SMPSO",
-    "MS2MO"
-  ]
+    "SMPSODynamic",
+    "MS2MO",
+    "MS2MODynamic"
+  ],
+  "objectiveEvaluations": 12000,
+  "numberOfSwarms": 30,
+  "swarmSize": 60
 }

@@ -5,5 +5,8 @@
   ],
   "algorithms": [
     "MS2MO"
-  ]
+  ],
+  "objectiveEvaluations": 12000,
+  "numberOfSwarms": 5,
+  "swarmSize": 200
 }

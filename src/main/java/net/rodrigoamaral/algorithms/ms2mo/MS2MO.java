@@ -24,7 +24,8 @@ public class MS2MO implements Algorithm {
     public MS2MO(List<ISwarm> swarms, int maxIterations, int swapInterval, TopologyType topology) {
         this.swarms = swarms;
         this.maxIterations = maxIterations;
-        this.swapInterval = swapInterval;
+//        this.swapInterval = swapInterval;
+        this.swapInterval = Math.round(maxIterations) / 2;
         this.topology = topology;
         this.globalArchive = new NonDominatedSolutionListArchive();
     }

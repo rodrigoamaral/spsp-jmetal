@@ -176,7 +176,7 @@ public class ExperimentRunner {
                 for (int run = 1; run <= numberOfRuns; run++) {
                     SPSPLogger.printRun(run, numberOfRuns);
                     final DSPSProblem problem = loadProblemInstance(instanceFile);
-                    AlgorithmAssembler assembler = new AlgorithmAssembler(algorithmID);
+                    AlgorithmAssembler assembler = new AlgorithmAssembler(algorithmID, experimentSettings);
                     runInstance(problem, assembler, run);
                 }
             }

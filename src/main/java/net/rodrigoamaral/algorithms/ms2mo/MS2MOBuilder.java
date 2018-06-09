@@ -60,6 +60,11 @@ public class MS2MOBuilder implements AlgorithmBuilder {
         return this;
     }
 
+    public MS2MOBuilder addSwarms(List<ISwarm> swarms_) {
+        swarms.addAll(swarms_);
+        return this;
+    }
+
 
     public MS2MOBuilder setMaxIterations(int maxIterations) {
         this.maxIterations = maxIterations;
