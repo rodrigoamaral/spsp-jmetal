@@ -171,38 +171,38 @@ public class JMetalDSPSPAdapter {
     }
 
     private DedicationMatrix repair(DoubleSolution solution) {
-        solution = filterAvailableEmployees(solution);
-        solution = filterAvailableTasks(solution);
+//        solution = enableOnlyAvailableEmployees(solution);
+//        solution = enableOnlyAvailableTasks(solution);
         return constraintEvaluator.repair(converter.convert(solution), project);
     }
 
-    private DoubleSolution filterAvailableTasks(DoubleSolution solution) {
-        for (DynamicTask task : getProject().getTasks()) {
-            if (!task.isAvailable()) {
-                for (DynamicEmployee employee : getProject().getEmployees()) {
-                    solution.setVariableValue(
-                            SolutionConverter.encode(employee.index(), task.index()),
-                            0.0
-                    );
-                }
-            }
-        }
-        return solution;
-    }
-
-    private DoubleSolution filterAvailableEmployees(DoubleSolution solution) {
-        for (DynamicEmployee employee : getProject().getEmployees()) {
-            if (!employee.isAvailable()) {
-                for (DynamicTask task : getProject().getAvailableTasks()) {
-                    solution.setVariableValue(
-                            SolutionConverter.encode(employee.index(), task.index()),
-                            0.0
-                    );
-                }
-            }
-        }
-        return solution;
-    }
+//    private DoubleSolution enableOnlyAvailableTasks(DoubleSolution solution) {
+//        for (DynamicTask task : getProject().getTasks()) {
+//            if (!task.isAvailable()) {
+//                for (DynamicEmployee employee : getProject().getEmployees()) {
+//                    solution.setVariableValue(
+//                            SolutionConverter.encode(employee.index(), task.index()),
+//                            0.0
+//                    );
+//                }
+//            }
+//        }
+//        return solution;
+//    }
+//
+//    private DoubleSolution enableOnlyAvailableEmployees(DoubleSolution solution) {
+//        for (DynamicEmployee employee : getProject().getEmployees()) {
+//            if (!employee.isAvailable()) {
+//                for (DynamicTask task : getProject().getAvailableTasks()) {
+//                    solution.setVariableValue(
+//                            SolutionConverter.encode(employee.index(), task.index()),
+//                            0.0
+//                    );
+//                }
+//            }
+//        }
+//        return solution;
+//    }
 
     public int getNumberOfConstraints() {
         return constraintEvaluator.size();
