@@ -19,6 +19,9 @@ public class ExperimentSettings {
     private Integer swarmSize;
     private List<String> instanceFiles;
     private List<String> algorithms;
+    private Integer populationSize;
+    private Double histPropGlobalSolutions;
+    private Double histPropPreviousEventSolutions;
 
     public Integer getNumberOfRuns() {
         return numberOfRuns;
@@ -50,6 +53,30 @@ public class ExperimentSettings {
 
     public void setSwarmSize(Integer swarmSize) {
         this.swarmSize = swarmSize;
+    }
+
+    public Integer getPopulationSize() {
+        return populationSize;
+    }
+
+    public void setPopulationSize(Integer populationSize) {
+        this.populationSize = populationSize;
+    }
+
+    public Double getHistPropGlobalSolutions() {
+        return histPropGlobalSolutions;
+    }
+
+    public void setHistPropGlobalSolutions(Double histPropGlobalSolutions) {
+        this.histPropGlobalSolutions = histPropGlobalSolutions;
+    }
+
+    public Double getHistPropPreviousEventSolutions() {
+        return histPropPreviousEventSolutions;
+    }
+
+    public void setHistPropPreviousEventSolutions(Double histPropPreviousEventSolutions) {
+        this.histPropPreviousEventSolutions = histPropPreviousEventSolutions;
     }
 
     public List<String> getInstanceFiles() {

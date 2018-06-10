@@ -149,7 +149,14 @@ public class ExperimentRunner {
 
         // First rescheduling doesn't take initial population
         if (reschedulings > 1) {
-            List<DoubleSolution> initialPopulation = new DynamicPopulationCreator(problem, history).create(reschedulings);
+
+            List<DoubleSolution> initialPopulation = new DynamicPopulationCreator(
+                    problem,
+                    history,
+                    experimentSettings,
+                    assembler.getAlgorithmID()
+            ).create(reschedulings);
+
             algorithm = assembler.assemble(problem, initialPopulation);
         } else {
             algorithm = assembler.assemble(problem);
