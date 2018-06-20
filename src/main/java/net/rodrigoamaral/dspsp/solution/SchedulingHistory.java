@@ -31,7 +31,7 @@ public class SchedulingHistory  {
     /**
      * Adds population to the scheduling history.
      *
-     * Instances of this class also keep a non-dominated solution
+     * Instances of this class also keep a non-dominated repairedSolution
      * archive. The first scheduling doesn't go into history, because it
      * corresponds to the initial static scheduling, with only 3 objectives.
      *

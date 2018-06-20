@@ -20,7 +20,7 @@ public class ExperimentSettings {
     private List<String> instanceFiles;
     private List<String> algorithms;
     private Integer populationSize;
-    private Double histPropGlobalSolutions;
+    private Double repairedSolutions;
     private Double histPropPreviousEventSolutions;
 
     public Integer getNumberOfRuns() {
@@ -63,12 +63,12 @@ public class ExperimentSettings {
         this.populationSize = populationSize;
     }
 
-    public Double getHistPropGlobalSolutions() {
-        return histPropGlobalSolutions;
+    public Double getRepairedSolutions() {
+        return repairedSolutions;
     }
 
-    public void setHistPropGlobalSolutions(Double histPropGlobalSolutions) {
-        this.histPropGlobalSolutions = histPropGlobalSolutions;
+    public void setRepairedSolutions(Double repairedSolutions) {
+        this.repairedSolutions = repairedSolutions;
     }
 
     public Double getHistPropPreviousEventSolutions() {
@@ -93,5 +93,21 @@ public class ExperimentSettings {
 
     public void setAlgorithms(List<String> algorithms) {
         this.algorithms = algorithms;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(super.toString() + "{ " );
+        sb.append("\n\tnumberOfRuns = " + numberOfRuns);
+        sb.append("\n\tobjectiveEvaluations = " + objectiveEvaluations);
+        sb.append("\n\tnumberOfSwarms = " + numberOfSwarms);
+        sb.append("\n\tswarmSize = " + swarmSize);
+        sb.append("\n\tinstanceFiles = " + instanceFiles);
+        sb.append("\n\talgorithms = " + algorithms);
+        sb.append("\n\tpopulationSize = " + populationSize);
+        sb.append("\n\trepairedSolutions = " + repairedSolutions);
+        sb.append("\n\thistPropPreviousEventSolutions = " + histPropPreviousEventSolutions);
+        sb.append("\n}");
+        return sb.toString();
     }
 }

@@ -51,7 +51,7 @@ public class SolutionConverter {
 
     private Double repairDedication(boolean repair, Double dedication) {
         if (repair) {
-            dedication = dedication < 10E-2 ? 0.0 : dedication;
+            dedication = dedication < DedicationMatrix.MIN_DED_THRESHOLD ? 0.0 : dedication;
         }
         return dedication;
     }

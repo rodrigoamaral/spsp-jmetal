@@ -42,6 +42,7 @@ public class DynamicProject {
     private double lastSchedulingTime;
     private List<Map<Integer, Double>> sampleEffortScenarios;
     private String instanceDescription;
+    private List<Integer> lastAvailableEmployees;
 
     public DynamicProject() {
         tasks = new ArrayList<>();
@@ -161,6 +162,7 @@ public class DynamicProject {
     public void update(DynamicEvent event, DoubleSolution lastSchedule) {
         // REFACTOR: lastSchedule should be a DedicationMatrix to avoid dependencies with jMetal
         setPreviousSchedule(lastSchedule);
+        setLastAvailableEmployees(availableEmployees);
         updateFinishedEffort(availableEmployees, event.getTime());
         updateCurrentStatus(event);
         setLastSchedulingTime(event.getTime());
@@ -295,10 +297,14 @@ public class DynamicProject {
 
             double partialDuration = Double.POSITIVE_INFINITY;
 
+
             for (DynamicTask localTask : localActiveTasks) {
                 EffortParameters ep = TaskManager.getEffortProperties(localTask, availableEmployees_, normalizedSchedule);
                 efforts.put(localTask.index(), ep);
-                partialDuration = Math.min(partialDuration, ep.timeSpent);
+                // Checking if active task had anyone really working on it
+                if (ep.timeSpent > 0) {
+                    partialDuration = Math.min(partialDuration, ep.timeSpent);
+                }
             }
 
             duration += partialDuration;
@@ -321,11 +327,15 @@ public class DynamicProject {
             for (DynamicTask localTask : localActiveTasks) {
 
                 EffortParameters ep = efforts.get(localTask.index());
-                double finished = ep.finishedEffort(effortDuration);
-                localTask.addFinishedEffort(finished);
-                ////
-                SPSPLogger.debug("localTask " + localTask + " finished effort: (" + (localTask.getFinishedEffort() - finished) + " + " + finished + ") = " + localTask.getFinishedEffort());
-                ////
+
+                // Checks again if task was really active
+                if (ep.timeSpent > 0) {
+                    double finished = ep.finishedEffort(effortDuration);
+                    localTask.addFinishedEffort(finished);
+                    ////
+                    SPSPLogger.debug("localTask " + localTask + " finished effort: (" + (localTask.getFinishedEffort() - finished) + " + " + finished + ") = " + localTask.getFinishedEffort());
+                    ////
+                }
             }
 
             // Calculates cost
@@ -358,7 +368,11 @@ public class DynamicProject {
         for (DynamicTask globalTask : activeTasks) {
 
             EffortParameters ep = efforts.get(globalTask.index());
-            globalTask.addFinishedEffort(ep.finishedEffort(effortDuration));
+
+            // Checks once more if task was really active
+            if (ep.timeSpent > 0) {
+                globalTask.addFinishedEffort(ep.finishedEffort(effortDuration));
+            }
 
             if (globalTask.isFinished()) {
                 globalTask.setAvailable(false);
@@ -410,7 +424,7 @@ public class DynamicProject {
 
     private DedicationMatrix normalize(DedicationMatrix dm, List<DynamicTask> activeTasks) {
 
-        DedicationMatrix normalized = new DedicationMatrix(employees.size(), tasks.size());
+        DedicationMatrix normalized = new DedicationMatrix(dm);
 
         for (DynamicTask t : activeTasks) {
             for (DynamicEmployee e : availableEmployees) {
@@ -809,5 +823,17 @@ public class DynamicProject {
 
     public String getInstanceDescription() {
         return instanceDescription;
+    }
+
+    public List<Integer> getLastAvailableEmployees() {
+        return this.lastAvailableEmployees;
+    }
+
+    private void setLastAvailableEmployees(List<DynamicEmployee> lastAvailableEmployees_) {
+        List<Integer> employees = new ArrayList<>();
+        for (DynamicEmployee emp: lastAvailableEmployees_) {
+            employees.add(emp.index());
+        }
+        this.lastAvailableEmployees = employees;
     }
 }

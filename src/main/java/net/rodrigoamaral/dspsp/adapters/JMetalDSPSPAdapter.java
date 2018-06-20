@@ -112,13 +112,13 @@ public class JMetalDSPSPAdapter {
 
     /**
      * Evaluates all objectives registered by the objectiveEvaluator in the
-     * constructor. Before evaluation, it repairs the solution according to
+     * constructor. Before evaluation, it repairs the repairedSolution according to
      * the constraints registered by the constraintEvaluator in the
      * constructor. Objectives are penalized if there is any skill missing
      * in the available emplyee team.
      *
      * @param solution
-     * @return repaired solution
+     * @return repaired repairedSolution
      */
     public DoubleSolution evaluateObjectives(DoubleSolution solution) {
 
@@ -151,7 +151,7 @@ public class JMetalDSPSPAdapter {
                 }
             } catch (InvalidSolutionException e) {
 
-                SPSPLogger.trace("Penalizing invalid solution: " + dm);
+                SPSPLogger.trace("Penalizing invalid repairedSolution: " + dm);
 
                 solution.setObjective(DURATION, project.penalizeDuration(1));
                 solution.setObjective(COST, project.penalizeCost(1));
@@ -171,37 +171,37 @@ public class JMetalDSPSPAdapter {
     }
 
     private DedicationMatrix repair(DoubleSolution solution) {
-//        solution = enableOnlyAvailableEmployees(solution);
-//        solution = enableOnlyAvailableTasks(solution);
+//        repairedSolution = enableOnlyAvailableEmployees(repairedSolution);
+//        repairedSolution = enableOnlyAvailableTasks(repairedSolution);
         return constraintEvaluator.repair(converter.convert(solution), project);
     }
 
-//    private DoubleSolution enableOnlyAvailableTasks(DoubleSolution solution) {
+//    private DoubleSolution enableOnlyAvailableTasks(DoubleSolution repairedSolution) {
 //        for (DynamicTask task : getProject().getTasks()) {
 //            if (!task.isAvailable()) {
 //                for (DynamicEmployee employee : getProject().getEmployees()) {
-//                    solution.setVariableValue(
+//                    repairedSolution.setVariableValue(
 //                            SolutionConverter.encode(employee.index(), task.index()),
 //                            0.0
 //                    );
 //                }
 //            }
 //        }
-//        return solution;
+//        return repairedSolution;
 //    }
 //
-//    private DoubleSolution enableOnlyAvailableEmployees(DoubleSolution solution) {
+//    private DoubleSolution enableOnlyAvailableEmployees(DoubleSolution repairedSolution) {
 //        for (DynamicEmployee employee : getProject().getEmployees()) {
 //            if (!employee.isAvailable()) {
 //                for (DynamicTask task : getProject().getAvailableTasks()) {
-//                    solution.setVariableValue(
+//                    repairedSolution.setVariableValue(
 //                            SolutionConverter.encode(employee.index(), task.index()),
 //                            0.0
 //                    );
 //                }
 //            }
 //        }
-//        return solution;
+//        return repairedSolution;
 //    }
 
     public int getNumberOfConstraints() {

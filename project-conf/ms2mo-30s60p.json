@@ -1,15 +1,15 @@
 {
-  "numberOfRuns": 1,
+  "numberOfRuns": 10,
   "instanceFiles": [
-    "project-conf/dynamic/dynamic_example_new1.json"
+    "project-conf/dynamic/dynamic_example_new18.json"
   ],
   "algorithms": [
-    "MS2MODynamic"
+    "MS2MO"
   ],
   "objectiveEvaluations": 12000,
   "populationSize": 100,
   "repairedSolutions": 0.3,
   "histPropPreviousEventSolutions": 0.2,
-  "numberOfSwarms": 5,
-  "swarmSize": 200
+  "numberOfSwarms": 30,
+  "swarmSize": 60
 }

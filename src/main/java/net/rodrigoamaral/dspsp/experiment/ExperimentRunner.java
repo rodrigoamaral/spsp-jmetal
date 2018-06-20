@@ -3,12 +3,17 @@ package net.rodrigoamaral.dspsp.experiment;
 import net.rodrigoamaral.dspsp.DSPSProblem;
 import net.rodrigoamaral.dspsp.decision.ComparisonMatrix;
 import net.rodrigoamaral.dspsp.decision.DecisionMaker;
+import net.rodrigoamaral.dspsp.project.DynamicEmployee;
 import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.project.events.DynamicEvent;
+import net.rodrigoamaral.dspsp.project.events.EventType;
 import net.rodrigoamaral.dspsp.results.SolutionFileWriter;
 import net.rodrigoamaral.dspsp.solution.DynamicPopulationCreator;
 import net.rodrigoamaral.dspsp.solution.SchedulingHistory;
 import net.rodrigoamaral.dspsp.solution.SchedulingResult;
+import net.rodrigoamaral.dspsp.solution.repair.EmployeeLeaveStrategy;
+import net.rodrigoamaral.dspsp.solution.repair.EmployeeReturnStrategy;
+import net.rodrigoamaral.dspsp.solution.repair.IScheduleRepairStrategy;
 import net.rodrigoamaral.logging.SPSPLogger;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.uma.jmetal.algorithm.Algorithm;
@@ -136,10 +141,23 @@ public class ExperimentRunner {
 
         SPSPLogger.info("Total execution time: " + DurationFormatUtils.formatDuration(totalComputingTime, "HH:mm:ss,SSS"));
 
-        // TODO: Write final solution files
+        // TODO: Write final repairedSolution files
     }
 
     private SchedulingResult reschedule(DynamicProject project, DynamicEvent event, DoubleSolution lastSchedule, AlgorithmAssembler assembler) {
+
+        IScheduleRepairStrategy repairStrategy = null;
+        switch (event.getType()) {
+            case EMPLOYEE_LEAVE:
+                repairStrategy = new EmployeeLeaveStrategy(lastSchedule, project, (DynamicEmployee) event.getSubject());
+                break;
+            case EMPLOYEE_RETURN:
+                repairStrategy = new EmployeeReturnStrategy(lastSchedule, project, (DynamicEmployee) event.getSubject());
+                break;
+            default:
+                repairStrategy = null;
+        }
+
 
         project.update(event, lastSchedule);
 
@@ -148,13 +166,14 @@ public class ExperimentRunner {
         Algorithm<List<DoubleSolution>> algorithm;
 
         // First rescheduling doesn't take initial population
-        if (reschedulings > 1) {
+        if ((reschedulings > 1) && (assembler.getAlgorithmID().toUpperCase().endsWith("DYNAMIC"))) {
 
             List<DoubleSolution> initialPopulation = new DynamicPopulationCreator(
                     problem,
                     history,
                     experimentSettings,
-                    assembler.getAlgorithmID()
+                    assembler.getAlgorithmID(),
+                    repairStrategy
             ).create(reschedulings);
 
             algorithm = assembler.assemble(problem, initialPopulation);
@@ -177,6 +196,7 @@ public class ExperimentRunner {
      *
      */
     public void run() {
+        System.out.println(experimentSettings);
         for (String instanceFile : experimentSettings.getInstanceFiles()) {
             for (String algorithmID : experimentSettings.getAlgorithms()) {
                 final Integer numberOfRuns = experimentSettings.getNumberOfRuns();
