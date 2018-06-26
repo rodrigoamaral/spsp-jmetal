@@ -332,6 +332,10 @@ public class SMPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Lis
         return iterations;
     }
 
+    public DoubleProblem getProblem() {
+        return problem;
+    }
+
     /* Setters */
     public void setIterations(int iterations) {
         this.iterations = iterations;

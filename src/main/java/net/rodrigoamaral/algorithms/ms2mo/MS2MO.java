@@ -15,28 +15,18 @@ public class MS2MO implements Algorithm {
 
     private int maxIterations;
     private int swapInterval;
-
-    private int archiveSize;
-    private ArchiveType firstArchiveType;
-    private ArchiveType secondArchiveType;
-    private ArchiveType currentArchiveType;
-
     private TopologyType topology;
     private Archive globalArchive;
 
     /**
      * Constructor
      */
-    public MS2MO(List<ISwarm> swarms, int maxIterations, int swapInterval, TopologyType topology,
-                 int archiveSize, ArchiveType firstArchiveType, ArchiveType secondArchiveType) {
+    public MS2MO(List<ISwarm> swarms, int maxIterations, int swapInterval, TopologyType topology) {
         this.swarms = swarms;
         this.maxIterations = maxIterations;
-        this.swapInterval = swapInterval;
+//        this.swapInterval = swapInterval;
+        this.swapInterval = Math.round(maxIterations) / 2;
         this.topology = topology;
-        this.archiveSize = archiveSize;
-        this.firstArchiveType = firstArchiveType;
-        this.secondArchiveType = secondArchiveType;
-        this.currentArchiveType = firstArchiveType;
         this.globalArchive = new NonDominatedSolutionListArchive();
     }
 
@@ -46,21 +36,8 @@ public class MS2MO implements Algorithm {
         mergeGlobalArchive();
     }
 
-
-    private ArchiveType getCurrentArchiveType() {
-        System.out.println(currentArchiveType);
-        if (currentArchiveType == firstArchiveType) {
-            currentArchiveType = secondArchiveType;
-        } else {
-            currentArchiveType = firstArchiveType;
-        }
-        return currentArchiveType;
-    }
-
     private void runIterations() {
         for (int i = 0; i < maxIterations; i++) {
-//            System.out.println("i = " + i);
-//            System.out.println("--------------");
             runSwarms();
             if (isTimeToSwap(i)) {
                 swap();
@@ -70,7 +47,6 @@ public class MS2MO implements Algorithm {
 
     private void runSwarms() {
         for (ISwarm swarm: swarms) {
-//            System.out.println("swarm = " + swarm);
             swarm.run();
         }
     }
@@ -80,7 +56,6 @@ public class MS2MO implements Algorithm {
     }
 
     private void swap() {
-//        System.out.println("Swapping: " + topology);
         if (topology == TopologyType.RING) {
             makeRingCommunication();
         } else if (topology == TopologyType.BROADCAST) {

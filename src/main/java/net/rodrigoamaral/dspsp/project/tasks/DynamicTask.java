@@ -6,7 +6,7 @@ import net.rodrigoamaral.dspsp.project.events.IEventSubject;
 import java.util.ArrayList;
 
 public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements IEventSubject {
-    private double realEffort;
+    private double meanEstimatedEffort;
     private double effortDeviation;
     private double finishedEffort;
     private int originalIndex;
@@ -16,13 +16,13 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
 
     public DynamicTask(int id,
                        double initialEstimatedEffort,
-                       double realEffort,
+                       double meanEstimatedEffort,
                        double effortDeviation,
                        int originalIndex,
                        int maximumHeadcount) {
 
         super(id, initialEstimatedEffort);
-        this.realEffort = realEffort;
+        this.meanEstimatedEffort = meanEstimatedEffort;
         this.effortDeviation = effortDeviation;
         this.originalIndex = originalIndex;
         this.finishedEffort = 0;
@@ -31,7 +31,7 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
 
      public DynamicTask(DynamicTask task) {
          super(task.getId(), task.getEffort());
-         this.setRealEffort(task.getRealEffort());
+         this.setMeanEstimatedEffort(task.getMeanEstimatedEffort());
          this.setEffortDeviation(task.getEffortDeviation());
          this.setDuration(task.getDuration());
          this.setStart(task.getStart());
@@ -43,12 +43,12 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
          this.available = task.isAvailable();
      }
 
-    public double getRealEffort() {
-        return realEffort;
+    public double getMeanEstimatedEffort() {
+        return meanEstimatedEffort;
     }
 
-    public void setRealEffort(double realEffort) {
-        this.realEffort = realEffort;
+    public void setMeanEstimatedEffort(double meanEstimatedEffort) {
+        this.meanEstimatedEffort = meanEstimatedEffort;
     }
 
     public double getEffortDeviation() {
@@ -91,15 +91,19 @@ public class DynamicTask extends net.rodrigoamaral.spsp.project.Task implements 
     }
 
     public double getRemainingEffort() {
-        return getRealEffort() - getFinishedEffort();
+        return getEffort() - getFinishedEffort();
     }
 
     public double finishedEffortRatio() {
-        return getFinishedEffort() / getRealEffort();
+        return getFinishedEffort() / getEffort();
     }
 
     public int getMaximumHeadcount() {
         return maximumHeadcount;
+    }
+
+    public void setEffort(double effort) {
+        this.effort = effort;
     }
 
     @Override

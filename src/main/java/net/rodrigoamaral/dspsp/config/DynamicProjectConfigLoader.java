@@ -79,7 +79,7 @@ public class DynamicProjectConfigLoader {
 
     private void loadTasks() {
 
-        for (int taskIndex = 0; taskIndex < config.getTask_effort_real_secnario_total().size(); taskIndex++) {
+        for (int taskIndex = 0; taskIndex < config.getTask_total_number(); taskIndex++) {
             DynamicTask t = loadTask(taskIndex);
             if (t != null) {
                 project.getTasks().add(t);
@@ -95,13 +95,13 @@ public class DynamicProjectConfigLoader {
 
     private DynamicTask loadTask(int taskIndex) {
         int taskId = taskIndex + 1;
-        double initialEstimatedEffort = config.getTask_effort_mu_total().get(taskIndex);
-        double realEffort = config.getTask_effort_mu_total().get(taskIndex);
+        double initialEstimatedEffort = config.getTask_effort_real_secnario_total().get(taskIndex);
+        double meanEstimatedEffort = config.getTask_effort_mu_total().get(taskIndex);
         double effortDeviation = config.getTask_effort_sigma_total().get(taskIndex);
         int maximumHeadcount = config.getTask_headcount_total().get(taskIndex);
         return new DynamicTask(taskId,
                                initialEstimatedEffort,
-                               realEffort,
+                               meanEstimatedEffort,
                                effortDeviation,
                                taskIndex,
                                maximumHeadcount);
@@ -116,7 +116,7 @@ public class DynamicProjectConfigLoader {
     }
 
     private void loadEmployees() {
-        for (int employeeIndex = 0; employeeIndex < config.getAvailable_employee().size(); employeeIndex++) {
+        for (int employeeIndex = 0; employeeIndex < config.getEmployee_number(); employeeIndex++) {
             DynamicEmployee emp = loadEmployee(employeeIndex);
             if (emp != null) {
                 project.getEmployees().add(emp);
@@ -138,8 +138,8 @@ public class DynamicProjectConfigLoader {
     }
 
     private void loadEmployeeSkill(int employeeIndex) {
-        List<Integer> skills = config.getEmployee_skill_set().get(employeeIndex);
-        List<Double> skillsProficiency = config.getEmployee_skill_proficieny_set().get(employeeIndex);
+        List<Integer> skills = new ArrayList<>(config.getEmployee_skill_set().get(employeeIndex));
+        List<Double> skillsProficiency = new ArrayList<>(config.getEmployee_skill_proficieny_set().get(employeeIndex));
         DynamicEmployee emp = project.getEmployees().get(employeeIndex);
         emp.setSkills(skills);
         for (int sk = 0; sk < skills.size(); sk++) {
@@ -148,7 +148,7 @@ public class DynamicProjectConfigLoader {
     }
 
     private void loadTaskPrecedenceGraph(List<DynamicTask> tasks) {
-        int initialSize = config.getTask_effort_real_secnario_total().size();
+        int initialSize = config.getTask_total_number();
         project.setTaskPrecedenceGraph(new DynamicTaskPrecedenceGraph(initialSize));
         for (List<Integer> edge : config.getEdge_set()) {
             DynamicTask t1 = project.getTaskById(edge.get(0));

@@ -51,7 +51,7 @@ public class SolutionConverter {
 
     private Double repairDedication(boolean repair, Double dedication) {
         if (repair) {
-            dedication = dedication < 10E-2 ? 0.0 : dedication;
+            dedication = dedication < DedicationMatrix.MIN_DED_THRESHOLD ? 0.0 : dedication;
         }
         return dedication;
     }
@@ -76,4 +76,15 @@ public class SolutionConverter {
         return Math.floorDiv(index, tasks);
     }
 
+
+    /**
+     * Encode a (employeeIndex, taskIndex) pair into a vector position.
+     *
+     * @param employeeIndex
+     * @param taskIndex
+     * @return position in vector
+     */
+    public static int encode(int employeeIndex, int taskIndex) {
+        return employeeIndex * tasks + taskIndex;
+    }
 }

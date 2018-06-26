@@ -22,9 +22,15 @@
 /docs/
 .ipynb_checkpoints
 *.csv
-*.ipynb
+#*.ipynb
+NSGA2_SMPSO_comparison_plot.ipynb
 META-INF
 src/main/java/META-INF
 /project-conf/dynamic/
 /results/
 /logs/
+
+# Hypervolume calculation #
+
+hypervolume/__pycache__/
+*.pyc

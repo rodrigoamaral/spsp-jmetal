@@ -11,7 +11,7 @@ import static net.rodrigoamaral.util.DoubleUtils.min;
 /**
  *  Implements the decision making method.
  *
- *  The solution with the maximum utility value is chosen
+ *  The repairedSolution with the maximum utility value is chosen
  *  as the final schedule.
  *
  */

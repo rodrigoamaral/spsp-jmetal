@@ -46,7 +46,7 @@ public class TaskManager {
 
     public static double generateEffortSample(DynamicTask task) {
 
-        double mean = task.getEffort();
+        double mean = task.getMeanEstimatedEffort();
         double sd = task.getEffortDeviation();
 
         NormalDistribution nd = new NormalDistribution(mean, sd);
@@ -60,7 +60,7 @@ public class TaskManager {
     }
 
     public static double sampleEstimatedEffort(DynamicTask task) {
-        NormalDistribution nd = new NormalDistribution(task.getEffort(), task.getEffortDeviation());
+        NormalDistribution nd = new NormalDistribution(task.getMeanEstimatedEffort(), task.getEffortDeviation());
         return nd.sample();
     }
 
@@ -122,6 +122,24 @@ public class TaskManager {
         return missingSkills.size();
     }
 
+//    static public int missingSkills(DynamicTask task, DynamicEmployee employee) {
+//        Set<Integer> missingSkills = new HashSet<>(task.getSkills());
+//        Set<Integer> skills =  new HashSet<>(employee.getSkills());
+//        missingSkills.removeAll(skills);
+//        return missingSkills.size();
+//    }
+
+    static public int missingSkills(DynamicTask task, DynamicEmployee employee) {
+        return missingSkillset(task, employee).size();
+    }
+
+    static public Set<Integer> missingSkillset(DynamicTask task, DynamicEmployee employee) {
+        Set<Integer> missingSkills = new HashSet<>(task.getSkills());
+        Set<Integer> skills =  new HashSet<>(employee.getSkills());
+        missingSkills.removeAll(skills);
+        return missingSkills;
+    }
+
     static public int totalMissingSkills(List<DynamicTask> tasks, List<DynamicEmployee> employees) {
         int missingSkills = 0;
         List<DynamicEmployee> availableEmployees = employees;
@@ -148,5 +166,45 @@ public class TaskManager {
     static public double teamSizePenalty(DynamicTask task, DedicationMatrix solution) {
         int teamSize = teamSize(task, solution);
         return 1 + ((teamSize * (teamSize - 1) / 2) / Z);
+    }
+
+    static public List<Integer> getEmployeeAssignedTasks(DedicationMatrix dm, DynamicEmployee employee) {
+        List<Integer> taskList = new ArrayList<>();
+        for (int j = 0; j < dm.getTasks(); j++) {
+            if (dm.getDedication(employee.index(), j) != 0) {
+                taskList.add(j);
+            }
+        }
+        return taskList;
+    }
+
+    public static List<Integer> getEmployeesNotAssignedToTask(DedicationMatrix dm, DynamicTask task) {
+        List<Integer> employeeList = new ArrayList<>();
+        for (int i = 0; i < dm.getEmployees(); i++) {
+            if (dm.getDedication(i, task.index()) == 0) {
+                employeeList.add(i);
+            }
+        }
+        return employeeList;
+    }
+
+    public static List<DynamicEmployee> getEmployeesNotAssignedToTask(DedicationMatrix dm, DynamicTask task, final DynamicProject project) {
+        List<DynamicEmployee> employees = new ArrayList<>();
+        for (int i = 0; i < dm.getEmployees(); i++) {
+            if (dm.getDedication(i, task.index()) == 0) {
+                employees.add(project.getEmployeeByIndex(i));
+            }
+        }
+        return employees;
+    }
+
+    public static List<DynamicEmployee> getEmployeesAssignedToTask(DedicationMatrix dm, DynamicTask task, final DynamicProject project) {
+        List<DynamicEmployee> employees = new ArrayList<>();
+        for (int i = 0; i < dm.getEmployees(); i++) {
+            if (dm.getDedication(i, task.index()) != 0) {
+                employees.add(project.getEmployeeByIndex(i));
+            }
+        }
+        return employees;
     }
 }

@@ -96,10 +96,21 @@ public class SPSPLogger {
         logger.info(msg);
     }
 
+    public static void warning(String msg) {
+        logger.warning(msg);
+    }
+
+    public static void rescheduling(int schedulings, DynamicEvent event, int runNumber, int totalRuns) {
+        
+        String msg = String.format("RESCHEDULING %d: %s at %.4f (run %d of %d) ", schedulings, event.description(), event.getTime(), runNumber, totalRuns);
+        
+        logger.info(highlight(msg));
+    }
+
     public static void rescheduling(int schedulings, DynamicEvent event) {
-        
+
         String msg = String.format("RESCHEDULING %d: %s at %.4f", schedulings, event.description(), event.getTime());
-        
+
         logger.info(highlight(msg));
     }
 

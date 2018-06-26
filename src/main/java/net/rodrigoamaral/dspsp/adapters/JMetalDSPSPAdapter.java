@@ -1,10 +1,12 @@
 package net.rodrigoamaral.dspsp.adapters;
 
 import net.rodrigoamaral.dspsp.config.DynamicProjectConfigLoader;
-import net.rodrigoamaral.dspsp.exceptions.InvalidSolutionException;
-import net.rodrigoamaral.dspsp.objectives.*;
-import net.rodrigoamaral.dspsp.project.DynamicProject;
 import net.rodrigoamaral.dspsp.constraints.*;
+import net.rodrigoamaral.dspsp.exceptions.InvalidSolutionException;
+import net.rodrigoamaral.dspsp.objectives.Efficiency;
+import net.rodrigoamaral.dspsp.project.DynamicEmployee;
+import net.rodrigoamaral.dspsp.project.DynamicProject;
+import net.rodrigoamaral.dspsp.project.tasks.DynamicTask;
 import net.rodrigoamaral.dspsp.solution.DedicationMatrix;
 import net.rodrigoamaral.logging.SPSPLogger;
 import org.uma.jmetal.solution.DoubleSolution;
@@ -110,13 +112,13 @@ public class JMetalDSPSPAdapter {
 
     /**
      * Evaluates all objectives registered by the objectiveEvaluator in the
-     * constructor. Before evaluation, it repairs the solution according to
+     * constructor. Before evaluation, it repairs the repairedSolution according to
      * the constraints registered by the constraintEvaluator in the
      * constructor. Objectives are penalized if there is any skill missing
      * in the available emplyee team.
      *
      * @param solution
-     * @return repaired solution
+     * @return repaired repairedSolution
      */
     public DoubleSolution evaluateObjectives(DoubleSolution solution) {
 
@@ -129,7 +131,7 @@ public class JMetalDSPSPAdapter {
             solution.setObjective(COST, project.penalizeCost(missingSkills));
             solution.setObjective(ROBUSTNESS, project.penalizeRobustness(missingSkills));
 
-            if (project.getPreviousSchedule() != null) {
+            if (mustIncludeStability(solution)) {
                 solution.setObjective(STABILITY, project.penalizeStability(missingSkills));
             }
 
@@ -143,19 +145,19 @@ public class JMetalDSPSPAdapter {
                 solution.setObjective(COST, efficiency.cost);
                 solution.setObjective(ROBUSTNESS, robustness);
 
-                if (project.getPreviousSchedule() != null) {
+                if (mustIncludeStability(solution)) {
                     double stability = project.calculateStability(dm);
                     solution.setObjective(STABILITY, stability);
                 }
             } catch (InvalidSolutionException e) {
 
-                SPSPLogger.trace("Penalizing invalid solution: " + dm);
+                SPSPLogger.trace("Penalizing invalid repairedSolution: " + dm);
 
                 solution.setObjective(DURATION, project.penalizeDuration(1));
                 solution.setObjective(COST, project.penalizeCost(1));
                 solution.setObjective(ROBUSTNESS, project.penalizeRobustness(1));
 
-                if (project.getPreviousSchedule() != null) {
+                if (mustIncludeStability(solution)) {
                     solution.setObjective(STABILITY, project.penalizeStability(1));
                 }
             }
@@ -164,9 +166,43 @@ public class JMetalDSPSPAdapter {
         return solution;
     }
 
+    private boolean mustIncludeStability(DoubleSolution solution) {
+        return project.getPreviousSchedule() != null && solution.getNumberOfObjectives() > 3;
+    }
+
     private DedicationMatrix repair(DoubleSolution solution) {
+//        repairedSolution = enableOnlyAvailableEmployees(repairedSolution);
+//        repairedSolution = enableOnlyAvailableTasks(repairedSolution);
         return constraintEvaluator.repair(converter.convert(solution), project);
     }
+
+//    private DoubleSolution enableOnlyAvailableTasks(DoubleSolution repairedSolution) {
+//        for (DynamicTask task : getProject().getTasks()) {
+//            if (!task.isAvailable()) {
+//                for (DynamicEmployee employee : getProject().getEmployees()) {
+//                    repairedSolution.setVariableValue(
+//                            SolutionConverter.encode(employee.index(), task.index()),
+//                            0.0
+//                    );
+//                }
+//            }
+//        }
+//        return repairedSolution;
+//    }
+//
+//    private DoubleSolution enableOnlyAvailableEmployees(DoubleSolution repairedSolution) {
+//        for (DynamicEmployee employee : getProject().getEmployees()) {
+//            if (!employee.isAvailable()) {
+//                for (DynamicTask task : getProject().getAvailableTasks()) {
+//                    repairedSolution.setVariableValue(
+//                            SolutionConverter.encode(employee.index(), task.index()),
+//                            0.0
+//                    );
+//                }
+//            }
+//        }
+//        return repairedSolution;
+//    }
 
     public int getNumberOfConstraints() {
         return constraintEvaluator.size();
