@@ -32,5 +32,9 @@
   "repairedSolutions": 0.3,
   "histPropPreviousEventSolutions": 0.2,
   "numberOfSwarms": 5,
-  "swarmSize": 200
+  "swarmSize": 200,
+  "dynamicStrategies": [
+    "history_info",
+    "proactive_repair"
+  ]
 }

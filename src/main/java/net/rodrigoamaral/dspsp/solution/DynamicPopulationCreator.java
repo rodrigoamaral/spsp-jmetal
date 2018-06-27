@@ -1,11 +1,11 @@
 package net.rodrigoamaral.dspsp.solution;
 
 
-import net.rodrigoamaral.dspsp.adapters.SolutionConverter;
 import net.rodrigoamaral.dspsp.experiment.ExperimentSettings;
+import net.rodrigoamaral.dspsp.solution.mutation.DSPSPRepairMutation;
 import net.rodrigoamaral.dspsp.solution.repair.IScheduleRepairStrategy;
-import net.rodrigoamaral.dspsp.solution.repair.ScheduleRepairStrategy;
 import net.rodrigoamaral.logging.SPSPLogger;
+import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
@@ -22,12 +22,14 @@ public class DynamicPopulationCreator {
     private double propRepairedSolutions;
     private double propPreviousEventSolutions;
     private IScheduleRepairStrategy repairStrategy;
+    private List<String> dynamicStrategies;
 
 //    REFACTOR: Remove string literals
     public DynamicPopulationCreator(DoubleProblem problem, SchedulingHistory history, ExperimentSettings settings, String algorithmID, IScheduleRepairStrategy repairStrategy) {
 
         this.problem = problem;
         this.history = history;
+        this.dynamicStrategies = settings.getDynamicStrategies();
         this.repairStrategy = repairStrategy;
         this.propRepairedSolutions = settings.getRepairedSolutions();
         this.propPreviousEventSolutions = settings.getHistPropPreviousEventSolutions();
@@ -48,14 +50,19 @@ public class DynamicPopulationCreator {
 
         List<DoubleSolution> population = new ArrayList<>(size);
 
-//        population.addAll(getRandomSublist(history.getAllSolutions(), propRepairedSolutions));
-//        population.addAll(getRandomSublist(history.getNonDominatedSolutions(), propRepairedSolutions));
-        if (repairStrategy != null) {
+        if (repairStrategy != null && dynamicStrategies.contains("proactive_repair")) {
+            SPSPLogger.debug("Using proactive repair");
             population.addAll(repairedSolutions());
         }
-        population.addAll(getRandomSublist(history.getPrevious(event), propPreviousEventSolutions));
+
+        if (dynamicStrategies.contains("history_info")) {
+            SPSPLogger.debug("Using history info");
+            population.addAll(getRandomSublist(history.getPrevious(event), propPreviousEventSolutions));
+        }
+
         population.addAll(getRandomSolutions(size - population.size()));
 
+        SPSPLogger.debug("Initial population created (size " + population.size() + ")");
         return population;
     }
 
@@ -63,10 +70,25 @@ public class DynamicPopulationCreator {
         List<DoubleSolution> repairedSolutions = new ArrayList<>();
 
         DoubleSolution seed = this.repairStrategy.repair();
-        repairedSolutions.add(seed);
-// TODO: generate some variations
-//        getRandomSublist(repairedSolutions(), propRepairedSolutions);
+
+        for (int i = 0; i < size; i++) {
+            repairedSolutions.add(getMutatedCopy(seed));
+        }
+
+        repairedSolutions = getRandomSublist(repairedSolutions, propRepairedSolutions);
+        repairedSolutions.set(0, seed);
+
         return repairedSolutions;
+    }
+
+    private DoubleSolution getMutatedCopy(DoubleSolution seed) {
+
+        double mutationProbability = 1.0;
+        double mutationDistributionIndex = 20.0 ;
+        MutationOperator<DoubleSolution> mutation;
+        mutation = new DSPSPRepairMutation(mutationProbability, mutationDistributionIndex);
+
+        return mutation.execute(new DefaultDoubleSolution((DefaultDoubleSolution) seed));
     }
 
 
