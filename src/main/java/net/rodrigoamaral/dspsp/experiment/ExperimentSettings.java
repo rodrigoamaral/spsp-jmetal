@@ -22,6 +22,7 @@ public class ExperimentSettings {
     private Integer populationSize;
     private Double repairedSolutions;
     private Double histPropPreviousEventSolutions;
+    private List<String> dynamicStrategies;
 
     public Integer getNumberOfRuns() {
         return numberOfRuns;
@@ -95,6 +96,14 @@ public class ExperimentSettings {
         this.algorithms = algorithms;
     }
 
+    public List<String> getDynamicStrategies() {
+        return dynamicStrategies;
+    }
+
+    public void setDynamicStrategies(List<String> dynamicStrategies) {
+        this.dynamicStrategies = dynamicStrategies;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(super.toString() + "{ " );
@@ -107,6 +116,7 @@ public class ExperimentSettings {
         sb.append("\n\tpopulationSize = " + populationSize);
         sb.append("\n\trepairedSolutions = " + repairedSolutions);
         sb.append("\n\thistPropPreviousEventSolutions = " + histPropPreviousEventSolutions);
+        sb.append("\n\tdynamicStrategies = " + dynamicStrategies);
         sb.append("\n}");
         return sb.toString();
     }

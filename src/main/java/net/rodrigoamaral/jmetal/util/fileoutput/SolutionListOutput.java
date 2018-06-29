@@ -71,7 +71,8 @@ public class SolutionListOutput {
         } else {
             printObjectivesToFile(funFileContext, solutionList, isObjectiveToBeMinimized);
         }
-        printVariablesToFile(varFileContext, solutionList);
+
+//        printVariablesToFile(varFileContext, solutionList);
     }
 
     public void printVariablesToFile(FileOutputContext context, List<? extends Solution<?>> solutionList) {
