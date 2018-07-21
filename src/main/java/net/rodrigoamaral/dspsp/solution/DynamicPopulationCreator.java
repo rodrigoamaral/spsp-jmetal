@@ -36,10 +36,9 @@ public class DynamicPopulationCreator {
         if (propRepairedSolutions + propPreviousEventSolutions > 1.0) {
             throw new IllegalArgumentException("Sum of repairedSolution proportions must not exceed 1.0");
         }
-        if (algorithmID.equals("MS2MO") ||
-                algorithmID.equals("MS2MODynamic") ||
-                algorithmID.equals("SMPSO") ||
-                algorithmID.equals("SMPSODynamic")) {
+        if (algorithmID.equals("MS2MO")
+                || algorithmID.equals("MS2MODynamic")
+                ) {
             this.size = settings.getSwarmSize();
         } else {
             this.size = settings.getPopulationSize();

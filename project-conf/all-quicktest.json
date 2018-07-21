@@ -4,7 +4,12 @@
     "project-conf/dynamic/dynamic_example_new1.json"
   ],
   "algorithms": [
-    "NSGAII"
+    "NSGAII",
+    "SMPSO",
+    "MS2MO",
+    "MS2MODynamic",
+    "NSGAIIDynamic",
+    "SMPSODynamic"
   ],
   "objectiveEvaluations": 12000,
   "populationSize": 100,
