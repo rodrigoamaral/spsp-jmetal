@@ -1,3 +1,4 @@
+import sys
 import os
 import csv
 from glob import glob
@@ -32,18 +33,23 @@ def get_reference_string(fname):
 
 
 def main():
-    with open("metrics.csv", "w") as out:
-        writer = csv.writer(out, delimiter=" ")
-        result_files = list_result_files()
-        s = len(result_files)
-        for i, fname in enumerate(result_files):
-            data = extract_instance_data(fname)
-            data.append(hv(fname, get_reference_string(fname)))
-            writer.writerow(data)
-            print("Calculating hypervolume. Please wait... ({:5.1f}%)".format((i * 100) / s), end="\r")
-        print("\nDone.")
+    output_file = "metrics.csv"
+    if len(sys.argv) > 1:
+        output_file = sys.argv[1]
+    result_files = list_result_files()
+    if result_files:
+        with open(output_file, "w") as out:
+            writer = csv.writer(out, delimiter=" ")
+            s = len(result_files)
+            for i, fname in enumerate(result_files):
+                data = extract_instance_data(fname)
+                data.append(hv(fname, get_reference_string(fname)))
+                writer.writerow(data)
+                print("Calculating hypervolume. Please wait... ({:5.1f}%)".format((i * 100) / s), end="\r")
+            print("\nDone.")
+    else:
+        print("Result file folder is empty.")
 
 
 if __name__ == '__main__':
-
     main()
