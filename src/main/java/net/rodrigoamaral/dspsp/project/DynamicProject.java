@@ -289,7 +289,6 @@ public class DynamicProject {
             List<DynamicTask> localActiveTasks = filterActiveTasks(localTPG, localAvailableTasks);
 
             if (localActiveTasks.isEmpty()) {
-                SPSPLogger.debug("localAvailableTasks = " + localAvailableTasks);
                 throw new RuntimeException("Problem instance not solvable!");
             }
 
@@ -555,7 +554,7 @@ public class DynamicProject {
         return activeTasks;
     }
 
-    private List<DynamicTask> filterActiveTasks(DynamicTaskPrecedenceGraph tpg, List<DynamicTask> tasks) {
+    private List<DynamicTask> filterActiveTasks(DynamicTaskPrecedenceGraph tpg, final List<DynamicTask> tasks) {
         List<DynamicTask> active = new ArrayList<>();
 
         for (DynamicTask task : tasks) {
@@ -687,7 +686,7 @@ public class DynamicProject {
 
             // Penalizing task effort if max headcount constraint violated
             if (repairedTeam.size() > t.getMaximumHeadcount()) {
-                t.setEffort(TaskManager.adjustedEffort(dm, t));
+                t.setEffort(t.getEffort() + TaskManager.adjustedEffort(dm, t));
             }
 
         }
@@ -695,12 +694,13 @@ public class DynamicProject {
         // Repairing overhead (end)
         // --------------------------
 
-        while (!localTPG.isEmpty() || !localAvailableTasks.isEmpty()) {
+        int over = 0;
+
+        while (!localTPG.isEmpty() || !(over == tasks.size())) {
 
             List<DynamicTask> localActiveTasks = filterActiveTasks(localTPG, localAvailableTasks);
 
             if (localActiveTasks.isEmpty()) {
-                SPSPLogger.debug("localAvailableTasks = " + localAvailableTasks);
                 throw new RuntimeException("Problem instance not solvable!");
             }
 
@@ -737,7 +737,8 @@ public class DynamicProject {
                 if (localTask.isFinished()) {
                     localTask.setAvailable(false);
                     localTPG.remove(localTask.index());
-                    localAvailableTasks.remove(localTask);
+//                    localAvailableTasks.remove(localTask);
+                    over += 1;
                 }
             }
         }
