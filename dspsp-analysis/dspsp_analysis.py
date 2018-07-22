@@ -22,6 +22,10 @@ def comparison_dataset(ds):
     return ds.groupby(["algorithm", "event"], as_index=False)["hypervolume"].mean()
 
 
+def median_hypervolume(ds):
+    return ds.groupby(["instance", "algorithm"], as_index=False)["hypervolume"].median()
+
+
 def mean_hypervolume(ds):
     return ds.groupby(["instance", "algorithm"], as_index=False)["hypervolume"].agg(['mean', 'std'])
 
